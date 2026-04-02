@@ -1,0 +1,98 @@
+{
+  "prompts": {
+    "present-simple-vs-continuous-prompt-1": {
+      "instructions": "Write three pairs of sentences. In each pair, use the present simple for a routine or general truth and the present continuous for an action in progress or a temporary situation.",
+      "starterText": "She works in the office, but this week she is working from home.",
+      "modelAnswer": "They usually take the train to work, but today they are driving because of the strike. My brother studies economics at university, but this month he is studying for his final exams every evening. We often eat at home on weekdays, but tonight we are eating out with some friends.",
+      "expectedKeywords": [
+        "present simple",
+        "present continuous",
+        "routine",
+        "temporary"
+      ],
+      "scoringProfile": "sentence_drill",
+      "minimumWordCount": 24,
+      "minimumResponseItems": 3
+    },
+    "present-simple-vs-continuous-2-prompt-1": {
+      "instructions": "Rewrite five sentences and choose the more natural tense. Use the present simple for stative verbs unless the sentence clearly emphasizes temporary behaviour or change.",
+      "starterText": "I understand the problem, but he is being unusually difficult today.",
+      "modelAnswer": "I understand the problem now. He is being unusually difficult today. We know the manager quite well. She looks tired this week. They prefer remote work, but this month they are trying a hybrid schedule.",
+      "expectedKeywords": [
+        "stative verbs",
+        "present simple",
+        "temporary behavior",
+        "natural tense"
+      ],
+      "scoringProfile": "rewrite",
+      "minimumWordCount": 20,
+      "minimumResponseItems": 5
+    },
+    "applying-for-a-job-prompt-1": {
+      "instructions": "Write a short formal cover letter that introduces your application, highlights relevant experience, and explains why you are suitable for the role.",
+      "starterText": "Dear Hiring Manager, I am writing to apply for the entry-level marketing assistant role advertised on your website.",
+      "modelAnswer": "Dear Hiring Manager, I am writing to apply for the entry-level marketing assistant role advertised on your website. During my studies and internship, I developed strong communication skills and gained experience preparing social media content and supporting event planning. I am especially interested in this post because it offers excellent training and career prospects, and I believe my enthusiasm and attention to detail would make me a strong fit for your team. Please find attached my CV in support of my application. I look forward to hearing from you.",
+      "expectedKeywords": [
+        "cover letter",
+        "application",
+        "experience",
+        "role",
+        "career prospects"
+      ],
+      "minimumWordCount": 55
+    },
+    "applying-for-a-job-prompt-2": {
+      "instructions": "List five phrases that commonly appear in job advertisements. Use authentic recruitment language rather than general business words.",
+      "modelAnswer": "competitive salary; excellent career prospects; full training provided; relevant prior experience required; strong communication skills",
+      "expectedKeywords": [
+        "competitive salary",
+        "career prospects",
+        "training provided",
+        "prior experience",
+        "communication skills"
+      ],
+      "scoringProfile": "list",
+      "minimumWordCount": 10,
+      "minimumResponseItems": 5
+    },
+    "job-interviews-prompt-1": {
+      "instructions": "Write five realistic interview questions and a short model answer for each one. Keep the tone formal and job-focused.",
+      "starterText": "I was shortlisted for an interview last week.",
+      "modelAnswer": "Question: Why do you want this role? Answer: I am interested in this role because it matches my experience in customer service and offers strong career development. Question: What are your main strengths? Answer: My main strengths are communication, organisation, and the ability to work well under pressure. Question: Describe a challenge you faced. Answer: In my previous role, I had to resolve a delivery problem quickly, so I coordinated with the supplier and kept the client informed throughout. Question: How do you prepare for deadlines? Answer: I prioritise tasks, break projects into smaller steps, and communicate early if any issue may affect the deadline. Question: When could you start? Answer: My notice period is two weeks, so I could start shortly after that.",
+      "expectedKeywords": [
+        "interview questions",
+        "model answer",
+        "strengths",
+        "experience",
+        "notice period"
+      ],
+      "scoringProfile": "sentence_drill",
+      "minimumWordCount": 45,
+      "minimumResponseItems": 5
+    },
+    "job-interviews-prompt-2": {
+      "instructions": "Describe a previous role in a formal interview style. Mention responsibilities, achievements, and what you learned from the experience.",
+      "starterText": "In my previous role as a sales assistant, I was responsible for handling customer enquiries and supporting the store manager.",
+      "modelAnswer": "In my previous role as a sales assistant, I was responsible for handling customer enquiries, organising stock, and supporting the store manager during busy periods. I also helped train new team members and contributed to a noticeable improvement in customer satisfaction scores. This experience strengthened my communication skills, taught me how to prioritise tasks under pressure, and showed me the importance of maintaining a professional attitude at all times.",
+      "expectedKeywords": [
+        "previous role",
+        "responsibilities",
+        "achievements",
+        "communication skills"
+      ],
+      "minimumWordCount": 45
+    },
+    "job-interviews-prompt-3": {
+      "instructions": "Draft a short professional email accepting a job offer. Mention the role, gratitude, and your expected start arrangements.",
+      "starterText": "Dear Ms Patel, thank you for offering me the position of Operations Assistant.",
+      "modelAnswer": "Dear Ms Patel, thank you for offering me the position of Operations Assistant. I am pleased to accept the role and appreciate the confidence you have shown in my application. I understand that my start date will be 3 May, following my two-week notice period, and I look forward to joining the team. Please let me know if you need any further documents before then. Kind regards, Ana Torres",
+      "expectedKeywords": [
+        "accept",
+        "job offer",
+        "start date",
+        "notice period"
+      ],
+      "minimumWordCount": 35
+    }
+  }
+}

@@ -269,6 +269,7 @@
               "targetSkill": "WRITING",
               "prompt": "Write five interview questions and model answers.",
               "instructions": "Write five realistic interview questions and a short model answer for each one. Keep the tone formal and job-focused.",
+              "starterText": "I was shortlisted for an interview last week.",
               "modelAnswer": "Question: Why do you want this role? Answer: I am interested in this role because it matches my experience in customer service and offers strong career development. Question: What are your main strengths? Answer: My main strengths are communication, organisation, and the ability to work well under pressure. Question: Describe a challenge you faced. Answer: In my previous role, I had to resolve a delivery problem quickly, so I coordinated with the supplier and kept the client informed throughout. Question: How do you prepare for deadlines? Answer: I prioritise tasks, break projects into smaller steps, and communicate early if any issue may affect the deadline. Question: When could you start? Answer: My notice period is two weeks, so I could start shortly after that.",
               "expectedKeywords": [
                 "interview questions",
