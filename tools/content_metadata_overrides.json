@@ -134,6 +134,77 @@
       ],
       "minimumWordCount": 40,
       "minimumKeywordMatches": 2
+    },
+    "future-perfect-vs-future-continuous-prompt-1": {
+      "instructions": "Write four sentences about a project timeline. Use the future perfect for milestones completed before a future point and the future continuous for work that will still be in progress at that time.",
+      "starterText": "By next Wednesday, the design team will have finished the client deck, and at 10 a.m. the product manager will be presenting the revised launch plan.",
+      "modelAnswer": "By Monday morning, the engineers will have completed the final testing cycle. At the same time, the support team will be preparing the release notes for clients. By the end of the week, we will have updated the onboarding guide for the new feature. During Friday's review meeting, the operations lead will be explaining the rollout timeline to the regional managers.",
+      "expectedKeywords": [
+        "future perfect",
+        "future continuous",
+        "completed",
+        "in progress",
+        "timeline"
+      ],
+      "scoringProfile": "sentence_drill",
+      "minimumWordCount": 32,
+      "minimumResponseItems": 4
+    },
+    "meeting-minutes-analysis-prompt-1": {
+      "instructions": "Read the meeting minutes and summarize the final decision, the condition attached to it, and one action item in three or four sentences.",
+      "starterText": "The minutes show that the team approved a phased launch, but only on the condition that extra support training is completed first.",
+      "modelAnswer": "The minutes show that the team approved a phased product launch for July rather than a wider immediate rollout. However, the approval is conditional because the support team must complete extra training by mid-June. The chair also kept the first release limited to three markets so that technical issues could be managed more carefully. One concrete action item is that the support lead must prepare the training materials while marketing produces the client-facing FAQs.",
+      "expectedKeywords": [
+        "phased launch",
+        "support training",
+        "three markets",
+        "action item",
+        "conditional approval"
+      ],
+      "minimumWordCount": 45,
+      "minimumKeywordMatches": 2,
+      "requiresToneReference": false
+    },
+    "deadline-renegotiation-call-prompt-1": {
+      "instructions": "Listen to the call summary and write a short summary of the final agreement plus the main condition attached to the revised deadline.",
+      "starterText": "The client accepts the revised delivery date, but they insist on a written progress update before the board review.",
+      "modelAnswer": "The client agrees to move the delivery date to 18 June because they understand the technical issue that caused the delay. However, they make it clear that the deadline cannot slip again because the board review is scheduled for the following week. The agreement therefore includes a written progress update by Tuesday and confirmation of final testing by Friday.",
+      "expectedKeywords": [
+        "18 June",
+        "progress update",
+        "board review",
+        "cannot slip again"
+      ],
+      "minimumWordCount": 36,
+      "minimumKeywordMatches": 2,
+      "requiresContrastMarker": true
+    },
+    "project-update-briefing-prompt-1": {
+      "instructions": "Give a short spoken update to a manager. Mention one completed task, one task still in progress, and one risk that needs attention.",
+      "starterText": "We have finished the first testing cycle, and we are now preparing the client documentation. However, the biggest current risk is that supplier approval may arrive later than expected.",
+      "modelAnswer": "We have completed the first testing cycle and shared the internal results with the product lead. At the moment, the team is preparing the client documentation and updating the onboarding guide for launch. However, the main risk is that supplier approval may arrive later than expected, which could delay the final sign-off. If that happens, we will need to adjust the release sequence and keep the client informed immediately.",
+      "expectedKeywords": [
+        "completed",
+        "in progress",
+        "risk",
+        "however",
+        "update"
+      ],
+      "minimumWordCount": 45,
+      "minimumKeywordMatches": 2
+    },
+    "delay-update-email-prompt-1": {
+      "instructions": "Write a short professional email that explains the delay, gives the reason, apologizes once, and states the revised plan clearly.",
+      "starterText": "Dear Ms Rivera, I am writing to let you know that the delivery pack will arrive later than planned because our final approval has taken longer than expected.",
+      "modelAnswer": "Dear Ms Rivera, I am writing to let you know that the delivery pack will arrive one day later than planned because the final approval stage has taken longer than expected. I apologise for the inconvenience this may cause. We will send the revised version by Thursday afternoon and confirm receipt as soon as it is delivered. To prevent any further delay, I will also send you a progress update tomorrow morning. Kind regards, Daniel Soto",
+      "expectedKeywords": [
+        "delay",
+        "reason",
+        "revised plan",
+        "apologise",
+        "progress update"
+      ],
+      "minimumWordCount": 45
     }
   }
 }

@@ -106,6 +106,53 @@
                                            "metadata":  {
                                                             "sourceFile":  "advanced-grammar\\unit-2.yaml"
                                                         }
+                                       },
+                                       {
+                                           "id":  "future-perfect-vs-future-continuous",
+                                           "title":  "Future perfect vs future continuous",
+                                           "order":  3,
+                                           "cefr":  [
+                                                        "C1"
+                                                    ],
+                                           "tags":  [
+                                                        "grammar",
+                                                        "future-forms",
+                                                        "project-planning",
+                                                        "timeline"
+                                                    ],
+                                           "summary":  "Use the future perfect for actions completed before a future point, and the future continuous for actions in progress at that future time.",
+                                           "points":  [
+                                                          "The future perfect focuses on completion before a future deadline.",
+                                                          "The future continuous describes an activity that will be in progress at a specific future moment.",
+                                                          "Both forms are useful when giving project updates and planning schedules."
+                                                      ],
+                                           "examples":  [
+                                                            {
+                                                                "english":  "By Friday, the team will have finished the draft report.",
+                                                                "note":  "completion before a future point"
+                                                            },
+                                                            {
+                                                                "english":  "At 10 a.m. tomorrow, the team will be presenting the proposal.",
+                                                                "note":  "action in progress at a future time"
+                                                            }
+                                                        ],
+                                           "pitfalls":  [
+                                                            "Do not use the future perfect when the meaning is simply a scheduled future action still in progress."
+                                                        ],
+                                           "practicePrompts":  [
+                                                                   {
+                                                                       "id":  "future-perfect-vs-future-continuous-prompt-1",
+                                                                       "type":  "open_text",
+                                                                       "targetSkill":  "WRITING",
+                                                                       "prompt":  "Write four sentences about a project timeline using both the future perfect and the future continuous."
+                                                                   }
+                                                               ],
+                                           "related":  [
+                                                           "present-simple-vs-continuous"
+                                                       ],
+                                           "metadata":  {
+                                                            "sourceFile":  "advanced-grammar\\unit-3.yaml"
+                                                        }
                                        }
                                    ]
                   },
@@ -369,6 +416,178 @@
                                                        ],
                                            "metadata":  {
                                                             "sourceFile":  "vocabulary\\unit-4.md"
+                                                        }
+                                       },
+                                       {
+                                           "id":  "meeting-minutes-analysis",
+                                           "title":  "Meeting minutes analysis",
+                                           "order":  8,
+                                           "cefr":  [
+                                                        "C1"
+                                                    ],
+                                           "tags":  [
+                                                        "vocabulary",
+                                                        "meetings",
+                                                        "reading",
+                                                        "decision-making"
+                                                    ],
+                                           "summary":  "Reading practice focused on tracing decisions, reservations and action points in formal meeting minutes.",
+                                           "points":  [
+                                                          "Meeting minutes usually separate the final decision from background discussion.",
+                                                          "A reservation or condition can change the practical meaning of an approved plan.",
+                                                          "Action points reveal who owns the next steps after the meeting."
+                                                      ],
+                                           "examples":  [
+                                                            {
+                                                                "english":  "The committee approved the phased rollout, subject to additional support training.",
+                                                                "note":  "conditional approval language"
+                                                            }
+                                                        ],
+                                           "pitfalls":  [
+                                                            "Do not confuse a proposed idea with the final approved decision."
+                                                        ],
+                                           "practicePrompts":  [
+                                                                   {
+                                                                       "id":  "meeting-minutes-analysis-prompt-1",
+                                                                       "type":  "read_and_summarize",
+                                                                       "targetSkill":  "READING",
+                                                                       "prompt":  "The minutes note that the team approved a phased product launch for July, provided the support team receives extra training by mid-June. Marketing asked for a wider campaign, but the chair decided to keep the first release limited to three markets so that technical issues could be handled more carefully. The final action items assign training materials to the support lead and customer-facing FAQs to marketing."
+                                                                   }
+                                                               ],
+                                           "related":  [
+                                                           "job-interviews"
+                                                       ],
+                                           "metadata":  {
+                                                            "sourceFile":  "vocabulary\\unit-5.md"
+                                                        }
+                                       },
+                                       {
+                                           "id":  "deadline-renegotiation-call",
+                                           "title":  "Deadline renegotiation call",
+                                           "order":  9,
+                                           "cefr":  [
+                                                        "C1"
+                                                    ],
+                                           "tags":  [
+                                                        "vocabulary",
+                                                        "listening",
+                                                        "deadlines",
+                                                        "negotiation"
+                                                    ],
+                                           "summary":  "Listening practice focused on the final agreement and the main concern raised in a deadline negotiation.",
+                                           "points":  [
+                                                          "A negotiation may end positively even when one side raises a serious concern.",
+                                                          "The speaker's final agreement is often qualified by one condition or monitoring step.",
+                                                          "Deadline language often combines reassurance with a request for interim updates."
+                                                      ],
+                                           "examples":  [
+                                                            {
+                                                                "english":  "We can accept the revised date, but we will need a progress update by Tuesday.",
+                                                                "note":  "conditional agreement"
+                                                            }
+                                                        ],
+                                           "pitfalls":  [
+                                                            "Do not focus only on the delay itself and miss the condition attached to the new deadline."
+                                                        ],
+                                           "practicePrompts":  [
+                                                                   {
+                                                                       "id":  "deadline-renegotiation-call-prompt-1",
+                                                                       "type":  "listen_and_summarize",
+                                                                       "targetSkill":  "LISTENING",
+                                                                       "prompt":  "The client says they understand the technical issue that delayed the release and are willing to accept a revised delivery date of 18 June. However, they stress that the project cannot slip again because the board review is scheduled for the following week. The call ends with an agreement that the team will send a written progress update by Tuesday and confirm final testing by Friday."
+                                                                   }
+                                                               ],
+                                           "related":  [
+                                                           "meeting-minutes-analysis"
+                                                       ],
+                                           "metadata":  {
+                                                            "sourceFile":  "vocabulary\\unit-6.md"
+                                                        }
+                                       },
+                                       {
+                                           "id":  "project-update-briefing",
+                                           "title":  "Project update briefing",
+                                           "order":  10,
+                                           "cefr":  [
+                                                        "C1"
+                                                    ],
+                                           "tags":  [
+                                                        "vocabulary",
+                                                        "speaking",
+                                                        "projects",
+                                                        "briefing"
+                                                    ],
+                                           "summary":  "Speaking practice focused on concise project updates that balance completed work, current progress and one active risk.",
+                                           "points":  [
+                                                          "A strong project briefing explains what has been completed before moving to current tasks.",
+                                                          "Managers expect at least one risk or dependency to be flagged clearly.",
+                                                          "Connectors help the update sound structured rather than improvised."
+                                                      ],
+                                           "examples":  [
+                                                            {
+                                                                "english":  "We have completed the first testing cycle, and we are now preparing the client-facing documentation.",
+                                                                "note":  "structured project update"
+                                                            }
+                                                        ],
+                                           "pitfalls":  [
+                                                            "Do not give a list of disconnected tasks without explaining the current risk or next step."
+                                                        ],
+                                           "practicePrompts":  [
+                                                                   {
+                                                                       "id":  "project-update-briefing-prompt-1",
+                                                                       "type":  "speak_response",
+                                                                       "targetSkill":  "SPEAKING",
+                                                                       "prompt":  "Give a short project update to a manager. Mention what has been completed, what is still in progress, and one risk that needs attention."
+                                                                   }
+                                                               ],
+                                           "related":  [
+                                                           "deadline-renegotiation-call"
+                                                       ],
+                                           "metadata":  {
+                                                            "sourceFile":  "vocabulary\\unit-7.md"
+                                                        }
+                                       },
+                                       {
+                                           "id":  "delay-update-email",
+                                           "title":  "Delay update email",
+                                           "order":  11,
+                                           "cefr":  [
+                                                        "C1"
+                                                    ],
+                                           "tags":  [
+                                                        "vocabulary",
+                                                        "writing",
+                                                        "email",
+                                                        "project-management"
+                                                    ],
+                                           "summary":  "Writing practice focused on explaining a delay, maintaining a professional tone and proposing a revised plan.",
+                                           "points":  [
+                                                          "A good delay update names the problem clearly without sounding defensive.",
+                                                          "Professional emails should explain the revised plan and next checkpoint.",
+                                                          "The tone should remain calm, responsible and solution-focused."
+                                                      ],
+                                           "examples":  [
+                                                            {
+                                                                "english":  "Unfortunately, the client pack will be ready one day later than planned, but we will send the revised version by Thursday afternoon.",
+                                                                "note":  "delay update language"
+                                                            }
+                                                        ],
+                                           "pitfalls":  [
+                                                            "Do not apologize repeatedly without explaining the revised plan and next step."
+                                                        ],
+                                           "practicePrompts":  [
+                                                                   {
+                                                                       "id":  "delay-update-email-prompt-1",
+                                                                       "type":  "open_text",
+                                                                       "targetSkill":  "WRITING",
+                                                                       "prompt":  "Write a short professional email explaining a delivery delay, the reason for it, and the revised plan."
+                                                                   }
+                                                               ],
+                                           "related":  [
+                                                           "deadline-renegotiation-call"
+                                                       ],
+                                           "metadata":  {
+                                                            "sourceFile":  "vocabulary\\unit-8.md"
                                                         }
                                        }
                                    ]
