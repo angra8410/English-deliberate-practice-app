@@ -1,5 +1,19 @@
 [
   {
+    "id": "c1_reading_policy_brief",
+    "title": "Reading: Policy Briefs",
+    "level": "C1",
+    "skill": "READING",
+    "description": "Read dense policy arguments, track concessions, and summarize both stance and tone with precision."
+  },
+  {
+    "id": "c1_writing_position_paper",
+    "title": "Writing: Position Papers",
+    "level": "C1",
+    "skill": "WRITING",
+    "description": "Write developed position responses that balance nuance, evidence, and formal connectors."
+  },
+  {
     "id": "c1_speaking_argumentation",
     "title": "Speaking: Argumentation",
     "level": "C1",

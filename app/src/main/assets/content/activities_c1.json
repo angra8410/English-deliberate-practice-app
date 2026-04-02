@@ -1,5 +1,61 @@
 [
   {
+    "id": "act_c1_read_001",
+    "unitId": "c1_reading_policy_brief",
+    "title": "Policy brief summary and stance",
+    "level": "C1",
+    "skill": "READING",
+    "exerciseType": "READ_AND_SUMMARIZE",
+    "prompt": "A policy brief argues that cities should not ban short-term rentals outright, but should cap them in districts where housing pressure is most severe. The writer accepts that tourism revenue matters and that some residents depend on flexible income, yet insists that unregulated expansion distorts local rents and weakens neighborhood stability. The closing paragraph recommends targeted caps, stricter registration, and annual impact reviews rather than a blanket prohibition.",
+    "instructions": "Write 80 to 100 words summarizing the writer's main position, one concession, and the overall tone.",
+    "tags": [
+      "policy",
+      "stance",
+      "tone-inference"
+    ],
+    "difficulty": 4,
+    "starterText": "The brief argues that...",
+    "supportNote": "State the writer's preferred policy, mention the concession about tourism or income, and identify the measured tone.",
+    "evaluationTargets": [
+      "cap",
+      "rent",
+      "concession",
+      "registration",
+      "measured"
+    ],
+    "minimumWordCount": 60,
+    "minimumKeywordMatches": 2,
+    "requiresToneReference": true,
+    "sampleAnswer": "The brief argues that cities should regulate short-term rentals through targeted caps rather than impose a total ban. It concedes that tourism income and flexible earnings matter for some residents, but maintains that unchecked growth increases rents and undermines neighborhood stability. The tone is measured and policy-focused, since the writer balances competing interests before recommending registration rules and yearly impact reviews."
+  },
+  {
+    "id": "act_c1_write_001",
+    "unitId": "c1_writing_position_paper",
+    "title": "Nuanced position response",
+    "level": "C1",
+    "skill": "WRITING",
+    "exerciseType": "OPEN_TEXT",
+    "prompt": "Should employers allow staff to work a four-day week if total weekly hours remain the same? Write a developed response that weighs productivity, employee wellbeing, and operational risks before taking a position.",
+    "instructions": "Write one well-developed paragraph of 90 to 120 words. Use at least two formal connectors and include one concession before your final position.",
+    "tags": [
+      "argumentation",
+      "concession",
+      "formal-connectors"
+    ],
+    "difficulty": 4,
+    "starterText": "A four-day week can be justified if...",
+    "supportNote": "Build the paragraph around a concession, a clear claim, and one concrete operational example.",
+    "evaluationTargets": [
+      "however",
+      "productivity",
+      "wellbeing",
+      "operational",
+      "position"
+    ],
+    "minimumWordCount": 70,
+    "sampleAnswer": "A four-day week can be justified if employers reorganize workloads rather than simply compress the same inefficiencies into fewer days. Admittedly, some teams that depend on continuous client coverage may face scheduling difficulties; however, a shorter week can still improve wellbeing, retention, and concentration when shifts are planned carefully. For example, departments with staggered schedules can preserve service levels while giving staff longer recovery time. Therefore, employers should allow a four-day model where operational planning is strong enough to protect both output and responsiveness."
+  },
+  {
     "id": "act_c1_speak_001",
     "unitId": "c1_speaking_argumentation",
     "title": "Argue both sides",
