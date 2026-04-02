@@ -13,15 +13,15 @@ data class PracticeUnitAsset(
     val description: String
 )
 
-class AssetContentRepository(private val context: Context) {
-    fun loadLevels(): List<CefrLevel> {
+class AssetContentRepository(private val context: Context) : ContentRepository {
+    override fun loadLevels(): List<CefrLevel> {
         return runCatching {
             val rawJson = context.assets.open("content/levels.json").bufferedReader().use { it.readText() }
             AssetContentParser.parseLevels(rawJson)
         }.getOrElse { emptyList() }
     }
 
-    fun loadActivitiesForLevel(level: CefrLevel): List<PracticeActivityItem> {
+    override fun loadActivitiesForLevel(level: CefrLevel): List<PracticeActivityItem> {
         val assetFileName = when (level) {
             CefrLevel.B2 -> "content/activities_b2.json"
             CefrLevel.C1 -> "content/activities_c1.json"
@@ -34,7 +34,7 @@ class AssetContentRepository(private val context: Context) {
         }.getOrElse { emptyList() }
     }
 
-    fun loadUnitsForLevel(level: CefrLevel): List<PracticeUnitAsset> {
+    override fun loadUnitsForLevel(level: CefrLevel): List<PracticeUnitAsset> {
         val assetFileName = when (level) {
             CefrLevel.B2 -> "content/units_b2.json"
             CefrLevel.C1 -> "content/units_c1.json"

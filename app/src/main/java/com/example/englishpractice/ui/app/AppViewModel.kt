@@ -5,6 +5,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.englishpractice.data.repository.AssetContentRepository
 import com.example.englishpractice.data.repository.AppPreferencesRepository
+import com.example.englishpractice.data.repository.BookCatalogRepository
+import com.example.englishpractice.data.repository.CompositeContentRepository
+import com.example.englishpractice.data.repository.ContentRepository
 import com.example.englishpractice.data.repository.PersistedSubmission
 import com.example.englishpractice.data.repository.PracticeUnitAsset
 import com.example.englishpractice.data.repository.PracticeRepository
@@ -26,13 +29,25 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class AppViewModel(application: Application) : AndroidViewModel(application) {
+class AppViewModel(
+    application: Application,
+    private val contentRepository: ContentRepository
+) : AndroidViewModel(application) {
+    constructor(application: Application) : this(
+        application = application,
+        contentRepository = CompositeContentRepository(
+            listOf(
+                AssetContentRepository(application),
+                BookCatalogRepository(application)
+            )
+        )
+    )
+
     private val speakingManager = SpeakingManager(application)
     private val listeningPlayer = ListeningPlayer(application)
-    private val contentRepository = AssetContentRepository(application)
     private val repository = PracticeRepository.create(application)
     private val preferencesRepository = AppPreferencesRepository(application)
-    private val currentPilotLevel = CefrLevel.B2
+    private val currentPilotLevel = CefrLevel.C1
 
     private val activityCatalog = buildActivityCatalog(currentPilotLevel)
     private val unitCatalog = buildUnitCatalog(currentPilotLevel)
