@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,20 +44,30 @@ fun ReviewScreen(
         }
 
         Text("Retry queue", style = MaterialTheme.typography.titleMedium)
-        state.reviewQueue.forEach { item ->
+        state.reviewQueue.forEachIndexed { index, item ->
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onOpenReviewActivity(item.activityId) }
+                    .clickable { onOpenReviewActivity(item.activityId) },
+                colors = CardDefaults.cardColors(
+                    containerColor = reviewCardColor(item.dueLabel)
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Text(
-                        text = "${item.skill.label}  |  ${item.dueLabel}",
-                        style = MaterialTheme.typography.titleSmall
-                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            text = reviewOrderLabel(index),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "${item.skill.label}  |  ${item.dueLabel}",
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    }
                     Text(item.title, style = MaterialTheme.typography.titleMedium)
                     Text(item.prompt)
                     Text("Source: ${item.sourceLabel}", style = MaterialTheme.typography.bodySmall)
@@ -74,3 +86,12 @@ fun ReviewScreen(
         }
     }
 }
+
+@Composable
+private fun reviewCardColor(dueLabel: String) = when (dueLabel) {
+    "Due now" -> MaterialTheme.colorScheme.errorContainer
+    "Today" -> MaterialTheme.colorScheme.tertiaryContainer
+    else -> MaterialTheme.colorScheme.surfaceVariant
+}
+
+private fun reviewOrderLabel(index: Int): String = "Retry ${index + 1}"

@@ -12,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -117,7 +118,12 @@ fun HomeScreen(
         }
 
         state.reviewQueue.firstOrNull()?.let { nextReview ->
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = bestRetryCardColor(nextReview.dueLabel)
+                )
+            ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -125,7 +131,8 @@ fun HomeScreen(
                     Text("Best next retry", style = MaterialTheme.typography.titleMedium)
                     Text(
                         "${nextReview.skill.label}  |  ${nextReview.dueLabel}",
-                        style = MaterialTheme.typography.labelLarge
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary
                     )
                     Text(nextReview.title, style = MaterialTheme.typography.titleSmall)
                     Text(nextReview.reason, style = MaterialTheme.typography.bodySmall)
@@ -174,4 +181,11 @@ fun HomeScreen(
             }
         }
     }
+}
+
+@Composable
+private fun bestRetryCardColor(dueLabel: String) = when (dueLabel) {
+    "Due now" -> MaterialTheme.colorScheme.errorContainer
+    "Today" -> MaterialTheme.colorScheme.tertiaryContainer
+    else -> MaterialTheme.colorScheme.secondaryContainer
 }
