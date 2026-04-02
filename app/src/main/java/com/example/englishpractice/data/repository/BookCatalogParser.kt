@@ -97,7 +97,13 @@ object BookCatalogParser {
                             ?.let { value -> PromptScoringProfile.valueOf(value.uppercase()) },
                         minimumWordCount = item.optInt("minimumWordCount").takeIf { value -> value > 0 },
                         minimumResponseItems = item.optInt("minimumResponseItems")
-                            .takeIf { value -> value > 0 }
+                            .takeIf { value -> value > 0 },
+                        minimumKeywordMatches = item.optInt("minimumKeywordMatches")
+                            .takeIf { value -> value > 0 },
+                        requiresToneReference = item.optBoolean("requiresToneReference")
+                            .takeUnless { !item.has("requiresToneReference") },
+                        requiresContrastMarker = item.optBoolean("requiresContrastMarker")
+                            .takeUnless { !item.has("requiresContrastMarker") }
                     )
                 )
             }

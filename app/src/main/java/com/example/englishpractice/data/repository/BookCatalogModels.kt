@@ -51,7 +51,10 @@ data class BookPracticePrompt(
     val expectedKeywords: List<String> = emptyList(),
     val scoringProfile: PromptScoringProfile? = null,
     val minimumWordCount: Int? = null,
-    val minimumResponseItems: Int? = null
+    val minimumResponseItems: Int? = null,
+    val minimumKeywordMatches: Int? = null,
+    val requiresToneReference: Boolean? = null,
+    val requiresContrastMarker: Boolean? = null
 )
 
 enum class SourceTargetSkill {

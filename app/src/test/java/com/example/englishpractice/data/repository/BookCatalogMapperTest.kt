@@ -162,4 +162,77 @@ class BookCatalogMapperTest {
         assertEquals(3, activity.minimumResponseItems)
         assertEquals(18, activity.minimumWordCount)
     }
+
+    @Test
+    fun `toActivities infers reading and listening summary requirements`() {
+        val catalog = BookCatalog(
+            version = 2,
+            generatedAt = "2026-04-02T13:08:48.105482+00:00",
+            books = listOf(
+                BookSeed(
+                    id = "mixed-skills",
+                    title = "Mixed Skills Source",
+                    author = "Example Author",
+                    cefr = listOf("B2"),
+                    sourceType = "curated_notes",
+                    tags = listOf("mixed"),
+                    chapters = listOf(
+                        BookChapter(
+                            id = "reading-summary",
+                            title = "Reading summary",
+                            order = 1,
+                            cefr = listOf("B2"),
+                            tags = listOf("reading", "argument", "tone"),
+                            summary = "Summarize the article and identify the writer's stance.",
+                            points = listOf("The article argues for clearer regulation."),
+                            examples = emptyList(),
+                            pitfalls = emptyList(),
+                            practicePrompts = listOf(
+                                BookPracticePrompt(
+                                    id = "reading-summary-prompt-1",
+                                    type = ExerciseType.READ_AND_SUMMARIZE,
+                                    targetSkill = SourceTargetSkill.READING,
+                                    prompt = "Read the article and summarize the argument."
+                                )
+                            ),
+                            related = emptyList(),
+                            metadata = emptyMap()
+                        ),
+                        BookChapter(
+                            id = "listening-summary",
+                            title = "Listening summary",
+                            order = 2,
+                            cefr = listOf("B2"),
+                            tags = listOf("listening", "debate", "contrast"),
+                            summary = "Summarize the speaker's final position and the nuance.",
+                            points = listOf("The speaker accepts one benefit but still prefers stricter rules."),
+                            examples = emptyList(),
+                            pitfalls = emptyList(),
+                            practicePrompts = listOf(
+                                BookPracticePrompt(
+                                    id = "listening-summary-prompt-1",
+                                    type = ExerciseType.LISTEN_AND_SUMMARIZE,
+                                    targetSkill = SourceTargetSkill.LISTENING,
+                                    prompt = "Listen to the debate and summarize the conclusion."
+                                )
+                            ),
+                            related = emptyList(),
+                            metadata = emptyMap()
+                        )
+                    )
+                )
+            )
+        )
+
+        val activities = BookCatalogMapper.toActivities(catalog)
+        val readingActivity = activities.first { it.id == "reading-summary-prompt-1" }
+        val listeningActivity = activities.first { it.id == "listening-summary-prompt-1" }
+
+        assertEquals(SkillType.READING, readingActivity.skill)
+        assertEquals(2, readingActivity.minimumKeywordMatches)
+        assertEquals(true, readingActivity.requiresToneReference)
+        assertEquals(SkillType.LISTENING, listeningActivity.skill)
+        assertEquals(2, listeningActivity.minimumKeywordMatches)
+        assertEquals(true, listeningActivity.requiresContrastMarker)
+    }
 }

@@ -58,7 +58,13 @@ object BookCatalogMapper {
                         supportNote = buildSupportNote(book.title, level, chapter),
                         scoringProfile = prompt.scoringProfile ?: inferScoringProfile(prompt),
                         minimumWordCount = prompt.minimumWordCount ?: inferMinimumWordCount(prompt),
-                        minimumResponseItems = prompt.minimumResponseItems ?: inferMinimumResponseItems(prompt)
+                        minimumResponseItems = prompt.minimumResponseItems ?: inferMinimumResponseItems(prompt),
+                        minimumKeywordMatches = prompt.minimumKeywordMatches
+                            ?: inferMinimumKeywordMatches(prompt),
+                        requiresToneReference = prompt.requiresToneReference
+                            ?: inferToneRequirement(prompt),
+                        requiresContrastMarker = prompt.requiresContrastMarker
+                            ?: inferContrastRequirement(prompt)
                     )
                 }
             }
@@ -180,6 +186,29 @@ object BookCatalogMapper {
             PromptScoringProfile.SENTENCE_DRILL -> numericHint
             PromptScoringProfile.REWRITE -> numericHint
             PromptScoringProfile.DEFAULT -> null
+        }
+    }
+
+    private fun inferMinimumKeywordMatches(prompt: BookPracticePrompt): Int? {
+        return when (prompt.type) {
+            ExerciseType.READ_AND_SUMMARIZE,
+            ExerciseType.LISTEN_AND_SUMMARIZE -> 2
+
+            else -> null
+        }
+    }
+
+    private fun inferToneRequirement(prompt: BookPracticePrompt): Boolean? {
+        return when (prompt.type) {
+            ExerciseType.READ_AND_SUMMARIZE -> true
+            else -> null
+        }
+    }
+
+    private fun inferContrastRequirement(prompt: BookPracticePrompt): Boolean? {
+        return when (prompt.type) {
+            ExerciseType.LISTEN_AND_SUMMARIZE -> true
+            else -> null
         }
     }
 

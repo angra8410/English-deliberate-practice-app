@@ -63,7 +63,12 @@ object AssetContentParser {
                 ?.let { value -> PromptScoringProfile.valueOf(value.uppercase()) }
                 ?: PromptScoringProfile.DEFAULT,
             minimumWordCount = optInt("minimumWordCount").takeIf { value -> value > 0 },
-            minimumResponseItems = optInt("minimumResponseItems").takeIf { value -> value > 0 }
+            minimumResponseItems = optInt("minimumResponseItems").takeIf { value -> value > 0 },
+            minimumKeywordMatches = optInt("minimumKeywordMatches").takeIf { value -> value > 0 },
+            requiresToneReference = optBoolean("requiresToneReference")
+                .takeUnless { !has("requiresToneReference") },
+            requiresContrastMarker = optBoolean("requiresContrastMarker")
+                .takeUnless { !has("requiresContrastMarker") }
         )
     }
 

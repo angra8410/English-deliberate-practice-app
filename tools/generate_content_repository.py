@@ -50,8 +50,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--input",
         type=Path,
-        default=Path("app/src/main/assets/content/content_repository.json"),
-        help="Path to the raw or partially enriched content repository JSON.",
+        default=Path("tools/content_repository.raw.json"),
+        help="Path to the raw book catalog JSON.",
     )
     parser.add_argument(
         "--output",
@@ -64,6 +64,11 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=Path("tools/content_metadata_overrides.json"),
         help="Optional prompt override file. Missing files are ignored.",
+    )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="Fail if the generated output differs from the current output file instead of writing it.",
     )
     return parser.parse_args()
 
@@ -137,6 +142,34 @@ def merge_prompt_metadata(
     if minimum_response_items is not None:
         enriched["minimumResponseItems"] = minimum_response_items
 
+    minimum_keyword_matches = (
+        positive_int(enriched.get("minimumKeywordMatches"))
+        or positive_int(override.get("minimumKeywordMatches"))
+        or infer_minimum_keyword_matches(prompt)
+    )
+    if minimum_keyword_matches is not None:
+        enriched["minimumKeywordMatches"] = minimum_keyword_matches
+
+    requires_tone_reference = (
+        explicit_boolean(enriched.get("requiresToneReference"))
+        if "requiresToneReference" in enriched
+        else explicit_boolean(override.get("requiresToneReference"))
+    )
+    if requires_tone_reference is None:
+        requires_tone_reference = infer_tone_requirement(prompt)
+    if requires_tone_reference is not None:
+        enriched["requiresToneReference"] = requires_tone_reference
+
+    requires_contrast_marker = (
+        explicit_boolean(enriched.get("requiresContrastMarker"))
+        if "requiresContrastMarker" in enriched
+        else explicit_boolean(override.get("requiresContrastMarker"))
+    )
+    if requires_contrast_marker is None:
+        requires_contrast_marker = infer_contrast_requirement(prompt)
+    if requires_contrast_marker is not None:
+        enriched["requiresContrastMarker"] = requires_contrast_marker
+
     return order_prompt_fields(enriched)
 
 
@@ -170,6 +203,9 @@ def order_prompt_fields(prompt: dict[str, Any]) -> dict[str, Any]:
         "scoringProfile",
         "minimumWordCount",
         "minimumResponseItems",
+        "minimumKeywordMatches",
+        "requiresToneReference",
+        "requiresContrastMarker",
     ]
     ordered_prompt: dict[str, Any] = {}
     for key in preferred_order:
@@ -277,6 +313,25 @@ def infer_minimum_response_items(prompt: dict[str, Any], scoring_profile: str) -
     return numeric_hint
 
 
+def infer_minimum_keyword_matches(prompt: dict[str, Any]) -> int | None:
+    prompt_type = prompt.get("type", "").lower()
+    if prompt_type in {"read_and_summarize", "listen_and_summarize"}:
+        return 2
+    return None
+
+
+def infer_tone_requirement(prompt: dict[str, Any]) -> bool | None:
+    if prompt.get("type", "").lower() == "read_and_summarize":
+        return True
+    return None
+
+
+def infer_contrast_requirement(prompt: dict[str, Any]) -> bool | None:
+    if prompt.get("type", "").lower() == "listen_and_summarize":
+        return True
+    return None
+
+
 def find_numeric_hint(text: str) -> int | None:
     digit_match = re.search(r"\b(\d+)\b", text)
     if digit_match:
@@ -333,6 +388,12 @@ def positive_int(value: Any) -> int | None:
     return None
 
 
+def explicit_boolean(value: Any) -> bool | None:
+    if isinstance(value, bool):
+        return value
+    return None
+
+
 def first_non_blank(*values: Any) -> str | None:
     for value in values:
         if isinstance(value, str) and value.strip():
@@ -345,11 +406,18 @@ def main() -> None:
     catalog = load_json(args.input)
     overrides = load_overrides(args.overrides)
     enriched_catalog = enrich_catalog(catalog, overrides)
+    rendered_output = json.dumps(enriched_catalog, indent=2, ensure_ascii=False) + "\n"
+    if args.check:
+        current_output = args.output.read_text(encoding="utf-8") if args.output.exists() else ""
+        if current_output != rendered_output:
+            raise SystemExit(
+                f"Generated output for {args.output} is out of date. "
+                f"Run the generator without --check to refresh it."
+            )
+        return
+
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(
-        json.dumps(enriched_catalog, indent=2, ensure_ascii=False) + "\n",
-        encoding="utf-8",
-    )
+    args.output.write_text(rendered_output, encoding="utf-8")
 
 
 if __name__ == "__main__":

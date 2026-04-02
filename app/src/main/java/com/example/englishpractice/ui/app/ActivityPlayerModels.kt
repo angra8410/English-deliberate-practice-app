@@ -26,7 +26,10 @@ data class PracticeActivityItem(
     val supportNote: String,
     val scoringProfile: PromptScoringProfile = PromptScoringProfile.DEFAULT,
     val minimumWordCount: Int? = null,
-    val minimumResponseItems: Int? = null
+    val minimumResponseItems: Int? = null,
+    val minimumKeywordMatches: Int? = null,
+    val requiresToneReference: Boolean? = null,
+    val requiresContrastMarker: Boolean? = null
 )
 
 data class ActivityAttemptRecord(

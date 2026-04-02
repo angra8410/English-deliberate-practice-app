@@ -40,6 +40,9 @@ Use JSON files in assets for initial content packs.
 - scoringProfile
 - minimumWordCount
 - minimumResponseItems
+- minimumKeywordMatches
+- requiresToneReference
+- requiresContrastMarker
 
 ## Writing scoring profiles
 - `default`: open response with normal length and target-language checks
@@ -48,11 +51,12 @@ Use JSON files in assets for initial content packs.
 - `rewrite`: rewrite/error-correction style task
 
 ## Generator workflow
-1. create or export a raw book catalog JSON
+1. create or export a raw book catalog JSON at `tools/content_repository.raw.json`
 2. keep prompt-specific metadata in `tools/content_metadata_overrides.json`
 3. run `tools/generate_content_repository.py`
 4. write the result to `app/src/main/assets/content/content_repository.json`
-5. run the app tests to verify the new asset still parses
+5. run the generator again with `--check` to detect drift
+6. run the app tests to verify the new asset still parses
 
 ## Import strategy
 On first launch:

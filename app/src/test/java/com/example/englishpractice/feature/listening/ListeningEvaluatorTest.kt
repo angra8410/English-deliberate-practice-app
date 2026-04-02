@@ -41,4 +41,22 @@ class ListeningEvaluatorTest {
             feedback.weakTags
         )
     }
+
+    @Test
+    fun `evaluateSummary respects custom summary thresholds and optional contrast requirement`() {
+        val feedback = ListeningEvaluator.evaluateSummary(
+            answer = "The speaker supports stricter rules because the current system is confusing.",
+            expectedKeywords = listOf("stricter", "confusing"),
+            minimumKeywordMatches = 1,
+            minimumWordCount = 8,
+            requiresContrastMarker = false
+        )
+
+        assertEquals(76, feedback.score)
+        assertEquals(
+            listOf("You captured the main listening point and some contrast."),
+            feedback.feedback
+        )
+        assertTrue(feedback.weakTags.isEmpty())
+    }
 }

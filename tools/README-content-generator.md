@@ -1,19 +1,29 @@
 # Content Generator
 
-Use `tools/generate_content_repository.py` to turn a raw or partially enriched book catalog into the app asset at `app/src/main/assets/content/content_repository.json`.
+Use `tools/generate_content_repository.py` to turn a checked-in raw book catalog into the app asset at `app/src/main/assets/content/content_repository.json`.
 
 ## Usage
 
 ```powershell
 python tools/generate_content_repository.py `
-  --input app/src/main/assets/content/content_repository.json `
+  --input tools/content_repository.raw.json `
   --output app/src/main/assets/content/content_repository.json `
   --overrides tools/content_metadata_overrides.json
 ```
 
+## Drift check
+
+```powershell
+python tools/generate_content_repository.py `
+  --input tools/content_repository.raw.json `
+  --output app/src/main/assets/content/content_repository.json `
+  --overrides tools/content_metadata_overrides.json `
+  --check
+```
+
 ## What the generator does
 
-- keeps existing prompt ids, chapters, and book metadata
+- reads raw book and chapter data from `tools/content_repository.raw.json`
 - infers prompt-level evaluation metadata when missing
 - applies prompt-specific overrides from `tools/content_metadata_overrides.json`
 - writes a stable, pretty-printed JSON file for the Android asset pipeline
@@ -27,6 +37,9 @@ python tools/generate_content_repository.py `
 - `scoringProfile`
 - `minimumWordCount`
 - `minimumResponseItems`
+- `minimumKeywordMatches`
+- `requiresToneReference`
+- `requiresContrastMarker`
 
 ## Override format
 
@@ -48,8 +61,8 @@ python tools/generate_content_repository.py `
 
 ## Recommended workflow
 
-1. Generate your raw book catalog JSON from your notes.
-2. Run the content generator with the raw catalog as `--input`.
-3. Keep high-quality prompt-specific metadata in `tools/content_metadata_overrides.json`.
-4. Re-run the generator whenever the raw catalog changes.
+1. Generate or update `tools/content_repository.raw.json` from your notes.
+2. Keep high-quality prompt-specific metadata in `tools/content_metadata_overrides.json`.
+3. Run the content generator to refresh `app/src/main/assets/content/content_repository.json`.
+4. Run the generator again with `--check` when you want to verify the asset has not drifted.
 5. Run `:app:testDebugUnitTest` to confirm the parser and asset smoke tests still pass.

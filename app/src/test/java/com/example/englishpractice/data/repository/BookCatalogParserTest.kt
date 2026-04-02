@@ -44,7 +44,10 @@ class BookCatalogParserTest {
                           "expectedKeywords": ["competitive salary", "career prospects"],
                           "scoringProfile": "list",
                           "minimumWordCount": 10,
-                          "minimumResponseItems": 5
+                          "minimumResponseItems": 5,
+                          "minimumKeywordMatches": 2,
+                          "requiresToneReference": false,
+                          "requiresContrastMarker": false
                         }
                       ],
                       "related": ["job-interviews"],
@@ -68,5 +71,8 @@ class BookCatalogParserTest {
         assertEquals(listOf("competitive salary", "career prospects"), prompt.expectedKeywords)
         assertEquals(10, prompt.minimumWordCount)
         assertEquals(5, prompt.minimumResponseItems)
+        assertEquals(2, prompt.minimumKeywordMatches)
+        assertEquals(false, prompt.requiresToneReference)
+        assertEquals(false, prompt.requiresContrastMarker)
     }
 }

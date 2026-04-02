@@ -488,7 +488,13 @@ class AppViewModel(
         transcriptText: String?
     ): PracticeFeedback {
         return when (activity.skill) {
-            SkillType.READING -> ReadingEvaluator.evaluateSummary(answer, activity.evaluationTargets)
+            SkillType.READING -> ReadingEvaluator.evaluateSummary(
+                answer = answer,
+                expectedKeywords = activity.evaluationTargets,
+                minimumKeywordMatches = activity.minimumKeywordMatches ?: 2,
+                minimumWordCount = activity.minimumWordCount ?: 35,
+                requiresToneReference = activity.requiresToneReference ?: true
+            )
             SkillType.WRITING -> WritingFeedbackRules.evaluateAnswer(
                 answer = answer,
                 expectedKeywords = activity.evaluationTargets,
@@ -496,7 +502,13 @@ class AppViewModel(
                 minimumWordCount = activity.minimumWordCount,
                 minimumResponseItems = activity.minimumResponseItems
             )
-            SkillType.LISTENING -> ListeningEvaluator.evaluateSummary(answer, activity.evaluationTargets)
+            SkillType.LISTENING -> ListeningEvaluator.evaluateSummary(
+                answer = answer,
+                expectedKeywords = activity.evaluationTargets,
+                minimumKeywordMatches = activity.minimumKeywordMatches ?: 2,
+                minimumWordCount = activity.minimumWordCount ?: 25,
+                requiresContrastMarker = activity.requiresContrastMarker ?: true
+            )
             SkillType.SPEAKING -> evaluateSpeakingAnswer(
                 answer = answer,
                 transcriptText = transcriptText ?: answer,
