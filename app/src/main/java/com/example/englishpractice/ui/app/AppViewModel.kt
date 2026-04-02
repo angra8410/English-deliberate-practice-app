@@ -21,6 +21,7 @@ import com.example.englishpractice.feature.progress.ProgressCalculator
 import com.example.englishpractice.feature.progress.SkillProgressInput
 import com.example.englishpractice.feature.reading.ReadingEvaluator
 import com.example.englishpractice.feature.review.ReviewScheduler
+import com.example.englishpractice.feature.speaking.SpeakingEvaluator
 import com.example.englishpractice.feature.speaking.SpeakingManager
 import com.example.englishpractice.feature.writing.WritingFeedbackRules
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -509,49 +510,14 @@ class AppViewModel(
                 minimumWordCount = activity.minimumWordCount ?: 25,
                 requiresContrastMarker = activity.requiresContrastMarker ?: true
             )
-            SkillType.SPEAKING -> evaluateSpeakingAnswer(
+            SkillType.SPEAKING -> SpeakingEvaluator.evaluateResponse(
                 answer = answer,
                 transcriptText = transcriptText ?: answer,
-                expectedKeywords = activity.evaluationTargets
+                expectedKeywords = activity.evaluationTargets,
+                minimumKeywordMatches = activity.minimumKeywordMatches ?: 2,
+                minimumWordCount = activity.minimumWordCount ?: 35
             )
         }
-    }
-
-    private fun evaluateSpeakingAnswer(
-        answer: String,
-        transcriptText: String,
-        expectedKeywords: List<String>
-    ): PracticeFeedback {
-        val normalizedTranscript = transcriptText.lowercase()
-        val matchedKeywords = expectedKeywords.count { keyword ->
-            normalizedTranscript.contains(keyword.lowercase())
-        }
-        val feedback = mutableListOf<String>()
-        val weakTags = mutableListOf<String>()
-
-        if (transcriptText.split(" ").size < 35) {
-            feedback += "Extend the response with a stronger explanation and one concrete example."
-            weakTags += "response length"
-        }
-
-        if (matchedKeywords < 2) {
-            feedback += "Stay closer to the task by naming junior employees, feedback, or your exact position."
-            weakTags += "task relevance"
-        } else {
-            feedback += "The response stays on topic and addresses the prompt."
-        }
-
-        if (!normalizedTranscript.contains("however") && !normalizedTranscript.contains("although")) {
-            feedback += "Add a connector such as however or although to improve fluency and range."
-            weakTags += "connector range"
-        }
-
-        if (answer == transcriptText) {
-            feedback += "Good for v1: the transcript is stored and ready for comparison with the model answer."
-        }
-
-        val score = (46 + matchedKeywords * 15 - weakTags.size * 5).coerceIn(0, 100)
-        return PracticeFeedback(score, feedback.distinct(), weakTags.distinct())
     }
 
     private fun mergeProgressInputs(

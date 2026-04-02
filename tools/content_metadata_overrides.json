@@ -121,6 +121,19 @@
       "minimumWordCount": 32,
       "minimumKeywordMatches": 2,
       "requiresContrastMarker": true
+    },
+    "interview-self-introduction-prompt-1": {
+      "instructions": "Answer aloud as if you were introducing yourself in a job interview. Mention your previous role, two responsibilities, and one strength that connects directly to the new role.",
+      "starterText": "In my previous role as a customer support assistant, I handled client requests, updated internal records, and learned how to communicate clearly under pressure. However, my biggest strength is staying organised while still keeping a professional tone with clients.",
+      "modelAnswer": "In my previous role as a customer support assistant, I managed client enquiries and coordinated follow-up tasks with the operations team. I was also responsible for updating internal records and making sure urgent issues were escalated quickly. However, the main strength I would bring to this position is clear communication, because I learned how to explain problems calmly and keep both clients and colleagues informed. That experience makes me a strong fit for a role that depends on organisation and professional communication.",
+      "expectedKeywords": [
+        "previous role",
+        "responsibilities",
+        "strength",
+        "communication"
+      ],
+      "minimumWordCount": 40,
+      "minimumKeywordMatches": 2
     }
   }
 }

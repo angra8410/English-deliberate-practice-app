@@ -37,5 +37,13 @@ class BookCatalogAssetSmokeTest {
             },
             "Expected at least one seeded listening summary prompt in the content repository asset"
         )
+        assertTrue(
+            catalog.books.any { book ->
+                book.chapters.any { chapter ->
+                    chapter.practicePrompts.any { prompt -> prompt.type.name == "SPEAK_RESPONSE" }
+                }
+            },
+            "Expected at least one seeded speaking prompt in the content repository asset"
+        )
     }
 }

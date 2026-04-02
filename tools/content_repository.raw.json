@@ -327,6 +327,49 @@
                                            "metadata":  {
                                                             "sourceFile":  "vocabulary\\unit-4.md"
                                                         }
+                                       },
+                                       {
+                                           "id":  "interview-self-introduction",
+                                           "title":  "Interview self-introduction",
+                                           "order":  7,
+                                           "cefr":  [
+                                                        "C1"
+                                                    ],
+                                           "tags":  [
+                                                        "vocabulary",
+                                                        "speaking",
+                                                        "interview",
+                                                        "jobs"
+                                                    ],
+                                           "summary":  "Speaking practice focused on introducing previous experience and strengths in an interview.",
+                                           "points":  [
+                                                          "A strong interview introduction should identify the previous role, key responsibilities, and one relevant strength.",
+                                                          "Candidates should connect experience to the role they are applying for.",
+                                                          "A clear connector helps the answer sound more fluent and structured."
+                                                      ],
+                                           "examples":  [
+                                                            {
+                                                                "english":  "In my previous role, I supported customer projects and learned how to communicate clearly under pressure.",
+                                                                "note":  "formal interview introduction"
+                                                            }
+                                                        ],
+                                           "pitfalls":  [
+                                                            "Do not give a list of unrelated facts without explaining why they matter for the role."
+                                                        ],
+                                           "practicePrompts":  [
+                                                                   {
+                                                                       "id":  "interview-self-introduction-prompt-1",
+                                                                       "type":  "speak_response",
+                                                                       "targetSkill":  "SPEAKING",
+                                                                       "prompt":  "You are in a job interview. Introduce your previous role, describe two responsibilities, and explain one strength that makes you a good fit for the position."
+                                                                   }
+                                                               ],
+                                           "related":  [
+                                                           "job-interviews"
+                                                       ],
+                                           "metadata":  {
+                                                            "sourceFile":  "vocabulary\\unit-4.md"
+                                                        }
                                        }
                                    ]
                   }
