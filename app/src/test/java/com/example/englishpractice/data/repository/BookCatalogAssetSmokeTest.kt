@@ -21,5 +21,21 @@ class BookCatalogAssetSmokeTest {
             },
             "Expected at least one chapter with practice prompts in the content repository asset"
         )
+        assertTrue(
+            catalog.books.any { book ->
+                book.chapters.any { chapter ->
+                    chapter.practicePrompts.any { prompt -> prompt.type.name == "READ_AND_SUMMARIZE" }
+                }
+            },
+            "Expected at least one seeded reading summary prompt in the content repository asset"
+        )
+        assertTrue(
+            catalog.books.any { book ->
+                book.chapters.any { chapter ->
+                    chapter.practicePrompts.any { prompt -> prompt.type.name == "LISTEN_AND_SUMMARIZE" }
+                }
+            },
+            "Expected at least one seeded listening summary prompt in the content repository asset"
+        )
     }
 }

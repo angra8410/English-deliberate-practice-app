@@ -321,6 +321,116 @@
           "metadata": {
             "sourceFile": "vocabulary\\unit-4.md"
           }
+        },
+        {
+          "id": "job-ad-analysis",
+          "title": "Job ad analysis",
+          "order": 5,
+          "cefr": [
+            "C1"
+          ],
+          "tags": [
+            "vocabulary",
+            "reading",
+            "jobs",
+            "applications"
+          ],
+          "summary": "Reading practice focused on identifying the main offer, required profile and overall tone in a job advertisement.",
+          "points": [
+            "Strong job ads explain the role, training and career prospects clearly.",
+            "Candidates should identify the required profile and the benefits that are being emphasized.",
+            "The tone is usually persuasive but professional."
+          ],
+          "examples": [
+            {
+              "english": "The post offers excellent career prospects and structured training.",
+              "note": "job advertisement language"
+            }
+          ],
+          "pitfalls": [
+            "Do not confuse the core responsibilities with the optional benefits."
+          ],
+          "practicePrompts": [
+            {
+              "id": "job-ad-analysis-prompt-1",
+              "type": "read_and_summarize",
+              "targetSkill": "READING",
+              "prompt": "CityBridge Consulting is looking for a junior operations assistant to support client projects, coordinate schedules, and prepare internal reports. The role includes structured training, regular mentoring, and clear career progression for candidates who show initiative. Applicants should have strong communication skills, good attention to detail, and the ability to work calmly under pressure. Previous internship experience is helpful, but we are mainly looking for people who learn quickly and write professionally.",
+              "instructions": "Read the advertisement and summarize the role, the ideal candidate, and the overall tone in three or four sentences.",
+              "starterText": "The advertisement is for a junior operations assistant role at CityBridge Consulting.",
+              "modelAnswer": "The advertisement is for a junior operations assistant role that combines project support, scheduling, and report preparation. It is aimed at candidates with strong communication skills, attention to detail, and the ability to stay calm under pressure, while making it clear that fast learning matters more than extensive experience. The tone is professional and encouraging because it highlights structured training, mentoring, and clear career progression.",
+              "expectedKeywords": [
+                "junior operations assistant",
+                "communication skills",
+                "career progression",
+                "professional tone"
+              ],
+              "minimumWordCount": 40,
+              "minimumKeywordMatches": 2,
+              "requiresToneReference": true
+            }
+          ],
+          "related": [
+            "applying-for-a-job"
+          ],
+          "metadata": {
+            "sourceFile": "vocabulary\\unit-3.json"
+          }
+        },
+        {
+          "id": "interview-panel-summary",
+          "title": "Interview panel summary",
+          "order": 6,
+          "cefr": [
+            "C1"
+          ],
+          "tags": [
+            "vocabulary",
+            "listening",
+            "interview",
+            "jobs"
+          ],
+          "summary": "Listening practice focused on the final decision and contrasting details in an interview discussion.",
+          "points": [
+            "The panel values strong preparation and clear examples from previous roles.",
+            "One interviewer is impressed by the candidate's communication skills, but another worries about limited leadership experience.",
+            "The final position is positive overall, although the panel wants one more example of handling deadlines."
+          ],
+          "examples": [
+            {
+              "english": "She gave clear examples from her previous role, but the panel still asked for more detail about deadlines.",
+              "note": "contrast in interview feedback"
+            }
+          ],
+          "pitfalls": [
+            "Do not miss the final recommendation just because one concern is mentioned along the way."
+          ],
+          "practicePrompts": [
+            {
+              "id": "interview-panel-summary-prompt-1",
+              "type": "listen_and_summarize",
+              "targetSkill": "LISTENING",
+              "prompt": "The panel agrees that the candidate communicated confidently and gave strong examples from her customer service role, but one interviewer notes that she did not fully explain how she manages multiple deadlines. In the end, the panel decides to move her to the next stage because her preparation and communication are stronger than those of the other candidates.",
+              "instructions": "Listen to the panel summary and write a short summary of the final decision plus the main reservation that was raised.",
+              "starterText": "The panel decides to move the candidate forward, but they still want more detail about her experience with deadlines.",
+              "modelAnswer": "The panel decides to move the candidate to the next stage because her preparation and communication are stronger than those of the other applicants. However, one interviewer still wants a clearer example of how she manages multiple deadlines. The final judgment is positive overall, but that reservation remains important.",
+              "expectedKeywords": [
+                "next stage",
+                "communication",
+                "deadlines",
+                "positive overall"
+              ],
+              "minimumWordCount": 32,
+              "minimumKeywordMatches": 2,
+              "requiresContrastMarker": true
+            }
+          ],
+          "related": [
+            "job-interviews"
+          ],
+          "metadata": {
+            "sourceFile": "vocabulary\\unit-4.md"
+          }
         }
       ]
     }
