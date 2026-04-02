@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.englishpractice.domain.model.CefrLevel
 import com.example.englishpractice.ui.app.AppUiState
+import com.example.englishpractice.ui.components.ContentProvenanceBlock
 
 @Composable
 fun HomeScreen(
@@ -93,9 +94,9 @@ fun HomeScreen(
                         text = "${item.exerciseType}  |  ${item.estimatedMinutes} min",
                         style = MaterialTheme.typography.bodySmall
                     )
-                    Text(
-                        text = "Source: ${item.sourceLabel}",
-                        style = MaterialTheme.typography.bodySmall
+                    ContentProvenanceBlock(
+                        sourceLabel = item.sourceLabel,
+                        collectionTitle = item.collectionTitle
                     )
                 }
             }
@@ -135,6 +136,12 @@ fun HomeScreen(
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(nextReview.title, style = MaterialTheme.typography.titleSmall)
+                    ContentProvenanceBlock(
+                        sourceLabel = nextReview.sourceLabel,
+                        collectionTitle = nextReview.collectionTitle,
+                        unitTitle = nextReview.unitTitle,
+                        currentTitle = nextReview.title
+                    )
                     Text(nextReview.reason, style = MaterialTheme.typography.bodySmall)
                     Text(
                         "Weak tags: ${nextReview.weakTags.joinToString()}",

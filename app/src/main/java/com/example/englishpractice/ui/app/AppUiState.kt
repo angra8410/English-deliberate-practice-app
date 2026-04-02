@@ -33,7 +33,8 @@ data class DailyPracticeItem(
     val focus: String,
     val exerciseType: ExerciseType,
     val estimatedMinutes: Int,
-    val sourceLabel: String = "Built-in assets"
+    val sourceLabel: String = "Built-in assets",
+    val collectionTitle: String? = null
 )
 
 data class WeakPattern(
@@ -56,6 +57,8 @@ data class ReviewQueueItem(
     val dueLabel: String,
     val reason: String,
     val sourceLabel: String,
+    val collectionTitle: String? = null,
+    val unitTitle: String? = null,
     val weakTags: List<String>,
     val lastScore: Int? = null
 )

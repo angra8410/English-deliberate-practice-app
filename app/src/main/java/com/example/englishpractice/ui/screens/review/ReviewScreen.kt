@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.englishpractice.ui.app.AppUiState
+import com.example.englishpractice.ui.components.ContentProvenanceBlock
 
 @Composable
 fun ReviewScreen(
@@ -69,8 +70,13 @@ fun ReviewScreen(
                         )
                     }
                     Text(item.title, style = MaterialTheme.typography.titleMedium)
+                    ContentProvenanceBlock(
+                        sourceLabel = item.sourceLabel,
+                        collectionTitle = item.collectionTitle,
+                        unitTitle = item.unitTitle,
+                        currentTitle = item.title
+                    )
                     Text(item.prompt)
-                    Text("Source: ${item.sourceLabel}", style = MaterialTheme.typography.bodySmall)
                     item.lastScore?.let { score ->
                         Text("Last score: $score", style = MaterialTheme.typography.bodySmall)
                     }

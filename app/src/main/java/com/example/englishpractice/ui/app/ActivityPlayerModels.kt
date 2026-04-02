@@ -13,6 +13,7 @@ enum class PromptScoringProfile {
 data class PracticeActivityItem(
     val id: String,
     val unitId: String? = null,
+    val unitTitle: String? = null,
     val skill: SkillType,
     val title: String,
     val sourceLabel: String = "Built-in assets",

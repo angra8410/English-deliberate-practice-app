@@ -130,6 +130,8 @@ class PracticeRepository private constructor(
                     dueLabel = dueLabel(reviewItem.dueAt),
                     reason = buildReviewReason(weakTags, latestAttempt?.score),
                     sourceLabel = activity?.sourceLabel ?: "Unknown source",
+                    collectionTitle = activity?.collectionTitle,
+                    unitTitle = activity?.unitTitle,
                     weakTags = weakTags,
                     lastScore = latestAttempt?.score
                 ) to reviewItem.dueAt

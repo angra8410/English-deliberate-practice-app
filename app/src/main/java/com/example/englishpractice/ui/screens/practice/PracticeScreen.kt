@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.englishpractice.domain.model.SkillType
 import com.example.englishpractice.ui.app.AppUiState
+import com.example.englishpractice.ui.components.ContentProvenanceBlock
 
 @Composable
 fun PracticeScreen(
@@ -55,7 +56,10 @@ fun PracticeScreen(
                     if (matchingPlan != null) {
                         Text("Today's task: ${matchingPlan.title}")
                         Text("Exercise type: ${matchingPlan.exerciseType}")
-                        Text("Source: ${matchingPlan.sourceLabel}")
+                        ContentProvenanceBlock(
+                            sourceLabel = matchingPlan.sourceLabel,
+                            collectionTitle = matchingPlan.collectionTitle
+                        )
                     }
 
                     when (progress.skill) {

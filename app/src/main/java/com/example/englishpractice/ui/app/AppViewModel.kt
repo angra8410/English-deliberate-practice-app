@@ -183,8 +183,11 @@ class AppViewModel(
     }
 
     private fun buildLevelContent(level: CefrLevel): LevelContent {
-        val activityCatalog = buildActivityCatalog(level)
         val unitCatalog = buildUnitCatalog(level)
+        val activityCatalog = attachUnitMetadata(
+            activities = buildActivityCatalog(level),
+            units = unitCatalog
+        )
         return LevelContent(
             activityCatalog = activityCatalog,
             dailyPlan = buildDailyPlan(unitCatalog, activityCatalog),
@@ -279,7 +282,8 @@ class AppViewModel(
                     focus = unit.description,
                     exerciseType = activity?.exerciseType ?: defaultExerciseType(unit.skill),
                     estimatedMinutes = 15,
-                    sourceLabel = unit.sourceLabel
+                    sourceLabel = unit.sourceLabel,
+                    collectionTitle = activity?.collectionTitle
                 )
             }
         } else {
@@ -327,7 +331,8 @@ class AppViewModel(
                 focus = "main idea, support, and more precise vocabulary",
                 exerciseType = ExerciseType.READ_AND_SUMMARIZE,
                 estimatedMinutes = 15,
-                sourceLabel = "Fallback seed"
+                sourceLabel = "Fallback seed",
+                collectionTitle = "Fallback seed"
             ),
             DailyPracticeItem(
                 skill = SkillType.WRITING,
@@ -335,7 +340,8 @@ class AppViewModel(
                 focus = "clarity, connectors, and stronger collocations",
                 exerciseType = ExerciseType.OPEN_TEXT,
                 estimatedMinutes = 15,
-                sourceLabel = "Fallback seed"
+                sourceLabel = "Fallback seed",
+                collectionTitle = "Fallback seed"
             ),
             DailyPracticeItem(
                 skill = SkillType.LISTENING,
@@ -343,7 +349,8 @@ class AppViewModel(
                 focus = "detail recall and contrast markers",
                 exerciseType = ExerciseType.LISTEN_AND_SUMMARIZE,
                 estimatedMinutes = 15,
-                sourceLabel = "Fallback seed"
+                sourceLabel = "Fallback seed",
+                collectionTitle = "Fallback seed"
             ),
             DailyPracticeItem(
                 skill = SkillType.SPEAKING,
@@ -351,7 +358,8 @@ class AppViewModel(
                 focus = "fluency, relevance, and longer structured answers",
                 exerciseType = ExerciseType.SPEAK_RESPONSE,
                 estimatedMinutes = 15,
-                sourceLabel = "Fallback seed"
+                sourceLabel = "Fallback seed",
+                collectionTitle = "Fallback seed"
             )
         )
     }
@@ -530,9 +538,28 @@ class AppViewModel(
                 dueLabel = fallbackDueLabels.getValue(skill),
                 reason = "Retry after score $score with focus on ${weakTags.joinToString()}.",
                 sourceLabel = activity.sourceLabel,
+                collectionTitle = activity.collectionTitle,
+                unitTitle = activity.unitTitle,
                 weakTags = weakTags,
                 lastScore = score
             )
+        }
+    }
+
+    private fun attachUnitMetadata(
+        activities: List<PracticeActivityItem>,
+        units: List<PracticeUnitAsset>
+    ): List<PracticeActivityItem> {
+        if (activities.isEmpty() || units.isEmpty()) return activities
+
+        val unitsById = units.associateBy { unit -> unit.id }
+        return activities.map { activity ->
+            val unit = activity.unitId?.let(unitsById::get)
+            if (unit == null) {
+                activity
+            } else {
+                activity.copy(unitTitle = unit.title)
+            }
         }
     }
 

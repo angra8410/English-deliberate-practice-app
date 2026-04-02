@@ -47,6 +47,7 @@ import com.example.englishpractice.feature.speaking.SpeakingCaptureState
 import com.example.englishpractice.feature.speaking.SpeakingManager
 import com.example.englishpractice.ui.app.ActivityAttemptRecord
 import com.example.englishpractice.ui.app.PracticeActivityItem
+import com.example.englishpractice.ui.components.ContentProvenanceBlock
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -411,7 +412,12 @@ fun ActivityPlayerScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(activity.skill.label, style = MaterialTheme.typography.labelLarge)
-                Text("Source: ${activity.sourceLabel}", style = MaterialTheme.typography.bodySmall)
+                ContentProvenanceBlock(
+                    sourceLabel = activity.sourceLabel,
+                    collectionTitle = activity.collectionTitle,
+                    unitTitle = activity.unitTitle,
+                    currentTitle = activity.title
+                )
                 Text(activity.prompt)
                 Text(activity.supportNote, style = MaterialTheme.typography.bodySmall)
             }
