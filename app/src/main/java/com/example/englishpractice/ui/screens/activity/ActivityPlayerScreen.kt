@@ -10,6 +10,7 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,9 +18,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -48,6 +52,7 @@ import com.example.englishpractice.feature.speaking.SpeakingManager
 import com.example.englishpractice.ui.app.ActivityAttemptRecord
 import com.example.englishpractice.ui.app.PracticeActivityItem
 import com.example.englishpractice.ui.components.ContentProvenanceBlock
+import com.example.englishpractice.ui.components.skillTone
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -108,6 +113,7 @@ fun ActivityPlayerScreen(
     val speakingManager = remember(context) { SpeakingManager(context) }
     val isListeningBusy = isListeningPreparing || isListeningPlaying
     val isSpeakingBusy = isSpeakingListening || isSpeakingProcessing
+    val tone = skillTone(activity.skill)
 
     fun applyTranscript(transcript: String) {
         val safeTranscript = transcript.trim()
@@ -400,18 +406,41 @@ fun ActivityPlayerScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(horizontal = 16.dp, vertical = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Text(activity.title, style = MaterialTheme.typography.headlineMedium)
-        Text(activity.instructions)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(tone.gradient, RoundedCornerShape(28.dp))
+                .padding(20.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = activity.skill.label,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = tone.accent
+                )
+                Text(activity.title, style = MaterialTheme.typography.headlineMedium)
+                Text(
+                    activity.instructions,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
 
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
             Column(
                 modifier = Modifier.padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(activity.skill.label, style = MaterialTheme.typography.labelLarge)
                 ContentProvenanceBlock(
                     sourceLabel = activity.sourceLabel,
                     collectionTitle = activity.collectionTitle,
@@ -424,12 +453,19 @@ fun ActivityPlayerScreen(
         }
 
         if (activity.skill == SkillType.LISTENING) {
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Listening playback", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Listening playback",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = tone.accent
+                    )
                     Text("Engine: ${listeningCapability.playbackEngine}")
                     Text("Source: $listeningSourceLabel")
                     Text("Status: $listeningStatus")
@@ -491,12 +527,19 @@ fun ActivityPlayerScreen(
         }
 
         if (activity.skill == SkillType.SPEAKING) {
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Speaking capture", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Speaking capture",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = tone.accent
+                    )
                     Text("Availability: $speakingAvailability")
                     Text("Status: $speakingStatus")
                     Text(speakingHint, style = MaterialTheme.typography.bodySmall)
@@ -635,45 +678,67 @@ fun ActivityPlayerScreen(
             }
         }
 
-        OutlinedTextField(
-            value = answerText,
-            onValueChange = { answerText = it },
+        Card(
             modifier = Modifier.fillMaxWidth(),
-            minLines = 8,
-            label = { Text(fieldLabel) }
-        )
-
-        Button(
-            enabled = when (activity.skill) {
-                SkillType.SPEAKING -> !isSpeakingBusy && answerText.isNotBlank()
-                SkillType.LISTENING -> ListeningSubmissionPolicy.canSubmit(
-                    isPreparing = isListeningPreparing,
-                    hasStartedPlayback = hasStartedListeningPlayback,
-                    hasPlaybackError = hasListeningPlaybackError,
-                    answerText = answerText
-                )
-                else -> answerText.isNotBlank()
-            },
-            onClick = {
-                val transcript = if (activity.skill == SkillType.SPEAKING) {
-                    capturedTranscript ?: answerText
-                } else {
-                    null
-                }
-                onSubmit(answerText, transcript)
-            },
-            modifier = Modifier.fillMaxWidth()
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
-            Text("Submit and get feedback")
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(
+                    text = "Response workspace",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = tone.accent
+                )
+                OutlinedTextField(
+                    value = answerText,
+                    onValueChange = { answerText = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 8,
+                    label = { Text(fieldLabel) }
+                )
+
+                Button(
+                    enabled = when (activity.skill) {
+                        SkillType.SPEAKING -> !isSpeakingBusy && answerText.isNotBlank()
+                        SkillType.LISTENING -> ListeningSubmissionPolicy.canSubmit(
+                            isPreparing = isListeningPreparing,
+                            hasStartedPlayback = hasStartedListeningPlayback,
+                            hasPlaybackError = hasListeningPlaybackError,
+                            answerText = answerText
+                        )
+                        else -> answerText.isNotBlank()
+                    },
+                    onClick = {
+                        val transcript = if (activity.skill == SkillType.SPEAKING) {
+                            capturedTranscript ?: answerText
+                        } else {
+                            null
+                        }
+                        onSubmit(answerText, transcript)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Submit and get feedback")
+                }
+            }
         }
 
         if (lastAttempt != null && lastAttempt.activityId == activity.id) {
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Latest attempt", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Latest attempt",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = tone.accent
+                    )
                     Text("Score: ${lastAttempt.score}")
                     Text("Weak tags: ${lastAttempt.weakTags.joinToString().ifBlank { "None" }}")
                     lastAttempt.feedback.forEach { line ->

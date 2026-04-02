@@ -1,18 +1,22 @@
 package com.example.englishpractice.ui.screens.browse
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,10 +26,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.example.englishpractice.domain.model.SkillType
 import com.example.englishpractice.ui.app.AppUiState
 import com.example.englishpractice.ui.app.ContentBrowserItem
+import com.example.englishpractice.ui.components.ContentProvenanceBlock
+import com.example.englishpractice.ui.components.skillTone
 
 private const val ALL_SOURCES = "All sources"
 private const val ALL_SKILLS = "All skills"
@@ -69,67 +76,34 @@ fun ContentBrowserScreen(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(horizontal = 16.dp, vertical = 18.dp),
+        verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-        Text("Browse content", style = MaterialTheme.typography.headlineMedium)
-        Text("Explore all ${state.currentLevel} activities and open a specific prompt directly.")
-
-        Card(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text("Catalog overview", style = MaterialTheme.typography.titleMedium)
-                Text("Visible activities: ${filteredItems.size}")
-                Text("Available sources: ${state.contentBrowserItems.map { it.sourceLabel }.distinct().size}")
-                Text("Current level: ${state.currentLevel}")
-            }
-        }
-
-        Text("Filter by source", style = MaterialTheme.typography.titleMedium)
-        Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            sourceOptions.forEach { source ->
-                val sourceCount = if (source == ALL_SOURCES) {
-                    state.contentBrowserItems.size
-                } else {
-                    sourceCounts[source] ?: 0
-                }
-                FilterChip(
-                    selected = selectedSource == source,
-                    onClick = { selectedSource = source },
-                    label = { Text("$source ($sourceCount)") }
-                )
-            }
-        }
-
-        Text("Filter by skill", style = MaterialTheme.typography.titleMedium)
-        Row(
-            modifier = Modifier.horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            skillOptions.forEach { skill ->
-                val skillCount = if (skill == ALL_SKILLS) {
-                    sourceFilteredItems.size
-                } else {
-                    skillCounts[SkillType.valueOf(skill)] ?: 0
-                }
-                FilterChip(
-                    selected = normalizedSelectedSkill == skill,
-                    onClick = { selectedSkill = skill },
-                    label = {
-                        Text("${skillLabel(skill)} ($skillCount)")
-                    }
-                )
-            }
-        }
+        BrowserHero(state = state, visibleCount = filteredItems.size)
+        FilterPanel(
+            title = "Source",
+            options = sourceOptions,
+            selectedOption = selectedSource,
+            countForOption = { option ->
+                if (option == ALL_SOURCES) state.contentBrowserItems.size else sourceCounts[option] ?: 0
+            },
+            labelForOption = { it },
+            onOptionSelected = { selectedSource = it }
+        )
+        FilterPanel(
+            title = "Skill",
+            options = skillOptions,
+            selectedOption = normalizedSelectedSkill,
+            countForOption = { option ->
+                if (option == ALL_SKILLS) sourceFilteredItems.size else skillCounts[SkillType.valueOf(option)] ?: 0
+            },
+            labelForOption = ::skillLabel,
+            onOptionSelected = { selectedSkill = it }
+        )
 
         if (filteredItems.isEmpty()) {
             Card(modifier = Modifier.fillMaxWidth()) {
-                Column(modifier = Modifier.padding(16.dp)) {
+                Column(modifier = Modifier.padding(18.dp)) {
                     Text("No content matches the current filters.")
                 }
             }
@@ -138,82 +112,186 @@ fun ContentBrowserScreen(
                 val skillItems = groupedItems[skill].orEmpty()
                 if (skillItems.isEmpty()) return@forEach
 
-                Text(skill.label, style = MaterialTheme.typography.titleMedium)
+                SectionHeading(
+                    eyebrow = skill.label,
+                    title = "${skillItems.size} visible activities",
+                    description = skill.deliberatePracticeFocus
+                )
                 skillItems.forEach { item ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onActivitySelected(item.activityId) }
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            item.collectionTitle?.let { collectionTitle ->
-                                Text(
-                                    text = collectionTitle,
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                            Text(item.title, style = MaterialTheme.typography.titleMedium)
-                            if (item.unitTitle != item.title) {
-                                Text(
-                                    text = item.unitTitle,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            Text(
-                                item.focus,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = "${item.exerciseType}  |  ${item.effortLabel}  |  Target: ${item.responseTargetLabel}",
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                            Text(
-                                text = "Source: ${item.sourceLabel}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            if (item.tags.isNotEmpty() || item.difficulty != null) {
-                                Row(
-                                    modifier = Modifier.horizontalScroll(rememberScrollState()),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    item.difficulty?.let { difficulty ->
-                                        AssistChip(
-                                            onClick = {},
-                                            label = { Text("Difficulty ${difficultyLabel(difficulty)}") },
-                                            colors = AssistChipDefaults.assistChipColors(
-                                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                                labelColor = MaterialTheme.colorScheme.onSecondaryContainer
-                                            )
-                                        )
-                                    }
-                                    item.tags.take(4).forEach { tag ->
-                                        AssistChip(
-                                            onClick = {},
-                                            label = { Text(tagLabel(tag)) },
-                                            colors = AssistChipDefaults.assistChipColors(
-                                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        )
-                                    }
-                                }
-                            }
-                            Text(
-                                text = abbreviate(item.promptPreview),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
+                    BrowserItemCard(
+                        item = item,
+                        onActivitySelected = onActivitySelected
+                    )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun BrowserHero(
+    state: AppUiState,
+    visibleCount: Int
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Content browser",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "Browse the catalog by source, skill, and effort without losing the context behind each prompt.",
+                style = MaterialTheme.typography.headlineMedium
+            )
+            Text(
+                text = "Current level ${state.currentLevel}  |  Visible activities $visibleCount  |  Sources ${state.contentBrowserItems.map { it.sourceLabel }.distinct().size}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun FilterPanel(
+    title: String,
+    options: List<String>,
+    selectedOption: String,
+    countForOption: (String) -> Int,
+    labelForOption: (String) -> String,
+    onOptionSelected: (String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium
+        )
+        Row(
+            modifier = Modifier.horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            options.forEach { option ->
+                FilterChip(
+                    selected = selectedOption == option,
+                    onClick = { onOptionSelected(option) },
+                    label = { Text("${labelForOption(option)} (${countForOption(option)})") }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BrowserItemCard(
+    item: ContentBrowserItem,
+    onActivitySelected: (String) -> Unit
+) {
+    val tone = skillTone(item.skill)
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onActivitySelected(item.activityId) },
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(tone.gradient)
+                    .padding(14.dp)
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        text = item.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = tone.accent
+                    )
+                    Text(
+                        text = item.focus,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            ContentProvenanceBlock(
+                sourceLabel = item.sourceLabel,
+                collectionTitle = item.collectionTitle,
+                unitTitle = item.unitTitle,
+                currentTitle = item.title
+            )
+
+            Text(
+                text = "${item.exerciseType}  |  ${item.effortLabel}  |  Target ${item.responseTargetLabel}",
+                style = MaterialTheme.typography.labelLarge
+            )
+
+            if (item.tags.isNotEmpty() || item.difficulty != null) {
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item.difficulty?.let { difficulty ->
+                        AssistChip(
+                            onClick = {},
+                            label = { Text("Difficulty ${difficultyLabel(difficulty)}") },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = tone.soft,
+                                labelColor = tone.accent
+                            )
+                        )
+                    }
+                    item.tags.take(4).forEach { tag ->
+                        AssistChip(
+                            onClick = {},
+                            label = { Text(tagLabel(tag)) },
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        )
+                    }
+                }
+            }
+
+            Text(
+                text = abbreviate(item.promptPreview),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+@Composable
+private fun SectionHeading(
+    eyebrow: String,
+    title: String,
+    description: String
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            text = eyebrow,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(text = title, style = MaterialTheme.typography.headlineMedium)
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
@@ -242,6 +320,4 @@ private fun tagLabel(tag: String): String {
         }
 }
 
-private fun difficultyLabel(difficulty: Int): String {
-    return "$difficulty/4"
-}
+private fun difficultyLabel(difficulty: Int): String = "$difficulty/4"
