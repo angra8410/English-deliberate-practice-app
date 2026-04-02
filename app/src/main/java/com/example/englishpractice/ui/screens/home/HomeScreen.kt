@@ -1,5 +1,10 @@
 package com.example.englishpractice.ui.screens.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
@@ -20,11 +25,16 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -49,6 +59,7 @@ fun HomeScreen(
 ) {
     val weakPatternsBySkill = state.weakPatterns.associateBy { it.skill }
     val reviewBySkill = state.reviewQueue.associateBy { it.skill }
+    var expandedSkillName by rememberSaveable { mutableStateOf<String?>(null) }
 
     Column(
         modifier = Modifier
@@ -81,6 +92,14 @@ fun HomeScreen(
                 item = item,
                 weakPattern = weakPatternsBySkill[item.skill],
                 reviewItem = reviewBySkill[item.skill],
+                expanded = expandedSkillName == item.skill.name,
+                onToggleExpanded = {
+                    expandedSkillName = if (expandedSkillName == item.skill.name) {
+                        null
+                    } else {
+                        item.skill.name
+                    }
+                },
                 onResumeReview = onResumeReview
             )
         }
@@ -294,6 +313,8 @@ private fun SkillHubCard(
     item: DailyPracticeItem,
     weakPattern: WeakPattern?,
     reviewItem: ReviewQueueItem?,
+    expanded: Boolean,
+    onToggleExpanded: () -> Unit,
     onResumeReview: (String) -> Unit
 ) {
     val tone = skillTone(item.skill)
@@ -306,30 +327,38 @@ private fun SkillHubCard(
             modifier = Modifier.padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Surface(
-                    shape = RoundedCornerShape(999.dp),
-                    color = tone.soft
-                ) {
-                    Text(
-                        text = item.skill.label,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = tone.accent
-                    )
-                }
-                reviewItem?.let {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     Surface(
                         shape = RoundedCornerShape(999.dp),
-                        color = reviewCardColor(it.dueLabel).copy(alpha = 0.92f)
+                        color = tone.soft
                     ) {
                         Text(
-                            text = it.dueLabel,
+                            text = item.skill.label,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            style = MaterialTheme.typography.labelLarge,
+                            color = tone.accent
                         )
                     }
+                    reviewItem?.let {
+                        Surface(
+                            shape = RoundedCornerShape(999.dp),
+                            color = reviewCardColor(it.dueLabel).copy(alpha = 0.92f)
+                        ) {
+                            Text(
+                                text = it.dueLabel,
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
+                }
+                OutlinedButton(onClick = onToggleExpanded) {
+                    Text(if (expanded) "Collapse" else "Expand")
                 }
             }
 
@@ -352,71 +381,79 @@ private fun SkillHubCard(
                 )
             }
 
-            ContentProvenanceBlock(
-                sourceLabel = item.sourceLabel,
-                collectionTitle = item.collectionTitle,
-                currentTitle = item.title
-            )
+            AnimatedVisibility(
+                visible = expanded,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    ContentProvenanceBlock(
+                        sourceLabel = item.sourceLabel,
+                        collectionTitle = item.collectionTitle,
+                        currentTitle = item.title
+                    )
 
-            weakPattern?.let { pattern ->
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium,
-                    color = tone.soft.copy(alpha = 0.72f)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = "Focus to tighten",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = tone.accent
-                        )
-                        Text(
-                            text = pattern.tag,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Text(
-                            text = pattern.note,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
-            if (reviewItem != null) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium,
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    border = BorderStroke(1.dp, tone.accent.copy(alpha = 0.16f))
-                ) {
-                    Column(
-                        modifier = Modifier.padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "Next retry",
-                            style = MaterialTheme.typography.labelLarge,
-                            color = tone.accent
-                        )
-                        Text(
-                            text = reviewItem.reason,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        if (reviewItem.weakTags.isNotEmpty()) {
-                            Text(
-                                text = "Weak tags: ${reviewItem.weakTags.joinToString()}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                    weakPattern?.let { pattern ->
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = MaterialTheme.shapes.medium,
+                            color = tone.soft.copy(alpha = 0.72f)
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(14.dp),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = "Focus to tighten",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = tone.accent
+                                )
+                                Text(
+                                    text = pattern.tag,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                                Text(
+                                    text = pattern.note,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
-                        Button(onClick = { onResumeReview(reviewItem.activityId) }) {
-                            Text("Resume ${item.skill.label.lowercase()} retry")
+                    }
+
+                    if (reviewItem != null) {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = MaterialTheme.shapes.medium,
+                            color = MaterialTheme.colorScheme.surfaceContainerLow,
+                            border = BorderStroke(1.dp, tone.accent.copy(alpha = 0.16f))
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(14.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = "Next retry",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = tone.accent
+                                )
+                                Text(
+                                    text = reviewItem.reason,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                if (reviewItem.weakTags.isNotEmpty()) {
+                                    Text(
+                                        text = "Weak tags: ${reviewItem.weakTags.joinToString()}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Button(onClick = { onResumeReview(reviewItem.activityId) }) {
+                                    Text("Resume ${item.skill.label.lowercase()} retry")
+                                }
+                            }
                         }
                     }
                 }
