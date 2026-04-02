@@ -54,6 +54,7 @@ class BookCatalogMapperTest {
         assertEquals(listOf(CefrLevel.C1), BookCatalogMapper.toLevels(catalog))
         assertEquals(1, units.size)
         assertEquals(SkillType.WRITING, units.single().skill)
+        assertEquals("Book catalog", units.single().sourceLabel)
         assertEquals(1, activities.size)
         assertEquals("applying-for-a-job-prompt-2", activities.single().id)
         assertEquals("applying-for-a-job", activities.single().unitId)

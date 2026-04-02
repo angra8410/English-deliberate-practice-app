@@ -69,6 +69,10 @@ fun HomeScreen(
                         text = "${item.exerciseType}  |  ${item.estimatedMinutes} min",
                         style = MaterialTheme.typography.bodySmall
                     )
+                    Text(
+                        text = "Source: ${item.sourceLabel}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
         }

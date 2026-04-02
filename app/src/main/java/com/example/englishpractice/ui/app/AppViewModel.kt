@@ -234,7 +234,8 @@ class AppViewModel(
                     title = unit.title,
                     focus = unit.description,
                     exerciseType = activity?.exerciseType ?: defaultExerciseType(unit.skill),
-                    estimatedMinutes = 15
+                    estimatedMinutes = 15,
+                    sourceLabel = unit.sourceLabel
                 )
             }
         } else {
@@ -249,28 +250,32 @@ class AppViewModel(
                 title = "Read and summarize an editorial",
                 focus = "main idea, support, and more precise vocabulary",
                 exerciseType = ExerciseType.READ_AND_SUMMARIZE,
-                estimatedMinutes = 15
+                estimatedMinutes = 15,
+                sourceLabel = "Fallback seed"
             ),
             DailyPracticeItem(
                 skill = SkillType.WRITING,
                 title = "Write a short opinion response",
                 focus = "clarity, connectors, and stronger collocations",
                 exerciseType = ExerciseType.OPEN_TEXT,
-                estimatedMinutes = 15
+                estimatedMinutes = 15,
+                sourceLabel = "Fallback seed"
             ),
             DailyPracticeItem(
                 skill = SkillType.LISTENING,
                 title = "Listen to a short debate and capture key details",
                 focus = "detail recall and contrast markers",
                 exerciseType = ExerciseType.LISTEN_AND_SUMMARIZE,
-                estimatedMinutes = 15
+                estimatedMinutes = 15,
+                sourceLabel = "Fallback seed"
             ),
             DailyPracticeItem(
                 skill = SkillType.SPEAKING,
                 title = "Answer a prompt aloud and improve the retry",
                 focus = "fluency, relevance, and longer structured answers",
                 exerciseType = ExerciseType.SPEAK_RESPONSE,
-                estimatedMinutes = 15
+                estimatedMinutes = 15,
+                sourceLabel = "Fallback seed"
             )
         )
     }

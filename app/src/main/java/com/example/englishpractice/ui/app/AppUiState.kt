@@ -31,7 +31,8 @@ data class DailyPracticeItem(
     val title: String,
     val focus: String,
     val exerciseType: ExerciseType,
-    val estimatedMinutes: Int
+    val estimatedMinutes: Int,
+    val sourceLabel: String = "Built-in assets"
 )
 
 data class WeakPattern(

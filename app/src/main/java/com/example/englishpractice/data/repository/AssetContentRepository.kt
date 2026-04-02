@@ -10,7 +10,8 @@ data class PracticeUnitAsset(
     val title: String,
     val level: CefrLevel,
     val skill: SkillType,
-    val description: String
+    val description: String,
+    val sourceLabel: String = "Built-in assets"
 )
 
 class AssetContentRepository(private val context: Context) : ContentRepository {

@@ -27,10 +27,11 @@ object BookCatalogMapper {
 
                 PracticeUnitAsset(
                     id = chapter.id,
-                    title = "Book: ${chapter.title}",
+                    title = chapter.title,
                     level = level,
                     skill = dominantSkill,
-                    description = buildChapterDescription(chapter)
+                    description = buildChapterDescription(chapter),
+                    sourceLabel = "Book catalog"
                 )
             }
         }
@@ -46,7 +47,7 @@ object BookCatalogMapper {
                         id = prompt.id,
                         unitId = chapter.id,
                         skill = skill,
-                        title = buildActivityTitle("Book: ${chapter.title}", index, chapter.practicePrompts.size),
+                        title = buildActivityTitle(chapter.title, index, chapter.practicePrompts.size),
                         instructions = buildInstructions(prompt.type),
                         prompt = prompt.prompt,
                         exerciseType = prompt.type,

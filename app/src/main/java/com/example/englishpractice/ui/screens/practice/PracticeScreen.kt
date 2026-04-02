@@ -50,6 +50,7 @@ fun PracticeScreen(
                     if (matchingPlan != null) {
                         Text("Today's task: ${matchingPlan.title}")
                         Text("Exercise type: ${matchingPlan.exerciseType}")
+                        Text("Source: ${matchingPlan.sourceLabel}")
                     }
 
                     when (progress.skill) {

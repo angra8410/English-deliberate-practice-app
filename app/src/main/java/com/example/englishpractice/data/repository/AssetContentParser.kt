@@ -67,7 +67,8 @@ object AssetContentParser {
             title = getString("title"),
             level = CefrLevel.valueOf(getString("level")),
             skill = SkillType.valueOf(getString("skill")),
-            description = getString("description")
+            description = getString("description"),
+            sourceLabel = "Built-in assets"
         )
     }
 
