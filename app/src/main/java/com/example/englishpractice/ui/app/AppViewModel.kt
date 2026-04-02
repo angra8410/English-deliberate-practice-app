@@ -33,6 +33,11 @@ class AppViewModel(
     application: Application,
     private val contentRepository: ContentRepository
 ) : AndroidViewModel(application) {
+    private data class LevelContent(
+        val activityCatalog: List<PracticeActivityItem>,
+        val dailyPlan: List<DailyPracticeItem>
+    )
+
     constructor(application: Application) : this(
         application = application,
         contentRepository = CompositeContentRepository(
@@ -47,18 +52,21 @@ class AppViewModel(
     private val listeningPlayer = ListeningPlayer(application)
     private val repository = PracticeRepository.create(application)
     private val preferencesRepository = AppPreferencesRepository(application)
-    private val currentPilotLevel = CefrLevel.C1
-
-    private val activityCatalog = buildActivityCatalog(currentPilotLevel)
-    private val unitCatalog = buildUnitCatalog(currentPilotLevel)
     private val pilotLevels = buildPilotLevels()
-    private val dailyPlan = buildDailyPlan(unitCatalog, activityCatalog)
+    private val defaultPilotLevel = pilotLevels.firstOrNull { level ->
+        level == AppPreferencesRepository.DEFAULT_PILOT_LEVEL
+    } ?: pilotLevels.firstOrNull() ?: AppPreferencesRepository.DEFAULT_PILOT_LEVEL
+    private val defaultLevelContent = buildLevelContent(defaultPilotLevel)
     private val baseProgressInputs = buildProgressInputs()
     private val defaultSpeakingLocaleTag = AppPreferencesRepository.DEFAULT_SPEAKING_LOCALE_TAG
+    private val selectedPilotLevel = MutableStateFlow(defaultPilotLevel)
     private val selectedSpeakingLocaleTag = MutableStateFlow(defaultSpeakingLocaleTag)
 
     private val _uiState = MutableStateFlow(
         buildUiState(
+            currentLevel = defaultPilotLevel,
+            activityCatalog = defaultLevelContent.activityCatalog,
+            dailyPlan = defaultLevelContent.dailyPlan,
             progressInputs = baseProgressInputs,
             weakPatterns = defaultWeakPatterns(),
             reviewQueue = defaultReviewQueue(),
@@ -70,11 +78,21 @@ class AppViewModel(
 
     init {
         observePreferences()
-        refreshPersistedState()
+        refreshPersistedState(defaultPilotLevel)
     }
 
     fun getActivity(skill: SkillType): PracticeActivityItem? {
         return _uiState.value.activityCatalog.firstOrNull { activity -> activity.skill == skill }
+    }
+
+    fun updatePilotLevel(level: CefrLevel) {
+        val normalizedLevel = normalizePilotLevel(level)
+        if (selectedPilotLevel.value == normalizedLevel) return
+        selectedPilotLevel.value = normalizedLevel
+        refreshPersistedState(normalizedLevel)
+        viewModelScope.launch {
+            preferencesRepository.setPilotLevel(normalizedLevel)
+        }
     }
 
     fun updateSpeakingLocale(localeTag: String) {
@@ -112,11 +130,14 @@ class AppViewModel(
                     weakTags = feedback.weakTags
                 )
             )
-            refreshPersistedState()
+            refreshPersistedState(selectedPilotLevel.value)
         }
     }
 
     private fun buildUiState(
+        currentLevel: CefrLevel,
+        activityCatalog: List<PracticeActivityItem>,
+        dailyPlan: List<DailyPracticeItem>,
         progressInputs: List<SkillProgressInput>,
         weakPatterns: List<WeakPattern>,
         reviewQueue: List<ReviewQueueItem>,
@@ -126,8 +147,8 @@ class AppViewModel(
         val skillProgress = progressInputs.map(ProgressCalculator::buildSnapshot)
 
         return AppUiState(
-            currentLevel = currentPilotLevel,
-            targetLevel = CefrLevel.C1,
+            currentLevel = currentLevel,
+            targetLevel = pilotLevels.lastOrNull() ?: CefrLevel.C1,
             streakDays = 12,
             dailyGoalMinutes = 60,
             pilotLevels = pilotLevels,
@@ -150,6 +171,19 @@ class AppViewModel(
             speakingCapability = speakingManager.capability(),
             listeningCapability = listeningPlayer.capability()
         )
+    }
+
+    private fun buildLevelContent(level: CefrLevel): LevelContent {
+        val activityCatalog = buildActivityCatalog(level)
+        val unitCatalog = buildUnitCatalog(level)
+        return LevelContent(
+            activityCatalog = activityCatalog,
+            dailyPlan = buildDailyPlan(unitCatalog, activityCatalog)
+        )
+    }
+
+    private fun normalizePilotLevel(level: CefrLevel): CefrLevel {
+        return level.takeIf { candidate -> candidate in pilotLevels } ?: defaultPilotLevel
     }
 
     private fun buildProgressInputs(): List<SkillProgressInput> {
@@ -201,7 +235,7 @@ class AppViewModel(
     private fun buildPilotLevels(): List<CefrLevel> {
         val levelsWithActivities = contentRepository.loadLevels().filter { level ->
             contentRepository.loadActivitiesForLevel(level).isNotEmpty()
-        }
+        }.sortedBy { level -> level.ordinal }
         return if (levelsWithActivities.isNotEmpty()) {
             levelsWithActivities
         } else {
@@ -404,6 +438,13 @@ class AppViewModel(
 
     private fun observePreferences() {
         viewModelScope.launch {
+            preferencesRepository.pilotLevelFlow.collectLatest { level ->
+                val normalizedLevel = normalizePilotLevel(level)
+                selectedPilotLevel.value = normalizedLevel
+                refreshPersistedState(normalizedLevel)
+            }
+        }
+        viewModelScope.launch {
             preferencesRepository.speakingLocaleTagFlow.collectLatest { localeTag ->
                 selectedSpeakingLocaleTag.value = localeTag
                 _uiState.value = _uiState.value.copy(selectedSpeakingLocaleTag = localeTag)
@@ -411,9 +452,11 @@ class AppViewModel(
         }
     }
 
-    private fun refreshPersistedState() {
+    private fun refreshPersistedState(level: CefrLevel) {
         viewModelScope.launch {
-            val snapshot = repository.loadSnapshot(activityCatalog)
+            val normalizedLevel = normalizePilotLevel(level)
+            val levelContent = buildLevelContent(normalizedLevel)
+            val snapshot = repository.loadSnapshot(levelContent.activityCatalog)
             val mergedProgressInputs = mergeProgressInputs(snapshot.skillProgressInputs)
             val effectiveWeakPatterns = if (snapshot.weakPatterns.isNotEmpty()) {
                 snapshot.weakPatterns
@@ -427,6 +470,9 @@ class AppViewModel(
             }
 
             _uiState.value = buildUiState(
+                currentLevel = normalizedLevel,
+                activityCatalog = levelContent.activityCatalog,
+                dailyPlan = levelContent.dailyPlan,
                 progressInputs = mergedProgressInputs,
                 weakPatterns = effectiveWeakPatterns,
                 reviewQueue = effectiveReviewQueue,

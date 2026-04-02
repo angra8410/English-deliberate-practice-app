@@ -19,11 +19,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.englishpractice.domain.model.CefrLevel
 import com.example.englishpractice.ui.app.AppUiState
 
 @Composable
 fun SettingsScreen(
     state: AppUiState,
+    onPilotLevelSelected: (CefrLevel) -> Unit,
     onSpeakingLocaleSelected: (String) -> Unit
 ) {
     val speechEnabled = remember { mutableStateOf(true) }
@@ -40,6 +42,28 @@ fun SettingsScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("Settings", style = MaterialTheme.typography.headlineMedium)
+
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text("Content level", style = MaterialTheme.typography.titleMedium)
+                Text("Current level: ${state.currentLevel}")
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    state.pilotLevels.forEach { level ->
+                        FilterChip(
+                            selected = level == state.currentLevel,
+                            onClick = { onPilotLevelSelected(level) },
+                            label = { Text(level.name) }
+                        )
+                    }
+                }
+            }
+        }
 
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(
@@ -91,7 +115,7 @@ fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text("MVP scope", style = MaterialTheme.typography.titleMedium)
-                Text("Levels: ${state.pilotLevels.joinToString()}")
+                Text("Available levels: ${state.pilotLevels.joinToString()}")
                 Text("Daily structure: Reading, Writing, Listening, Speaking")
                 Text("Speaking v1: transcript-first feedback with model answer comparison")
             }

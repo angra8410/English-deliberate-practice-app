@@ -6,21 +6,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.englishpractice.domain.model.CefrLevel
 import com.example.englishpractice.ui.app.AppUiState
 
 @Composable
 fun HomeScreen(
     state: AppUiState,
+    onPilotLevelSelected: (CefrLevel) -> Unit,
     onStartPractice: () -> Unit
 ) {
     Column(
@@ -38,11 +43,22 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
-                    text = "B2 to C1 deliberate practice",
+                    text = "English deliberate practice",
                     style = MaterialTheme.typography.titleLarge
                 )
                 Text("Current level: ${state.currentLevel}  Target: ${state.targetLevel}")
-                Text("Pilot content: ${state.pilotLevels.joinToString()}")
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    state.pilotLevels.forEach { level ->
+                        FilterChip(
+                            selected = level == state.currentLevel,
+                            onClick = { onPilotLevelSelected(level) },
+                            label = { Text(level.name) }
+                        )
+                    }
+                }
                 Text("Daily goal: ${state.dailyGoalMinutes} minutes across four skills")
                 LinearProgressIndicator(
                     progress = { state.overallCompletion / 100f },

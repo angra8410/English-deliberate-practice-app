@@ -112,6 +112,7 @@ fun AppNavHost() {
             composable(AppDestination.Home.route) {
                 HomeScreen(
                     state = uiState,
+                    onPilotLevelSelected = appViewModel::updatePilotLevel,
                     onStartPractice = { navController.navigate(AppDestination.Practice.route) }
                 )
             }
@@ -128,6 +129,7 @@ fun AppNavHost() {
             composable(AppDestination.Settings.route) {
                 SettingsScreen(
                     state = uiState,
+                    onPilotLevelSelected = appViewModel::updatePilotLevel,
                     onSpeakingLocaleSelected = appViewModel::updateSpeakingLocale
                 )
             }
