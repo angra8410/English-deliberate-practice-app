@@ -3,6 +3,7 @@ package com.example.englishpractice.ui.app
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.englishpractice.data.repository.AppPreferencesRepository
 import com.example.englishpractice.data.repository.PersistedSubmission
 import com.example.englishpractice.data.repository.PracticeRepository
 import com.example.englishpractice.domain.model.CefrLevel
@@ -19,32 +20,46 @@ import com.example.englishpractice.feature.writing.WritingFeedbackRules
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val speakingManager = SpeakingManager(application)
     private val listeningPlayer = ListeningPlayer()
     private val repository = PracticeRepository.create(application)
+    private val preferencesRepository = AppPreferencesRepository(application)
 
     private val activityCatalog = buildActivityCatalog()
     private val baseProgressInputs = buildProgressInputs()
+    private val defaultSpeakingLocaleTag = AppPreferencesRepository.DEFAULT_SPEAKING_LOCALE_TAG
+    private val selectedSpeakingLocaleTag = MutableStateFlow(defaultSpeakingLocaleTag)
 
     private val _uiState = MutableStateFlow(
         buildUiState(
             progressInputs = baseProgressInputs,
             weakPatterns = defaultWeakPatterns(),
             reviewQueue = defaultReviewQueue(),
-            recentAttempts = emptyList()
+            recentAttempts = emptyList(),
+            speakingLocaleTag = defaultSpeakingLocaleTag
         )
     )
     val uiState: StateFlow<AppUiState> = _uiState.asStateFlow()
 
     init {
+        observePreferences()
         refreshPersistedState()
     }
 
     fun getActivity(skill: SkillType): PracticeActivityItem? {
         return _uiState.value.activityCatalog.firstOrNull { activity -> activity.skill == skill }
+    }
+
+    fun updateSpeakingLocale(localeTag: String) {
+        selectedSpeakingLocaleTag.value = localeTag
+        _uiState.value = _uiState.value.copy(selectedSpeakingLocaleTag = localeTag)
+        viewModelScope.launch {
+            preferencesRepository.setSpeakingLocaleTag(localeTag)
+        }
     }
 
     fun submitActivity(
@@ -82,7 +97,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         progressInputs: List<SkillProgressInput>,
         weakPatterns: List<WeakPattern>,
         reviewQueue: List<ReviewQueueItem>,
-        recentAttempts: List<ActivityAttemptRecord>
+        recentAttempts: List<ActivityAttemptRecord>,
+        speakingLocaleTag: String
     ): AppUiState {
         val skillProgress = progressInputs.map(ProgressCalculator::buildSnapshot)
 
@@ -136,6 +152,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             reviewQueue = reviewQueue,
             activityCatalog = activityCatalog,
             recentAttempts = recentAttempts,
+            selectedSpeakingLocaleTag = speakingLocaleTag,
             speakingCapability = speakingManager.capability(),
             listeningCapability = listeningPlayer.capability()
         )
@@ -281,6 +298,15 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
+    private fun observePreferences() {
+        viewModelScope.launch {
+            preferencesRepository.speakingLocaleTagFlow.collectLatest { localeTag ->
+                selectedSpeakingLocaleTag.value = localeTag
+                _uiState.value = _uiState.value.copy(selectedSpeakingLocaleTag = localeTag)
+            }
+        }
+    }
+
     private fun refreshPersistedState() {
         viewModelScope.launch {
             val snapshot = repository.loadSnapshot(activityCatalog)
@@ -300,7 +326,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 progressInputs = mergedProgressInputs,
                 weakPatterns = effectiveWeakPatterns,
                 reviewQueue = effectiveReviewQueue,
-                recentAttempts = snapshot.recentAttempts
+                recentAttempts = snapshot.recentAttempts,
+                speakingLocaleTag = selectedSpeakingLocaleTag.value
             )
         }
     }

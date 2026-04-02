@@ -125,7 +125,12 @@ fun AppNavHost() {
             }
             composable(AppDestination.Review.route) { ReviewScreen(state = uiState) }
             composable(AppDestination.Progress.route) { ProgressScreen(state = uiState) }
-            composable(AppDestination.Settings.route) { SettingsScreen(state = uiState) }
+            composable(AppDestination.Settings.route) {
+                SettingsScreen(
+                    state = uiState,
+                    onSpeakingLocaleSelected = appViewModel::updateSpeakingLocale
+                )
+            }
             composable(
                 route = AppDestination.ActivityPlayer.route,
                 arguments = listOf(
@@ -141,8 +146,10 @@ fun AppNavHost() {
                     lastAttempt = skill?.let { selectedSkill ->
                         uiState.recentAttempts.firstOrNull { attempt -> attempt.skill == selectedSkill }
                     },
+                    selectedSpeakingLocaleTag = uiState.selectedSpeakingLocaleTag,
                     speakingCapability = uiState.speakingCapability,
                     listeningCapability = uiState.listeningCapability,
+                    onSpeakingLocaleSelected = appViewModel::updateSpeakingLocale,
                     onSubmit = { answer, transcript ->
                         if (skill != null) {
                             appViewModel.submitActivity(skill, answer, transcript)

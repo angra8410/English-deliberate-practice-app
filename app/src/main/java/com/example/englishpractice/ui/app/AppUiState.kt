@@ -21,6 +21,7 @@ data class AppUiState(
     val reviewQueue: List<ReviewQueueItem>,
     val activityCatalog: List<PracticeActivityItem>,
     val recentAttempts: List<ActivityAttemptRecord>,
+    val selectedSpeakingLocaleTag: String,
     val speakingCapability: SpeakingCapability,
     val listeningCapability: ListeningCapability
 )
