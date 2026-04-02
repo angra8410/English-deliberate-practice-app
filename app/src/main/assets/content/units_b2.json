@@ -1,0 +1,16 @@
+[
+  {
+    "id": "b2_reading_summaries",
+    "title": "Reading Summaries",
+    "level": "B2",
+    "skill": "READING",
+    "description": "Read mid-length texts and summarize them clearly."
+  },
+  {
+    "id": "b2_writing_opinions",
+    "title": "Opinion Writing",
+    "level": "B2",
+    "skill": "WRITING",
+    "description": "Write focused opinion paragraphs with support."
+  }
+]

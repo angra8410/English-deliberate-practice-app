@@ -1,0 +1,16 @@
+[
+  {
+    "id": "c1_speaking_argumentation",
+    "title": "Speaking: Argumentation",
+    "level": "C1",
+    "skill": "SPEAKING",
+    "description": "Give nuanced spoken responses using precise connectors."
+  },
+  {
+    "id": "c1_listening_dense_input",
+    "title": "Listening: Dense Input",
+    "level": "C1",
+    "skill": "LISTENING",
+    "description": "Process advanced spoken input and summarize key ideas."
+  }
+]

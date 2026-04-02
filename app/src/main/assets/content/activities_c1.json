@@ -1,0 +1,37 @@
+[
+  {
+    "id": "act_c1_speak_001",
+    "unitId": "c1_speaking_argumentation",
+    "title": "Argue both sides",
+    "level": "C1",
+    "skill": "SPEAKING",
+    "exerciseType": "SPEAK_RESPONSE",
+    "prompt": "Should universities prioritize job-ready skills over broad academic education?",
+    "instructions": "Speak for 60 to 90 seconds and acknowledge both sides before giving your position.",
+    "tags": [
+      "argumentation",
+      "hedging",
+      "connectors"
+    ],
+    "difficulty": 4,
+    "sampleAnswer": "A nuanced spoken model response transcript goes here."
+  },
+  {
+    "id": "act_c1_listen_001",
+    "unitId": "c1_listening_dense_input",
+    "title": "Advanced listening summary",
+    "level": "C1",
+    "skill": "LISTENING",
+    "exerciseType": "LISTEN_AND_SUMMARIZE",
+    "prompt": "Listen to the audio and summarize the speaker's main claim and two implications.",
+    "instructions": "Write 80 to 100 words.",
+    "tags": [
+      "listening",
+      "summary",
+      "implications"
+    ],
+    "difficulty": 4,
+    "audioAsset": "audio/c1_listen_001.mp3",
+    "sampleAnswer": "An accurate C1 sample answer goes here."
+  }
+]

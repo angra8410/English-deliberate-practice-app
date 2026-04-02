@@ -1,0 +1,36 @@
+[
+  {
+    "id": "act_b2_read_001",
+    "unitId": "b2_reading_summaries",
+    "title": "Summarize a short article",
+    "level": "B2",
+    "skill": "READING",
+    "exerciseType": "READ_AND_SUMMARIZE",
+    "prompt": "Read the passage and write a 60-word summary.",
+    "instructions": "Focus on the main idea and two supporting details.",
+    "tags": [
+      "summary",
+      "main-idea",
+      "supporting-details"
+    ],
+    "difficulty": 2,
+    "sampleAnswer": "A clear and concise summary model goes here."
+  },
+  {
+    "id": "act_b2_write_001",
+    "unitId": "b2_writing_opinions",
+    "title": "Opinion paragraph",
+    "level": "B2",
+    "skill": "WRITING",
+    "exerciseType": "OPEN_TEXT",
+    "prompt": "Do you think remote work improves productivity?",
+    "instructions": "Write 100 to 120 words and support your view with two reasons.",
+    "tags": [
+      "opinion",
+      "cohesion",
+      "support"
+    ],
+    "difficulty": 2,
+    "sampleAnswer": "A balanced B2-level sample answer goes here."
+  }
+]
