@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -148,6 +149,12 @@ fun ContentBrowserScreen(
                             verticalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
                             Text(item.title, style = MaterialTheme.typography.titleMedium)
+                            item.collectionTitle?.let { collectionTitle ->
+                                Text(
+                                    text = collectionTitle,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
                             if (item.unitTitle != item.title) {
                                 Text(
                                     text = item.unitTitle,
@@ -156,9 +163,32 @@ fun ContentBrowserScreen(
                             }
                             Text(item.focus, style = MaterialTheme.typography.bodySmall)
                             Text(
-                                text = "${item.exerciseType}  |  Source: ${item.sourceLabel}",
+                                text = "${item.exerciseType}  |  ${item.effortLabel}  |  Target: ${item.responseTargetLabel}",
                                 style = MaterialTheme.typography.bodySmall
                             )
+                            Text(
+                                text = "Source: ${item.sourceLabel}",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            if (item.tags.isNotEmpty() || item.difficulty != null) {
+                                Row(
+                                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    item.difficulty?.let { difficulty ->
+                                        AssistChip(
+                                            onClick = {},
+                                            label = { Text("Difficulty ${difficultyLabel(difficulty)}") }
+                                        )
+                                    }
+                                    item.tags.take(4).forEach { tag ->
+                                        AssistChip(
+                                            onClick = {},
+                                            label = { Text(tagLabel(tag)) }
+                                        )
+                                    }
+                                }
+                            }
                             Text(
                                 text = abbreviate(item.promptPreview),
                                 style = MaterialTheme.typography.bodyMedium
@@ -186,4 +216,16 @@ private fun skillLabel(skill: String): String {
     } else {
         SkillType.valueOf(skill).label
     }
+}
+
+private fun tagLabel(tag: String): String {
+    return tag.split('-', '_')
+        .filter(String::isNotBlank)
+        .joinToString(" ") { part ->
+            part.replaceFirstChar { char -> char.uppercase() }
+        }
+}
+
+private fun difficultyLabel(difficulty: Int): String {
+    return "$difficulty/4"
 }

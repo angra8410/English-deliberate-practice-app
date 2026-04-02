@@ -64,6 +64,9 @@ class BookCatalogMapperTest {
         assertEquals("applying-for-a-job", activities.single().unitId)
         assertEquals(SkillType.WRITING, activities.single().skill)
         assertEquals("Applying for a job", activities.single().title)
+        assertEquals("English Vocabulary in Use Advanced", activities.single().collectionTitle)
+        assertEquals(listOf("vocabulary", "jobs", "applications", "career", "open_text"), activities.single().tags)
+        assertEquals(4, activities.single().difficulty)
         assertEquals(PromptScoringProfile.LIST, activities.single().scoringProfile)
         assertEquals(5, activities.single().minimumResponseItems)
         assertEquals(

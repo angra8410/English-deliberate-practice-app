@@ -50,6 +50,7 @@ object BookCatalogMapper {
                         skill = skill,
                         title = buildActivityTitle(chapter.title, index, chapter.practicePrompts.size),
                         sourceLabel = "Book catalog",
+                        collectionTitle = book.title,
                         instructions = prompt.instructions ?: buildInstructions(prompt.type),
                         prompt = prompt.prompt,
                         exerciseType = prompt.type,
@@ -57,6 +58,8 @@ object BookCatalogMapper {
                         modelAnswer = prompt.modelAnswer ?: defaultModelAnswer(skill),
                         evaluationTargets = buildEvaluationTargets(chapter, prompt, skill),
                         supportNote = buildSupportNote(book.title, level, chapter),
+                        tags = buildActivityTags(book, chapter, prompt),
+                        difficulty = inferDifficulty(level),
                         scoringProfile = prompt.scoringProfile ?: inferScoringProfile(prompt),
                         minimumWordCount = prompt.minimumWordCount ?: inferMinimumWordCount(prompt),
                         minimumResponseItems = prompt.minimumResponseItems ?: inferMinimumResponseItems(prompt),
@@ -237,6 +240,29 @@ object BookCatalogMapper {
             .map { it.lowercase() }
             .filter { it.length >= 4 }
             .take(2)
+    }
+
+    private fun buildActivityTags(
+        book: BookSeed,
+        chapter: BookChapter,
+        prompt: BookPracticePrompt
+    ): List<String> {
+        return buildList {
+            addAll(book.tags)
+            addAll(chapter.tags)
+            add(prompt.type.name.lowercase())
+        }.distinct().take(6)
+    }
+
+    private fun inferDifficulty(level: CefrLevel): Int {
+        return when (level) {
+            CefrLevel.A1,
+            CefrLevel.A2 -> 1
+
+            CefrLevel.B1 -> 2
+            CefrLevel.B2 -> 3
+            CefrLevel.C1 -> 4
+        }
     }
 
     private fun buildSupportNote(bookTitle: String, level: CefrLevel, chapter: BookChapter): String {

@@ -57,11 +57,16 @@ data class ReviewQueueItem(
 
 data class ContentBrowserItem(
     val activityId: String,
+    val collectionTitle: String?,
     val unitTitle: String,
     val title: String,
     val skill: SkillType,
     val exerciseType: ExerciseType,
     val sourceLabel: String,
+    val tags: List<String>,
+    val difficulty: Int?,
     val focus: String,
-    val promptPreview: String
+    val promptPreview: String,
+    val effortLabel: String,
+    val responseTargetLabel: String
 )

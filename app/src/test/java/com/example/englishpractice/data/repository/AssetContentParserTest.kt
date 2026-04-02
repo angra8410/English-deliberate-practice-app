@@ -23,6 +23,8 @@ class AssetContentParserTest {
                 "starterText": "The speaker argues that...",
                 "audioAsset": "audio/listening_b2_remote_work.wav",
                 "listeningPromptText": "A speaker recognizes convenience, then argues for mentoring.",
+                "tags": ["listening", "contrast"],
+                "difficulty": 3,
                 "supportNote": "Bundled audio first.",
                 "evaluationTargets": ["hybrid", "mentoring"],
                 "sampleAnswer": "The speaker supports hybrid work."
@@ -42,6 +44,9 @@ class AssetContentParserTest {
             "A speaker recognizes convenience, then argues for mentoring.",
             activity.listeningPromptText
         )
+        assertEquals("Built-in B2 track", activity.collectionTitle)
+        assertEquals(listOf("listening", "contrast"), activity.tags)
+        assertEquals(3, activity.difficulty)
         assertEquals("The speaker supports hybrid work.", activity.modelAnswer)
         assertEquals(listOf("hybrid", "mentoring"), activity.evaluationTargets)
     }
@@ -67,6 +72,7 @@ class AssetContentParserTest {
         assertNull(activity.unitId)
         assertNull(activity.audioAssetPath)
         assertNull(activity.listeningPromptText)
+        assertEquals("Built-in B2 track", activity.collectionTitle)
         assertEquals(
             "Give a clear position, support it, and keep the response cohesive.",
             activity.modelAnswer

@@ -49,6 +49,7 @@ object AssetContentParser {
             skill = skill,
             title = getString("title"),
             sourceLabel = "Built-in assets",
+            collectionTitle = optNullableString("level")?.let { level -> "Built-in $level track" },
             instructions = getString("instructions"),
             prompt = getString("prompt"),
             exerciseType = ExerciseType.valueOf(getString("exerciseType")),
@@ -60,6 +61,8 @@ object AssetContentParser {
                 ?: defaultModelAnswer(skill),
             evaluationTargets = optStringList("evaluationTargets"),
             supportNote = optNullableString("supportNote") ?: defaultSupportNote(skill),
+            tags = optStringList("tags"),
+            difficulty = optInt("difficulty").takeIf { value -> value > 0 },
             scoringProfile = optNullableString("scoringProfile")
                 ?.let { value -> PromptScoringProfile.valueOf(value.uppercase()) }
                 ?: PromptScoringProfile.DEFAULT,

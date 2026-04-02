@@ -296,13 +296,18 @@ class AppViewModel(
             val unit = activity.unitId?.let(unitsById::get)
             ContentBrowserItem(
                 activityId = activity.id,
+                collectionTitle = activity.collectionTitle,
                 unitTitle = unit?.title ?: activity.title,
                 title = activity.title,
                 skill = activity.skill,
                 exerciseType = activity.exerciseType,
                 sourceLabel = unit?.sourceLabel ?: activity.sourceLabel,
+                tags = activity.tags,
+                difficulty = activity.difficulty,
                 focus = unit?.description ?: activity.supportNote,
-                promptPreview = activity.prompt
+                promptPreview = activity.prompt,
+                effortLabel = buildEffortLabel(activity),
+                responseTargetLabel = buildResponseTargetLabel(activity)
             )
         }.sortedWith(
             compareBy<ContentBrowserItem>(
@@ -366,6 +371,35 @@ class AppViewModel(
             SkillType.WRITING -> 1
             SkillType.LISTENING -> 2
             SkillType.SPEAKING -> 3
+        }
+    }
+
+    private fun buildEffortLabel(activity: PracticeActivityItem): String {
+        val baseMinutes = when (activity.exerciseType) {
+            ExerciseType.READ_AND_SUMMARIZE -> 12
+            ExerciseType.LISTEN_AND_SUMMARIZE -> 14
+            ExerciseType.SPEAK_RESPONSE -> 12
+            ExerciseType.OPEN_TEXT -> 10
+            ExerciseType.ERROR_CORRECTION,
+            ExerciseType.SENTENCE_TRANSFORMATION -> 9
+
+            ExerciseType.FILL_IN_BLANK,
+            ExerciseType.MULTIPLE_CHOICE -> 8
+        }
+        val difficultyBoost = (activity.difficulty ?: 2) - 2
+        return "${(baseMinutes + difficultyBoost).coerceAtLeast(6)} min"
+    }
+
+    private fun buildResponseTargetLabel(activity: PracticeActivityItem): String {
+        return when {
+            activity.minimumResponseItems != null -> "${activity.minimumResponseItems}+ items"
+            activity.minimumWordCount != null -> "${activity.minimumWordCount}+ words"
+            else -> when (activity.exerciseType) {
+                ExerciseType.SPEAK_RESPONSE -> "1 complete spoken response"
+                ExerciseType.READ_AND_SUMMARIZE,
+                ExerciseType.LISTEN_AND_SUMMARIZE -> "1 focused summary"
+                else -> "1 complete response"
+            }
         }
     }
 
