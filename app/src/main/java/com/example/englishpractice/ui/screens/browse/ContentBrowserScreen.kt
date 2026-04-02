@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
@@ -146,29 +147,36 @@ fun ContentBrowserScreen(
                     ) {
                         Column(
                             modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(item.title, style = MaterialTheme.typography.titleMedium)
                             item.collectionTitle?.let { collectionTitle ->
                                 Text(
                                     text = collectionTitle,
-                                    style = MaterialTheme.typography.labelLarge
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                             }
+                            Text(item.title, style = MaterialTheme.typography.titleMedium)
                             if (item.unitTitle != item.title) {
                                 Text(
                                     text = item.unitTitle,
-                                    style = MaterialTheme.typography.labelLarge
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            Text(item.focus, style = MaterialTheme.typography.bodySmall)
+                            Text(
+                                item.focus,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                             Text(
                                 text = "${item.exerciseType}  |  ${item.effortLabel}  |  Target: ${item.responseTargetLabel}",
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.labelMedium
                             )
                             Text(
                                 text = "Source: ${item.sourceLabel}",
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             if (item.tags.isNotEmpty() || item.difficulty != null) {
                                 Row(
@@ -178,13 +186,21 @@ fun ContentBrowserScreen(
                                     item.difficulty?.let { difficulty ->
                                         AssistChip(
                                             onClick = {},
-                                            label = { Text("Difficulty ${difficultyLabel(difficulty)}") }
+                                            label = { Text("Difficulty ${difficultyLabel(difficulty)}") },
+                                            colors = AssistChipDefaults.assistChipColors(
+                                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                                labelColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                            )
                                         )
                                     }
                                     item.tags.take(4).forEach { tag ->
                                         AssistChip(
                                             onClick = {},
-                                            label = { Text(tagLabel(tag)) }
+                                            label = { Text(tagLabel(tag)) },
+                                            colors = AssistChipDefaults.assistChipColors(
+                                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
                                         )
                                     }
                                 }
