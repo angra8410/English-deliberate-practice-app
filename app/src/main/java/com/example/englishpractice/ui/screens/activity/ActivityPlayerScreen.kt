@@ -411,6 +411,7 @@ fun ActivityPlayerScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Text(activity.skill.label, style = MaterialTheme.typography.labelLarge)
+                Text("Source: ${activity.sourceLabel}", style = MaterialTheme.typography.bodySmall)
                 Text(activity.prompt)
                 Text(activity.supportNote, style = MaterialTheme.typography.bodySmall)
             }

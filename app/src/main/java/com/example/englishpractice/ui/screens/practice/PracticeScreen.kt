@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,7 +21,8 @@ import com.example.englishpractice.ui.app.AppUiState
 @Composable
 fun PracticeScreen(
     state: AppUiState,
-    onSkillSelected: (SkillType) -> Unit = {}
+    onSkillSelected: (SkillType) -> Unit = {},
+    onBrowseContent: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -31,6 +33,9 @@ fun PracticeScreen(
     ) {
         Text("Practice", style = MaterialTheme.typography.headlineMedium)
         Text("Choose one of the four deliberate-practice tracks.")
+        Button(onClick = onBrowseContent) {
+            Text("Browse all content")
+        }
 
         state.skillProgress.forEach { progress ->
             val matchingPlan = state.dailyPlan.firstOrNull { item -> item.skill == progress.skill }

@@ -36,7 +36,8 @@ class AppViewModel(
 ) : AndroidViewModel(application) {
     private data class LevelContent(
         val activityCatalog: List<PracticeActivityItem>,
-        val dailyPlan: List<DailyPracticeItem>
+        val dailyPlan: List<DailyPracticeItem>,
+        val contentBrowserItems: List<ContentBrowserItem>
     )
 
     constructor(application: Application) : this(
@@ -67,6 +68,7 @@ class AppViewModel(
         buildUiState(
             currentLevel = defaultPilotLevel,
             activityCatalog = defaultLevelContent.activityCatalog,
+            contentBrowserItems = defaultLevelContent.contentBrowserItems,
             dailyPlan = defaultLevelContent.dailyPlan,
             progressInputs = baseProgressInputs,
             weakPatterns = defaultWeakPatterns(),
@@ -82,7 +84,11 @@ class AppViewModel(
         refreshPersistedState(defaultPilotLevel)
     }
 
-    fun getActivity(skill: SkillType): PracticeActivityItem? {
+    fun getActivity(activityId: String): PracticeActivityItem? {
+        return _uiState.value.activityCatalog.firstOrNull { activity -> activity.id == activityId }
+    }
+
+    fun getFirstActivityForSkill(skill: SkillType): PracticeActivityItem? {
         return _uiState.value.activityCatalog.firstOrNull { activity -> activity.skill == skill }
     }
 
@@ -105,11 +111,11 @@ class AppViewModel(
     }
 
     fun submitActivity(
-        skill: SkillType,
+        activityId: String,
         answer: String,
         transcriptText: String? = null
     ) {
-        val activity = getActivity(skill) ?: return
+        val activity = getActivity(activityId) ?: return
         val normalizedAnswer = answer.trim()
         if (normalizedAnswer.isBlank()) return
 
@@ -123,7 +129,7 @@ class AppViewModel(
             repository.saveSubmission(
                 PersistedSubmission(
                     activity = activity,
-                    skill = skill,
+                    skill = activity.skill,
                     answer = normalizedAnswer,
                     transcriptText = transcriptText,
                     score = feedback.score,
@@ -138,6 +144,7 @@ class AppViewModel(
     private fun buildUiState(
         currentLevel: CefrLevel,
         activityCatalog: List<PracticeActivityItem>,
+        contentBrowserItems: List<ContentBrowserItem>,
         dailyPlan: List<DailyPracticeItem>,
         progressInputs: List<SkillProgressInput>,
         weakPatterns: List<WeakPattern>,
@@ -167,6 +174,7 @@ class AppViewModel(
             ),
             reviewQueue = reviewQueue,
             activityCatalog = activityCatalog,
+            contentBrowserItems = contentBrowserItems,
             recentAttempts = recentAttempts,
             selectedSpeakingLocaleTag = speakingLocaleTag,
             speakingCapability = speakingManager.capability(),
@@ -179,7 +187,8 @@ class AppViewModel(
         val unitCatalog = buildUnitCatalog(level)
         return LevelContent(
             activityCatalog = activityCatalog,
-            dailyPlan = buildDailyPlan(unitCatalog, activityCatalog)
+            dailyPlan = buildDailyPlan(unitCatalog, activityCatalog),
+            contentBrowserItems = buildContentBrowser(unitCatalog, activityCatalog)
         )
     }
 
@@ -278,6 +287,33 @@ class AppViewModel(
         }
     }
 
+    private fun buildContentBrowser(
+        units: List<PracticeUnitAsset>,
+        activities: List<PracticeActivityItem>
+    ): List<ContentBrowserItem> {
+        val unitsById = units.associateBy { unit -> unit.id }
+        return activities.map { activity ->
+            val unit = activity.unitId?.let(unitsById::get)
+            ContentBrowserItem(
+                activityId = activity.id,
+                unitTitle = unit?.title ?: activity.title,
+                title = activity.title,
+                skill = activity.skill,
+                exerciseType = activity.exerciseType,
+                sourceLabel = unit?.sourceLabel ?: activity.sourceLabel,
+                focus = unit?.description ?: activity.supportNote,
+                promptPreview = activity.prompt
+            )
+        }.sortedWith(
+            compareBy<ContentBrowserItem>(
+                { skillBrowseOrder(it.skill) },
+                { it.sourceLabel },
+                { it.unitTitle },
+                { it.title }
+            )
+        )
+    }
+
     private fun fallbackDailyPlan(): List<DailyPracticeItem> {
         return listOf(
             DailyPracticeItem(
@@ -324,6 +360,15 @@ class AppViewModel(
         }
     }
 
+    private fun skillBrowseOrder(skill: SkillType): Int {
+        return when (skill) {
+            SkillType.READING -> 0
+            SkillType.WRITING -> 1
+            SkillType.LISTENING -> 2
+            SkillType.SPEAKING -> 3
+        }
+    }
+
     private fun fallbackActivityCatalog(): List<PracticeActivityItem> {
         return listOf(
             PracticeActivityItem(
@@ -331,6 +376,7 @@ class AppViewModel(
                 unitId = "b2_reading_summaries",
                 skill = SkillType.READING,
                 title = "Editorial summary and tone",
+                sourceLabel = "Fallback seed",
                 instructions = "Read the passage and write a short summary that states the main idea, one supporting point, and the writer's tone.",
                 prompt = "City centers should reduce private car traffic, not because cars are inherently harmful, but because current street design prioritizes speed over public life. Supporters of the change argue that quieter streets improve health, increase local commerce, and make commuting more predictable. Critics worry that delivery times and commuter flexibility will suffer during the transition.",
                 exerciseType = ExerciseType.READ_AND_SUMMARIZE,
@@ -344,6 +390,7 @@ class AppViewModel(
                 unitId = "b2_writing_opinions",
                 skill = SkillType.WRITING,
                 title = "Opinion paragraph upgrade",
+                sourceLabel = "Fallback seed",
                 instructions = "Write one clear paragraph in response to the prompt. Use at least one connector and one reasoned example.",
                 prompt = "Should universities require all students to take a communication course, even if it is outside their major?",
                 exerciseType = ExerciseType.OPEN_TEXT,
@@ -357,6 +404,7 @@ class AppViewModel(
                 unitId = "b2_listening_hybrid_work",
                 skill = SkillType.LISTENING,
                 title = "Listening detail capture",
+                sourceLabel = "Fallback seed",
                 instructions = "Pretend you listened to a short debate. Write a summary of the speaker's final position and one contrasting detail they mentioned.",
                 prompt = "Audio prompt placeholder: a speaker first recognizes the convenience of remote work, then argues that junior employees still benefit from in-person mentoring several times per week.",
                 exerciseType = ExerciseType.LISTEN_AND_SUMMARIZE,
@@ -372,6 +420,7 @@ class AppViewModel(
                 unitId = "b2_speaking_remote_work",
                 skill = SkillType.SPEAKING,
                 title = "Spoken argument and retry",
+                sourceLabel = "Fallback seed",
                 instructions = "Answer the prompt aloud. For the MVP, use the transcript field or load the guided transcript sample, then submit for feedback.",
                 prompt = "Do you agree that remote work is harder for junior employees than for experienced employees? Explain your position.",
                 exerciseType = ExerciseType.SPEAK_RESPONSE,
@@ -473,6 +522,7 @@ class AppViewModel(
             _uiState.value = buildUiState(
                 currentLevel = normalizedLevel,
                 activityCatalog = levelContent.activityCatalog,
+                contentBrowserItems = levelContent.contentBrowserItems,
                 dailyPlan = levelContent.dailyPlan,
                 progressInputs = mergedProgressInputs,
                 weakPatterns = effectiveWeakPatterns,

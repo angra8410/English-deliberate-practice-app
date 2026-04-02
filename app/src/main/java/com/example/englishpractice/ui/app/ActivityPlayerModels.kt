@@ -15,6 +15,7 @@ data class PracticeActivityItem(
     val unitId: String? = null,
     val skill: SkillType,
     val title: String,
+    val sourceLabel: String = "Built-in assets",
     val instructions: String,
     val prompt: String,
     val exerciseType: ExerciseType,

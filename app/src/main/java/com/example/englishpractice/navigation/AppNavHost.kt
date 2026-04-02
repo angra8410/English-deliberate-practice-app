@@ -21,9 +21,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.englishpractice.domain.model.SkillType
 import com.example.englishpractice.ui.app.AppViewModel
 import com.example.englishpractice.ui.screens.activity.ActivityPlayerScreen
+import com.example.englishpractice.ui.screens.browse.ContentBrowserScreen
 import com.example.englishpractice.ui.screens.home.HomeScreen
 import com.example.englishpractice.ui.screens.progress.ProgressScreen
 import com.example.englishpractice.ui.screens.practice.PracticeScreen
@@ -47,6 +47,7 @@ fun AppNavHost() {
     val currentRoute = navBackStackEntry?.destination?.route
     val isTopLevelDestination = items.any { destination -> destination.route == currentRoute }
     val topBarTitle = when (currentRoute) {
+        AppDestination.Browse.route -> AppDestination.Browse.label
         AppDestination.ActivityPlayer.route -> AppDestination.ActivityPlayer.label
         else -> items.firstOrNull { destination -> destination.route == currentRoute }?.label
             ?: "English Deliberate Practice"
@@ -113,14 +114,26 @@ fun AppNavHost() {
                 HomeScreen(
                     state = uiState,
                     onPilotLevelSelected = appViewModel::updatePilotLevel,
-                    onStartPractice = { navController.navigate(AppDestination.Practice.route) }
+                    onStartPractice = { navController.navigate(AppDestination.Practice.route) },
+                    onBrowseContent = { navController.navigate(AppDestination.Browse.route) }
                 )
             }
             composable(AppDestination.Practice.route) {
                 PracticeScreen(
                     state = uiState,
                     onSkillSelected = { skill ->
-                        navController.navigate(AppDestination.ActivityPlayer.createRoute(skill))
+                        appViewModel.getFirstActivityForSkill(skill)?.id?.let { activityId ->
+                            navController.navigate(AppDestination.ActivityPlayer.createRoute(activityId))
+                        }
+                    },
+                    onBrowseContent = { navController.navigate(AppDestination.Browse.route) }
+                )
+            }
+            composable(AppDestination.Browse.route) {
+                ContentBrowserScreen(
+                    state = uiState,
+                    onActivitySelected = { activityId ->
+                        navController.navigate(AppDestination.ActivityPlayer.createRoute(activityId))
                     }
                 )
             }
@@ -136,25 +149,29 @@ fun AppNavHost() {
             composable(
                 route = AppDestination.ActivityPlayer.route,
                 arguments = listOf(
-                    navArgument(AppDestination.ActivityPlayer.skillArg) { type = NavType.StringType }
+                    navArgument(AppDestination.ActivityPlayer.activityIdArg) {
+                        type = NavType.StringType
+                    }
                 )
             ) { backStackEntry ->
-                val skill = backStackEntry.arguments
-                    ?.getString(AppDestination.ActivityPlayer.skillArg)
-                    ?.let { value -> runCatching { SkillType.valueOf(value) }.getOrNull() }
+                val activityId = backStackEntry.arguments
+                    ?.getString(AppDestination.ActivityPlayer.activityIdArg)
+                val activity = activityId?.let(appViewModel::getActivity)
 
                 ActivityPlayerScreen(
-                    activity = skill?.let(appViewModel::getActivity),
-                    lastAttempt = skill?.let { selectedSkill ->
-                        uiState.recentAttempts.firstOrNull { attempt -> attempt.skill == selectedSkill }
+                    activity = activity,
+                    lastAttempt = activityId?.let { selectedActivityId ->
+                        uiState.recentAttempts.firstOrNull { attempt ->
+                            attempt.activityId == selectedActivityId
+                        }
                     },
                     selectedSpeakingLocaleTag = uiState.selectedSpeakingLocaleTag,
                     speakingCapability = uiState.speakingCapability,
                     listeningCapability = uiState.listeningCapability,
                     onSpeakingLocaleSelected = appViewModel::updateSpeakingLocale,
                     onSubmit = { answer, transcript ->
-                        if (skill != null) {
-                            appViewModel.submitActivity(skill, answer, transcript)
+                        if (activityId != null) {
+                            appViewModel.submitActivity(activityId, answer, transcript)
                         }
                     }
                 )

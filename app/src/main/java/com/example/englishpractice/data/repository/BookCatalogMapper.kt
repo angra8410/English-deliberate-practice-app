@@ -49,6 +49,7 @@ object BookCatalogMapper {
                         unitId = chapter.id,
                         skill = skill,
                         title = buildActivityTitle(chapter.title, index, chapter.practicePrompts.size),
+                        sourceLabel = "Book catalog",
                         instructions = prompt.instructions ?: buildInstructions(prompt.type),
                         prompt = prompt.prompt,
                         exerciseType = prompt.type,

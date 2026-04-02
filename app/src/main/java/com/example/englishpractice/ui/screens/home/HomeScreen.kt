@@ -26,7 +26,8 @@ import com.example.englishpractice.ui.app.AppUiState
 fun HomeScreen(
     state: AppUiState,
     onPilotLevelSelected: (CefrLevel) -> Unit,
-    onStartPractice: () -> Unit
+    onStartPractice: () -> Unit,
+    onBrowseContent: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -65,8 +66,13 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text("Program completion: ${state.overallCompletion}%")
-                Button(onClick = onStartPractice) {
-                    Text("Start practice")
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = onStartPractice) {
+                        Text("Start practice")
+                    }
+                    Button(onClick = onBrowseContent) {
+                        Text("Browse content")
+                    }
                 }
             }
         }

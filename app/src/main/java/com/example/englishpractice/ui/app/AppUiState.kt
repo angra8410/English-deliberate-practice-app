@@ -20,6 +20,7 @@ data class AppUiState(
     val reviewSummary: ReviewSummary,
     val reviewQueue: List<ReviewQueueItem>,
     val activityCatalog: List<PracticeActivityItem>,
+    val contentBrowserItems: List<ContentBrowserItem>,
     val recentAttempts: List<ActivityAttemptRecord>,
     val selectedSpeakingLocaleTag: String,
     val speakingCapability: SpeakingCapability,
@@ -52,4 +53,15 @@ data class ReviewQueueItem(
     val prompt: String,
     val dueLabel: String,
     val reason: String
+)
+
+data class ContentBrowserItem(
+    val activityId: String,
+    val unitTitle: String,
+    val title: String,
+    val skill: SkillType,
+    val exerciseType: ExerciseType,
+    val sourceLabel: String,
+    val focus: String,
+    val promptPreview: String
 )

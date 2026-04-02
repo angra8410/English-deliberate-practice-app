@@ -48,6 +48,7 @@ object AssetContentParser {
             unitId = optNullableString("unitId"),
             skill = skill,
             title = getString("title"),
+            sourceLabel = "Built-in assets",
             instructions = getString("instructions"),
             prompt = getString("prompt"),
             exerciseType = ExerciseType.valueOf(getString("exerciseType")),
