@@ -53,8 +53,8 @@ class BookCatalogAssetSmokeTest {
         assertTrue(listeningPromptCount >= 4, "Expected at least four seeded listening summary prompts in the content repository asset")
         assertTrue(speakingPromptCount >= 4, "Expected at least four seeded speaking prompts in the content repository asset")
         assertTrue(
-            listeningPromptAudioAssets.size >= 2,
-            "Expected at least two listening prompts with bundled audio assets in the content repository asset"
+            listeningPromptAudioAssets.size == listeningPromptCount,
+            "Expected every seeded listening prompt to include a bundled audio asset in the content repository asset"
         )
         listeningPromptAudioAssets.forEach { audioAsset ->
             val audioFile = File("src/main/assets/$audioAsset")

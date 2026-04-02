@@ -592,6 +592,7 @@
               "prompt": "The panel agrees that the candidate communicated confidently and gave strong examples from her customer service role, but one interviewer notes that she did not fully explain how she manages multiple deadlines. In the end, the panel decides to move her to the next stage because her preparation and communication are stronger than those of the other candidates.",
               "instructions": "Listen to the panel summary and write a short summary of the final decision plus the main reservation that was raised.",
               "starterText": "The panel decides to move the candidate forward, but they still want more detail about her experience with deadlines.",
+              "audioAsset": "audio/c1_interview_panel_summary.wav",
               "modelAnswer": "The panel decides to move the candidate to the next stage because her preparation and communication are stronger than those of the other applicants. However, one interviewer still wants a clearer example of how she manages multiple deadlines. The final judgment is positive overall, but that reservation remains important.",
               "expectedKeywords": [
                 "next stage",
@@ -757,6 +758,7 @@
               "prompt": "The client says they understand the technical issue that delayed the release and are willing to accept a revised delivery date of 18 June. However, they stress that the project cannot slip again because the board review is scheduled for the following week. The call ends with an agreement that the team will send a written progress update by Tuesday and confirm final testing by Friday.",
               "instructions": "Listen to the call summary and write a short summary of the final agreement plus the main condition attached to the revised deadline.",
               "starterText": "The client accepts the revised delivery date, but they insist on a written progress update before the board review.",
+              "audioAsset": "audio/c1_deadline_renegotiation_call.wav",
               "modelAnswer": "The client agrees to move the delivery date to 18 June because they understand the technical issue that caused the delay. However, they make it clear that the deadline cannot slip again because the board review is scheduled for the following week. The agreement therefore includes a written progress update by Tuesday and confirmation of final testing by Friday.",
               "expectedKeywords": [
                 "18 June",
