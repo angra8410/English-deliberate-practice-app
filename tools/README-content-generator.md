@@ -21,6 +21,12 @@ python tools/generate_content_repository.py `
   --check
 ```
 
+## Generator tests
+
+```powershell
+python -m unittest discover -s tools -p "test_*.py"
+```
+
 ## What the generator does
 
 - reads raw book and chapter data from `tools/content_repository.raw.json`
@@ -65,4 +71,5 @@ python tools/generate_content_repository.py `
 2. Keep high-quality prompt-specific metadata in `tools/content_metadata_overrides.json`.
 3. Run the content generator to refresh `app/src/main/assets/content/content_repository.json`.
 4. Run the generator again with `--check` when you want to verify the asset has not drifted.
-5. Run `:app:testDebugUnitTest` to confirm the parser and asset smoke tests still pass.
+5. Run `python -m unittest discover -s tools -p "test_*.py"` to verify generator inference and drift behavior.
+6. Run `:app:testDebugUnitTest` to confirm the parser and asset smoke tests still pass.
