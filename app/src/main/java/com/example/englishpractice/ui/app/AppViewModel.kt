@@ -72,7 +72,7 @@ class AppViewModel(
             dailyPlan = defaultLevelContent.dailyPlan,
             progressInputs = baseProgressInputs,
             weakPatterns = defaultWeakPatterns(),
-            reviewQueue = defaultReviewQueue(),
+            reviewQueue = defaultReviewQueue(defaultLevelContent.activityCatalog),
             recentAttempts = emptyList(),
             speakingLocaleTag = defaultSpeakingLocaleTag
         )
@@ -491,33 +491,49 @@ class AppViewModel(
         )
     }
 
-    private fun defaultReviewQueue(): List<ReviewQueueItem> {
-        return listOf(
-            ReviewQueueItem(
-                skill = SkillType.SPEAKING,
-                prompt = "Argue for or against remote work for junior employees.",
-                dueLabel = "Due now",
-                reason = "Retry after short response and weak connector range."
-            ),
-            ReviewQueueItem(
-                skill = SkillType.WRITING,
-                prompt = "Rewrite a message so it sounds more natural and precise.",
-                dueLabel = "Today",
-                reason = "Recurring collocation and paragraph-structure issues."
-            ),
-            ReviewQueueItem(
-                skill = SkillType.LISTENING,
-                prompt = "Re-listen and identify the speaker's final position.",
-                dueLabel = "Tomorrow",
-                reason = "Detail recall dropped when the audio shifted tone."
-            ),
-            ReviewQueueItem(
-                skill = SkillType.READING,
-                prompt = "Infer tone from a short article intro and closing paragraph.",
-                dueLabel = "In 3 days",
-                reason = "Review for tone inference and supporting-idea selection."
-            )
+    private fun defaultReviewQueue(
+        activityCatalog: List<PracticeActivityItem>
+    ): List<ReviewQueueItem> {
+        val fallbackWeakTags = mapOf(
+            SkillType.SPEAKING to listOf("response length", "connector range"),
+            SkillType.WRITING to listOf("collocations", "paragraph structure"),
+            SkillType.LISTENING to listOf("detail recall", "contrast markers"),
+            SkillType.READING to listOf("tone inference", "supporting ideas")
         )
+        val fallbackDueLabels = mapOf(
+            SkillType.SPEAKING to "Due now",
+            SkillType.WRITING to "Today",
+            SkillType.LISTENING to "Tomorrow",
+            SkillType.READING to "In 3 days"
+        )
+        val fallbackScores = mapOf(
+            SkillType.SPEAKING to 69,
+            SkillType.WRITING to 74,
+            SkillType.LISTENING to 77,
+            SkillType.READING to 81
+        )
+
+        return listOf(
+            SkillType.SPEAKING,
+            SkillType.WRITING,
+            SkillType.LISTENING,
+            SkillType.READING
+        ).mapNotNull { skill ->
+            val activity = activityCatalog.firstOrNull { item -> item.skill == skill } ?: return@mapNotNull null
+            val weakTags = fallbackWeakTags[skill].orEmpty()
+            val score = fallbackScores[skill]
+            ReviewQueueItem(
+                activityId = activity.id,
+                skill = skill,
+                title = activity.title,
+                prompt = activity.prompt,
+                dueLabel = fallbackDueLabels.getValue(skill),
+                reason = "Retry after score $score with focus on ${weakTags.joinToString()}.",
+                sourceLabel = activity.sourceLabel,
+                weakTags = weakTags,
+                lastScore = score
+            )
+        }
     }
 
     private fun observePreferences() {
@@ -550,7 +566,7 @@ class AppViewModel(
             val effectiveReviewQueue = if (snapshot.reviewQueue.isNotEmpty()) {
                 snapshot.reviewQueue
             } else {
-                defaultReviewQueue()
+                defaultReviewQueue(levelContent.activityCatalog)
             }
 
             _uiState.value = buildUiState(

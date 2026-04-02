@@ -27,7 +27,8 @@ fun HomeScreen(
     state: AppUiState,
     onPilotLevelSelected: (CefrLevel) -> Unit,
     onStartPractice: () -> Unit,
-    onBrowseContent: () -> Unit
+    onBrowseContent: () -> Unit,
+    onResumeReview: (String) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -111,6 +112,33 @@ fun HomeScreen(
                         style = MaterialTheme.typography.titleSmall
                     )
                     Text(pattern.note)
+                }
+            }
+        }
+
+        state.reviewQueue.firstOrNull()?.let { nextReview ->
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Best next retry", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "${nextReview.skill.label}  |  ${nextReview.dueLabel}",
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                    Text(nextReview.title, style = MaterialTheme.typography.titleSmall)
+                    Text(nextReview.reason, style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        "Weak tags: ${nextReview.weakTags.joinToString()}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    nextReview.lastScore?.let { score ->
+                        Text("Last score: $score", style = MaterialTheme.typography.bodySmall)
+                    }
+                    Button(onClick = { onResumeReview(nextReview.activityId) }) {
+                        Text("Resume this retry")
+                    }
                 }
             }
         }

@@ -115,7 +115,10 @@ fun AppNavHost() {
                     state = uiState,
                     onPilotLevelSelected = appViewModel::updatePilotLevel,
                     onStartPractice = { navController.navigate(AppDestination.Practice.route) },
-                    onBrowseContent = { navController.navigate(AppDestination.Browse.route) }
+                    onBrowseContent = { navController.navigate(AppDestination.Browse.route) },
+                    onResumeReview = { activityId ->
+                        navController.navigate(AppDestination.ActivityPlayer.createRoute(activityId))
+                    }
                 )
             }
             composable(AppDestination.Practice.route) {
@@ -137,7 +140,14 @@ fun AppNavHost() {
                     }
                 )
             }
-            composable(AppDestination.Review.route) { ReviewScreen(state = uiState) }
+            composable(AppDestination.Review.route) {
+                ReviewScreen(
+                    state = uiState,
+                    onOpenReviewActivity = { activityId ->
+                        navController.navigate(AppDestination.ActivityPlayer.createRoute(activityId))
+                    }
+                )
+            }
             composable(AppDestination.Progress.route) { ProgressScreen(state = uiState) }
             composable(AppDestination.Settings.route) {
                 SettingsScreen(

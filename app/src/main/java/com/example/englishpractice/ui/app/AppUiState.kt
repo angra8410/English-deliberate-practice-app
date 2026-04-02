@@ -49,10 +49,15 @@ data class ReviewSummary(
 )
 
 data class ReviewQueueItem(
+    val activityId: String,
     val skill: SkillType,
+    val title: String,
     val prompt: String,
     val dueLabel: String,
-    val reason: String
+    val reason: String,
+    val sourceLabel: String,
+    val weakTags: List<String>,
+    val lastScore: Int? = null
 )
 
 data class ContentBrowserItem(

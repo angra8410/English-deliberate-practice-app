@@ -73,6 +73,7 @@ class PracticeRepository private constructor(
         val mistakes = database.mistakeDao().getAllByNewest()
         val reviewItems = database.reviewItemDao().getAllByDueAt()
         val mistakesByAttemptId = mistakes.groupBy { mistake -> mistake.attemptId }
+        val latestAttemptByActivityId = attempts.associateBy { attempt -> attempt.activityId }
 
         val recentAttempts = attempts.take(8).map { attempt ->
             val activity = activityCatalog.firstOrNull { item -> item.id == attempt.activityId }
@@ -112,15 +113,35 @@ class PracticeRepository private constructor(
                 )
             }
 
-        val reviewQueue = reviewItems.take(6).map { reviewItem ->
-            val activity = activityCatalog.firstOrNull { item -> item.id == reviewItem.activityId }
-            ReviewQueueItem(
-                skill = activity?.skill ?: SkillType.READING,
-                prompt = activity?.prompt ?: reviewItem.activityId,
-                dueLabel = dueLabel(reviewItem.dueAt),
-                reason = "Retry for ${reviewItem.sourceMistakeTag}."
+        val reviewQueue = reviewItems
+            .map { reviewItem ->
+                val activity = activityCatalog.firstOrNull { item -> item.id == reviewItem.activityId }
+                val latestAttempt = latestAttemptByActivityId[reviewItem.activityId]
+                val weakTags = reviewItem.sourceMistakeTag
+                    .split(",")
+                    .map(String::trim)
+                    .filter(String::isNotBlank)
+
+                ReviewQueueItem(
+                    activityId = reviewItem.activityId,
+                    skill = activity?.skill ?: SkillType.READING,
+                    title = activity?.title ?: reviewItem.activityId,
+                    prompt = activity?.prompt ?: reviewItem.activityId,
+                    dueLabel = dueLabel(reviewItem.dueAt),
+                    reason = buildReviewReason(weakTags, latestAttempt?.score),
+                    sourceLabel = activity?.sourceLabel ?: "Unknown source",
+                    weakTags = weakTags,
+                    lastScore = latestAttempt?.score
+                ) to reviewItem.dueAt
+            }
+            .sortedWith(
+                compareBy<Pair<ReviewQueueItem, Long>>(
+                    { it.second },
+                    { it.first.lastScore ?: Int.MAX_VALUE }
+                )
             )
-        }
+            .map { it.first }
+            .take(6)
 
         val progressInputs = activityCatalog.map { activity ->
             val activityAttempts = attempts.filter { attempt -> attempt.activityId == activity.id }
@@ -173,6 +194,15 @@ class PracticeRepository private constructor(
                 remainingMillis <= DAY_IN_MILLIS -> "Today"
                 remainingMillis <= 2L * DAY_IN_MILLIS -> "Tomorrow"
                 else -> "Soon"
+            }
+        }
+
+        private fun buildReviewReason(weakTags: List<String>, lastScore: Int?): String {
+            val tagSummary = weakTags.joinToString().ifBlank { "recent weak patterns" }
+            return if (lastScore != null) {
+                "Retry after score $lastScore with focus on $tagSummary."
+            } else {
+                "Retry for $tagSummary."
             }
         }
     }

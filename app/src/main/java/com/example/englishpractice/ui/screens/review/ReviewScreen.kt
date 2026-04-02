@@ -1,5 +1,6 @@
 package com.example.englishpractice.ui.screens.review
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,7 +17,10 @@ import androidx.compose.ui.unit.dp
 import com.example.englishpractice.ui.app.AppUiState
 
 @Composable
-fun ReviewScreen(state: AppUiState) {
+fun ReviewScreen(
+    state: AppUiState,
+    onOpenReviewActivity: (String) -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -39,16 +43,31 @@ fun ReviewScreen(state: AppUiState) {
 
         Text("Retry queue", style = MaterialTheme.typography.titleMedium)
         state.reviewQueue.forEach { item ->
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onOpenReviewActivity(item.activityId) }
+            ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
                         text = "${item.skill.label}  |  ${item.dueLabel}",
                         style = MaterialTheme.typography.titleSmall
                     )
+                    Text(item.title, style = MaterialTheme.typography.titleMedium)
                     Text(item.prompt)
+                    Text("Source: ${item.sourceLabel}", style = MaterialTheme.typography.bodySmall)
+                    item.lastScore?.let { score ->
+                        Text("Last score: $score", style = MaterialTheme.typography.bodySmall)
+                    }
+                    if (item.weakTags.isNotEmpty()) {
+                        Text(
+                            "Weak tags: ${item.weakTags.joinToString()}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                     Text(item.reason, style = MaterialTheme.typography.bodySmall)
                 }
             }
