@@ -1,7 +1,7 @@
 package com.example.englishpractice.ui.screens.home
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,9 +22,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -47,6 +47,9 @@ fun HomeScreen(
     onBrowseContent: () -> Unit,
     onResumeReview: (String) -> Unit
 ) {
+    val weakPatternsBySkill = state.weakPatterns.associateBy { it.skill }
+    val reviewBySkill = state.reviewQueue.associateBy { it.skill }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -70,44 +73,24 @@ fun HomeScreen(
 
         SectionHeading(
             eyebrow = "Today",
-            title = "Deliberate loop",
-            description = "One focused pass through each skill, with clearer pacing and stronger visual cues."
+            title = "Skill hubs",
+            description = "Each card holds the anchor task, the weak pattern to watch, and the next retry for that skill."
         )
         state.dailyPlan.forEach { item ->
-            DailyLoopCard(item = item)
-        }
-
-        SectionHeading(
-            eyebrow = "Watch list",
-            title = "Weak patterns",
-            description = "These are the habits worth tightening before they harden into default responses."
-        )
-        state.weakPatterns.forEach { pattern ->
-            WeakPatternCard(pattern = pattern)
+            SkillHubCard(
+                item = item,
+                weakPattern = weakPatternsBySkill[item.skill],
+                reviewItem = reviewBySkill[item.skill],
+                onResumeReview = onResumeReview
+            )
         }
 
         SectionHeading(
             eyebrow = "Support",
             title = "Capture and playback",
-            description = "Your speaking and listening tools are active and ready for deliberate reps."
+            description = "The toolchain is still visible, just condensed so it stops dominating the page."
         )
-        SupportCard(
-            title = "Speaking capture",
-            accent = MaterialTheme.colorScheme.secondary,
-            lines = listOf(
-                "Status: ${state.speakingCapability.availability}",
-                "Flow: ${state.speakingCapability.sessionFlow.joinToString(separator = " -> ")}",
-                "Feedback: ${state.speakingCapability.feedbackDimensions.joinToString()}"
-            )
-        )
-        SupportCard(
-            title = "Listening playback",
-            accent = MaterialTheme.colorScheme.tertiary,
-            lines = listOf(
-                "Engine: ${state.listeningCapability.playbackEngine}",
-                "Flow: ${state.listeningCapability.workflowSteps.joinToString(separator = " -> ")}"
-            )
-        )
+        SupportStrip(state = state)
     }
 }
 
@@ -145,7 +128,7 @@ private fun HeroPanel(
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
             Text(
-                text = "Current level ${state.currentLevel}  |  Target ${state.targetLevel}",
+                text = levelSummary(state),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
             )
@@ -209,7 +192,7 @@ private fun HeroPanel(
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
-                    Text("Start today’s loop")
+                    Text("Start today's loop")
                 }
                 Button(
                     onClick = onBrowseContent,
@@ -307,80 +290,164 @@ private fun ReviewHighlightCard(
 }
 
 @Composable
-private fun DailyLoopCard(item: DailyPracticeItem) {
+private fun SkillHubCard(
+    item: DailyPracticeItem,
+    weakPattern: WeakPattern?,
+    reviewItem: ReviewQueueItem?,
+    onResumeReview: (String) -> Unit
+) {
     val tone = skillTone(item.skill)
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, tone.accent.copy(alpha = 0.18f))
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .width(10.dp)
-                    .height(112.dp)
-                    .clip(RoundedCornerShape(999.dp))
-                    .background(tone.gradient)
-            )
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Surface(
+                    shape = RoundedCornerShape(999.dp),
+                    color = tone.soft
+                ) {
+                    Text(
+                        text = item.skill.label,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = tone.accent
+                    )
+                }
+                reviewItem?.let {
+                    Surface(
+                        shape = RoundedCornerShape(999.dp),
+                        color = reviewCardColor(it.dueLabel).copy(alpha = 0.92f)
+                    ) {
+                        Text(
+                            text = it.dueLabel,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(
-                    text = item.skill.label,
+                    text = "Today's anchor",
                     style = MaterialTheme.typography.labelLarge,
                     color = tone.accent
                 )
-                Text(item.title, style = MaterialTheme.typography.titleLarge)
+                Text(item.title, style = MaterialTheme.typography.headlineSmall)
                 Text(
                     text = item.focus,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = "${item.exerciseType}  |  ${item.estimatedMinutes} min",
-                    style = MaterialTheme.typography.labelMedium
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                ContentProvenanceBlock(
-                    sourceLabel = item.sourceLabel,
-                    collectionTitle = item.collectionTitle
-                )
+            }
+
+            ContentProvenanceBlock(
+                sourceLabel = item.sourceLabel,
+                collectionTitle = item.collectionTitle,
+                currentTitle = item.title
+            )
+
+            weakPattern?.let { pattern ->
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                    color = tone.soft.copy(alpha = 0.72f)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "Focus to tighten",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = tone.accent
+                        )
+                        Text(
+                            text = pattern.tag,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = pattern.note,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            if (reviewItem != null) {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    border = BorderStroke(1.dp, tone.accent.copy(alpha = 0.16f))
+                ) {
+                    Column(
+                        modifier = Modifier.padding(14.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Next retry",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = tone.accent
+                        )
+                        Text(
+                            text = reviewItem.reason,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        if (reviewItem.weakTags.isNotEmpty()) {
+                            Text(
+                                text = "Weak tags: ${reviewItem.weakTags.joinToString()}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Button(onClick = { onResumeReview(reviewItem.activityId) }) {
+                            Text("Resume ${item.skill.label.lowercase()} retry")
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun WeakPatternCard(pattern: WeakPattern) {
-    val tone = skillTone(pattern.skill)
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = tone.soft.copy(alpha = 0.65f))
+private fun SupportStrip(state: AppUiState) {
+    Row(
+        modifier = Modifier.horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(
-                text = pattern.skill.label,
-                style = MaterialTheme.typography.labelLarge,
-                color = tone.accent
+        SupportCard(
+            title = "Speaking capture",
+            accent = MaterialTheme.colorScheme.secondary,
+            lines = listOf(
+                "Status: ${state.speakingCapability.availability}",
+                "Flow: ${state.speakingCapability.sessionFlow.joinToString(separator = " -> ")}",
+                "Feedback: ${state.speakingCapability.feedbackDimensions.joinToString()}"
             )
-            Text(
-                text = pattern.tag,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+        )
+        SupportCard(
+            title = "Listening playback",
+            accent = MaterialTheme.colorScheme.tertiary,
+            lines = listOf(
+                "Engine: ${state.listeningCapability.playbackEngine}",
+                "Flow: ${state.listeningCapability.workflowSteps.joinToString(separator = " -> ")}"
             )
-            Text(
-                text = pattern.note,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        )
     }
 }
 
@@ -391,9 +458,9 @@ private fun SupportCard(
     lines: List<String>
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.width(260.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        border = androidx.compose.foundation.BorderStroke(1.dp, accent.copy(alpha = 0.22f))
+        border = BorderStroke(1.dp, accent.copy(alpha = 0.22f))
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -433,6 +500,14 @@ private fun SectionHeading(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+private fun levelSummary(state: AppUiState): String {
+    return if (state.currentLevel == state.targetLevel) {
+        "Current level ${state.currentLevel}"
+    } else {
+        "Current level ${state.currentLevel}  |  Target ${state.targetLevel}"
     }
 }
 
