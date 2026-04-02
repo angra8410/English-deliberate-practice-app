@@ -190,6 +190,125 @@
           "metadata": {
             "sourceFile": "advanced-grammar\\unit-3.yaml"
           }
+        },
+        {
+          "id": "mixed-conditionals",
+          "title": "Mixed conditionals",
+          "order": 4,
+          "cefr": [
+            "C1"
+          ],
+          "tags": [
+            "grammar",
+            "conditionals",
+            "cause-and-effect",
+            "speculation"
+          ],
+          "summary": "Mixed conditionals connect a hypothetical past event with a present result, or a present unreal condition with a past consequence.",
+          "points": [
+            "Use a past unreal clause plus a present result when a different past action would change the current situation.",
+            "Use a present unreal clause plus a past result when a different present state would have changed an earlier outcome.",
+            "Mixed conditionals are common in reflection, analysis, and professional post-mortems."
+          ],
+          "examples": [
+            {
+              "english": "If we had prepared earlier, we would be in a stronger position now.",
+              "note": "past cause, present result"
+            },
+            {
+              "english": "If she were more confident, she would have accepted the offer last week.",
+              "note": "present condition, past result"
+            }
+          ],
+          "pitfalls": [
+            "Do not use a mixed conditional when the sentence simply refers to a past result with no present consequence."
+          ],
+          "practicePrompts": [
+            {
+              "id": "mixed-conditionals-prompt-1",
+              "type": "open_text",
+              "targetSkill": "WRITING",
+              "prompt": "Write four sentences using mixed conditionals to reflect on missed opportunities or present consequences.",
+              "instructions": "Write four sentences using mixed conditionals to reflect on a past decision and its present result, or a present condition and its past consequence.",
+              "starterText": "If we had planned the launch more carefully, we would be in a much stronger position now.",
+              "modelAnswer": "If the team had tested the feature earlier, we would not be dealing with these client complaints now. If I were more confident in public speaking, I would have accepted the conference invitation last month. If the supplier had delivered on time, the product would be on the market already. If she were better at delegating, she would not have missed the earlier deadline.",
+              "expectedKeywords": [
+                "mixed conditional",
+                "past decision",
+                "present result",
+                "past consequence"
+              ],
+              "scoringProfile": "sentence_drill",
+              "minimumWordCount": 30,
+              "minimumResponseItems": 4
+            }
+          ],
+          "related": [
+            "future-perfect-vs-future-continuous"
+          ],
+          "metadata": {
+            "sourceFile": "advanced-grammar\\unit-4.yaml"
+          }
+        },
+        {
+          "id": "inversion-for-emphasis",
+          "title": "Inversion for emphasis",
+          "order": 5,
+          "cefr": [
+            "C1"
+          ],
+          "tags": [
+            "grammar",
+            "inversion",
+            "formal-style",
+            "emphasis"
+          ],
+          "summary": "Formal inversion is used after negative adverbials and limiting expressions to create emphasis and a more advanced written style.",
+          "points": [
+            "Inversion often follows expressions like rarely, never, only then, and not until.",
+            "The auxiliary usually comes before the subject when inversion is required.",
+            "This pattern is common in formal reports, commentary, and argumentative writing."
+          ],
+          "examples": [
+            {
+              "english": "Rarely have I seen a team respond so quickly to a crisis.",
+              "note": "negative adverbial with inversion"
+            },
+            {
+              "english": "Only after the review did the managers approve the revised plan.",
+              "note": "limiting expression with inversion"
+            }
+          ],
+          "pitfalls": [
+            "Do not invert after every adverbial; the structure is limited to specific emphatic patterns."
+          ],
+          "practicePrompts": [
+            {
+              "id": "inversion-for-emphasis-prompt-1",
+              "type": "open_text",
+              "targetSkill": "WRITING",
+              "prompt": "Write four formal sentences that use inversion for emphasis after negative or limiting expressions.",
+              "instructions": "Write four formal sentences using inversion after negative or limiting expressions such as rarely, never, only then, or not until.",
+              "starterText": "Rarely have I seen a proposal generate such immediate support from senior management.",
+              "modelAnswer": "Rarely have I seen a project team recover so quickly after a major delay. Only after the audit did the board understand the full scale of the problem. Not until the final review did the client approve the revised schedule. Never had the department faced such a complex negotiation before the merger talks began.",
+              "expectedKeywords": [
+                "inversion",
+                "rarely",
+                "only after",
+                "not until",
+                "formal style"
+              ],
+              "scoringProfile": "sentence_drill",
+              "minimumWordCount": 28,
+              "minimumResponseItems": 4
+            }
+          ],
+          "related": [
+            "mixed-conditionals"
+          ],
+          "metadata": {
+            "sourceFile": "advanced-grammar\\unit-5.yaml"
+          }
         }
       ]
     },

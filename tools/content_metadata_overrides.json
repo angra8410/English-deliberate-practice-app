@@ -28,6 +28,50 @@
       "minimumWordCount": 20,
       "minimumResponseItems": 5
     },
+    "future-perfect-vs-future-continuous-prompt-1": {
+      "instructions": "Write four timeline sentences about a project. Use the future perfect for completed milestones before a future deadline and the future continuous for work that will still be happening at a specific future time.",
+      "starterText": "By Thursday, the analysts will have finished the budget review, and at 3 p.m. the finance lead will be presenting the revised figures to the board.",
+      "modelAnswer": "By next Monday, the design team will have completed the revised client pack. At 11 a.m. that day, the project manager will be meeting the client to discuss the final changes. By the end of the month, we will have updated the onboarding guide for the regional teams. During Friday's review session, the support lead will be explaining the rollout timeline to the new hires.",
+      "expectedKeywords": [
+        "future perfect",
+        "future continuous",
+        "completed",
+        "in progress",
+        "timeline"
+      ],
+      "scoringProfile": "sentence_drill",
+      "minimumWordCount": 32,
+      "minimumResponseItems": 4
+    },
+    "mixed-conditionals-prompt-1": {
+      "instructions": "Write four sentences using mixed conditionals to reflect on a past decision and its present result, or a present condition and its past consequence.",
+      "starterText": "If we had planned the launch more carefully, we would be in a much stronger position now.",
+      "modelAnswer": "If the team had tested the feature earlier, we would not be dealing with these client complaints now. If I were more confident in public speaking, I would have accepted the conference invitation last month. If the supplier had delivered on time, the product would be on the market already. If she were better at delegating, she would not have missed the earlier deadline.",
+      "expectedKeywords": [
+        "mixed conditional",
+        "past decision",
+        "present result",
+        "past consequence"
+      ],
+      "scoringProfile": "sentence_drill",
+      "minimumWordCount": 30,
+      "minimumResponseItems": 4
+    },
+    "inversion-for-emphasis-prompt-1": {
+      "instructions": "Write four formal sentences using inversion after negative or limiting expressions such as rarely, never, only then, or not until.",
+      "starterText": "Rarely have I seen a proposal generate such immediate support from senior management.",
+      "modelAnswer": "Rarely have I seen a project team recover so quickly after a major delay. Only after the audit did the board understand the full scale of the problem. Not until the final review did the client approve the revised schedule. Never had the department faced such a complex negotiation before the merger talks began.",
+      "expectedKeywords": [
+        "inversion",
+        "rarely",
+        "only after",
+        "not until",
+        "formal style"
+      ],
+      "scoringProfile": "sentence_drill",
+      "minimumWordCount": 28,
+      "minimumResponseItems": 4
+    },
     "applying-for-a-job-prompt-1": {
       "instructions": "Write a short formal cover letter that introduces your application, highlights relevant experience, and explains why you are suitable for the role.",
       "starterText": "Dear Hiring Manager, I am writing to apply for the entry-level marketing assistant role advertised on your website.",
