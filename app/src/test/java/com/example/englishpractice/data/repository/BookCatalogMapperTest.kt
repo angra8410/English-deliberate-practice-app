@@ -216,7 +216,8 @@ class BookCatalogMapperTest {
                                     id = "listening-summary-prompt-1",
                                     type = ExerciseType.LISTEN_AND_SUMMARIZE,
                                     targetSkill = SourceTargetSkill.LISTENING,
-                                    prompt = "Listen to the debate and summarize the conclusion."
+                                    prompt = "Listen to the debate and summarize the conclusion.",
+                                    audioAsset = "audio/listening-summary.wav"
                                 )
                             ),
                             related = emptyList(),
@@ -235,6 +236,7 @@ class BookCatalogMapperTest {
         assertEquals(2, readingActivity.minimumKeywordMatches)
         assertEquals(true, readingActivity.requiresToneReference)
         assertEquals(SkillType.LISTENING, listeningActivity.skill)
+        assertEquals("audio/listening-summary.wav", listeningActivity.audioAssetPath)
         assertEquals(2, listeningActivity.minimumKeywordMatches)
         assertEquals(true, listeningActivity.requiresContrastMarker)
     }

@@ -40,6 +40,7 @@ class BookCatalogParserTest {
                           "targetSkill": "VOCABULARY",
                           "prompt": "List five phrases commonly used in job advertisements.",
                           "instructions": "List five phrases from authentic job ads.",
+                          "audioAsset": "audio/job_ads.wav",
                           "modelAnswer": "competitive salary; excellent career prospects",
                           "expectedKeywords": ["competitive salary", "career prospects"],
                           "scoringProfile": "list",
@@ -67,6 +68,7 @@ class BookCatalogParserTest {
         assertEquals(ExerciseType.OPEN_TEXT, prompt.type)
         assertEquals(SourceTargetSkill.VOCABULARY, prompt.targetSkill)
         assertEquals("List five phrases from authentic job ads.", prompt.instructions)
+        assertEquals("audio/job_ads.wav", prompt.audioAsset)
         assertEquals(PromptScoringProfile.LIST, prompt.scoringProfile)
         assertEquals(listOf("competitive salary", "career prospects"), prompt.expectedKeywords)
         assertEquals(10, prompt.minimumWordCount)

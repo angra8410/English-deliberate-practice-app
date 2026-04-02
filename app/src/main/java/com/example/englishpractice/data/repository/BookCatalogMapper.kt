@@ -55,6 +55,7 @@ object BookCatalogMapper {
                         prompt = prompt.prompt,
                         exerciseType = prompt.type,
                         starterText = prompt.starterText ?: defaultStarterText(skill),
+                        audioAssetPath = prompt.audioAsset,
                         modelAnswer = prompt.modelAnswer ?: defaultModelAnswer(skill),
                         evaluationTargets = buildEvaluationTargets(chapter, prompt, skill),
                         supportNote = buildSupportNote(book.title, level, chapter),

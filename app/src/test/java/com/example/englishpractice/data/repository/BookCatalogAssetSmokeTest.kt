@@ -31,6 +31,13 @@ class BookCatalogAssetSmokeTest {
                 chapter.practicePrompts.count { prompt -> prompt.type.name == "SPEAK_RESPONSE" }
             }
         }
+        val listeningPromptAudioAssets = catalog.books.flatMap { book ->
+            book.chapters.flatMap { chapter ->
+                chapter.practicePrompts
+                    .filter { prompt -> prompt.type.name == "LISTEN_AND_SUMMARIZE" }
+                    .mapNotNull { prompt -> prompt.audioAsset }
+            }
+        }
 
         assertTrue(catalog.version >= 2)
         assertTrue(catalog.books.isNotEmpty(), "Expected at least one book in the content repository asset")
@@ -45,5 +52,14 @@ class BookCatalogAssetSmokeTest {
         assertTrue(readingPromptCount >= 2, "Expected at least two seeded reading summary prompts in the content repository asset")
         assertTrue(listeningPromptCount >= 4, "Expected at least four seeded listening summary prompts in the content repository asset")
         assertTrue(speakingPromptCount >= 4, "Expected at least four seeded speaking prompts in the content repository asset")
+        assertTrue(
+            listeningPromptAudioAssets.size >= 2,
+            "Expected at least two listening prompts with bundled audio assets in the content repository asset"
+        )
+        listeningPromptAudioAssets.forEach { audioAsset ->
+            val audioFile = File("src/main/assets/$audioAsset")
+            assertTrue(audioFile.exists(), "Expected bundled audio asset to exist at ${audioFile.path}")
+            assertTrue(audioFile.length() > 0L, "Expected bundled audio asset to be non-empty at ${audioFile.path}")
+        }
     }
 }

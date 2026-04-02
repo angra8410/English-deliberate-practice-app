@@ -90,6 +90,7 @@ object BookCatalogParser {
                         prompt = item.getString("prompt"),
                         instructions = item.optString("instructions").takeIf { it.isNotBlank() },
                         starterText = item.optString("starterText").takeIf { it.isNotBlank() },
+                        audioAsset = item.optString("audioAsset").takeIf { it.isNotBlank() },
                         modelAnswer = item.optString("modelAnswer").takeIf { it.isNotBlank() },
                         expectedKeywords = item.optStringList("expectedKeywords"),
                         scoringProfile = item.optString("scoringProfile")
