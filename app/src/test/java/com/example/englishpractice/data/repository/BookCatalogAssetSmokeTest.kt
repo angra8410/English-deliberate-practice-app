@@ -34,8 +34,8 @@ class BookCatalogAssetSmokeTest {
 
         assertTrue(catalog.version >= 2)
         assertTrue(catalog.books.isNotEmpty(), "Expected at least one book in the content repository asset")
-        assertTrue(totalChapters >= 10, "Expected at least 10 curated chapters in the content repository asset")
-        assertTrue(totalPrompts >= 14, "Expected at least 14 seeded prompts in the content repository asset")
+        assertTrue(totalChapters >= 18, "Expected at least 18 curated chapters in the content repository asset")
+        assertTrue(totalPrompts >= 21, "Expected at least 21 seeded prompts in the content repository asset")
         assertTrue(
             catalog.books.any { book ->
                 book.chapters.any { chapter -> chapter.practicePrompts.isNotEmpty() }
@@ -43,7 +43,7 @@ class BookCatalogAssetSmokeTest {
             "Expected at least one chapter with practice prompts in the content repository asset"
         )
         assertTrue(readingPromptCount >= 2, "Expected at least two seeded reading summary prompts in the content repository asset")
-        assertTrue(listeningPromptCount >= 2, "Expected at least two seeded listening summary prompts in the content repository asset")
-        assertTrue(speakingPromptCount >= 2, "Expected at least two seeded speaking prompts in the content repository asset")
+        assertTrue(listeningPromptCount >= 4, "Expected at least four seeded listening summary prompts in the content repository asset")
+        assertTrue(speakingPromptCount >= 4, "Expected at least four seeded speaking prompts in the content repository asset")
     }
 }

@@ -884,6 +884,228 @@
           "metadata": {
             "sourceFile": "vocabulary\\unit-8.md"
           }
+        },
+        {
+          "id": "client-escalation-call",
+          "title": "Client escalation call",
+          "order": 12,
+          "cefr": [
+            "C1"
+          ],
+          "tags": [
+            "vocabulary",
+            "listening",
+            "clients",
+            "escalation"
+          ],
+          "summary": "Listening practice focused on identifying the final concession in a client escalation and the immediate recovery step that follows.",
+          "points": [
+            "Escalation calls often begin with frustration but end with a negotiated action plan.",
+            "The client's main concern may remain, even after a partial concession is offered.",
+            "Strong summaries capture both the final agreement and the first immediate next step."
+          ],
+          "examples": [
+            {
+              "english": "We can extend the deadline by forty-eight hours, but we need a revised implementation plan before the end of today.",
+              "note": "partial concession with immediate requirement"
+            }
+          ],
+          "pitfalls": [
+            "Do not focus only on the complaint and miss the concrete action that closes the call."
+          ],
+          "practicePrompts": [
+            {
+              "id": "client-escalation-call-prompt-1",
+              "type": "listen_and_summarize",
+              "targetSkill": "LISTENING",
+              "prompt": "The client says the delayed rollout has already affected two regional teams and insists that the situation cannot continue into next week. After reviewing the options, the account manager agrees to extend the deadline by forty-eight hours, but only if the project lead sends a revised implementation plan by 5 p.m. and joins a follow-up call tomorrow morning. The conversation ends with the client saying they still expect weekly status updates until the rollout is stable.",
+              "instructions": "Listen to the escalation summary and explain the final concession, the immediate requirement attached to it, and the longer follow-up expectation.",
+              "starterText": "The account manager grants a forty-eight-hour extension, but only if the project lead sends a revised plan by 5 p.m.",
+              "modelAnswer": "The call ends with the account manager granting a forty-eight-hour extension because the client says the current delay has already affected two regional teams. However, the concession is conditional, since the project lead must send a revised implementation plan by 5 p.m. and join a follow-up call the next morning. The client also makes it clear that weekly status updates will still be expected until the rollout is stable.",
+              "expectedKeywords": [
+                "forty-eight-hour extension",
+                "revised implementation plan",
+                "5 p.m.",
+                "follow-up call",
+                "weekly status updates"
+              ],
+              "minimumWordCount": 40,
+              "minimumKeywordMatches": 2,
+              "requiresContrastMarker": true
+            }
+          ],
+          "related": [
+            "deadline-renegotiation-call"
+          ],
+          "metadata": {
+            "sourceFile": "vocabulary\\unit-9.md"
+          }
+        },
+        {
+          "id": "handover-briefing",
+          "title": "Handover briefing",
+          "order": 13,
+          "cefr": [
+            "C1"
+          ],
+          "tags": [
+            "vocabulary",
+            "speaking",
+            "handover",
+            "operations"
+          ],
+          "summary": "Speaking practice focused on handing over a project clearly by naming current status, priorities and one unresolved risk.",
+          "points": [
+            "A handover should state what has already been completed before moving to outstanding tasks.",
+            "Priorities need to be ordered clearly so the next person knows what matters first.",
+            "A useful handover also flags one unresolved issue that may require quick attention."
+          ],
+          "examples": [
+            {
+              "english": "I have finished the client notes and uploaded the revised schedule, but the legal approval is still pending.",
+              "note": "clear handover update"
+            }
+          ],
+          "pitfalls": [
+            "Do not give isolated task details without making the current priority and the unresolved risk explicit."
+          ],
+          "practicePrompts": [
+            {
+              "id": "handover-briefing-prompt-1",
+              "type": "speak_response",
+              "targetSkill": "SPEAKING",
+              "prompt": "You are handing over a live project to a colleague before going on leave. Explain what has already been completed, what the top priority is for tomorrow, and one unresolved risk they should monitor.",
+              "instructions": "Give a spoken handover that explains what is finished, what tomorrow's priority is, and one unresolved risk the next person should monitor closely.",
+              "starterText": "I have finished the client notes and uploaded the revised schedule. Tomorrow's first priority is confirming the supplier timeline, but the unresolved risk is that legal approval may still arrive late.",
+              "modelAnswer": "I have completed the client notes, uploaded the revised schedule, and shared the latest budget comments with the operations lead. The top priority for tomorrow is confirming the supplier timeline before the regional team begins implementation. However, the main unresolved risk is that legal approval may still arrive late, which could delay the final sign-off. If that happens, the next step should be to warn the client immediately and adjust the handover plan.",
+              "expectedKeywords": [
+                "completed",
+                "priority",
+                "risk",
+                "handover",
+                "however"
+              ],
+              "minimumWordCount": 48,
+              "minimumKeywordMatches": 2
+            }
+          ],
+          "related": [
+            "project-update-briefing"
+          ],
+          "metadata": {
+            "sourceFile": "vocabulary\\unit-10.md"
+          }
+        },
+        {
+          "id": "vendor-status-update-call",
+          "title": "Vendor status update call",
+          "order": 14,
+          "cefr": [
+            "C1"
+          ],
+          "tags": [
+            "vocabulary",
+            "listening",
+            "suppliers",
+            "status-update"
+          ],
+          "summary": "Listening practice focused on supplier updates where a reassuring headline is qualified by one operational risk or dependency.",
+          "points": [
+            "Status calls often sound positive at first, but a later qualification can change the practical meaning.",
+            "Operational risks are frequently linked to approvals, shipping windows or technical sign-off.",
+            "A strong summary should capture both the reassuring headline and the risk that remains."
+          ],
+          "examples": [
+            {
+              "english": "Most components will arrive on schedule, although customs clearance may still delay the final batch.",
+              "note": "positive headline with qualifier"
+            }
+          ],
+          "pitfalls": [
+            "Do not summarise the update as fully positive if the speaker later adds a dependency that could affect delivery."
+          ],
+          "practicePrompts": [
+            {
+              "id": "vendor-status-update-call-prompt-1",
+              "type": "listen_and_summarize",
+              "targetSkill": "LISTENING",
+              "prompt": "The supplier says that most of the components have now left the warehouse and should arrive on schedule by Thursday. However, they explain that the final batch is still waiting for customs clearance, so there is a small risk that the installation team may need to begin without the spare units. The call ends with an agreement that the supplier will confirm the customs update by noon tomorrow and arrange direct delivery to the site if needed.",
+              "instructions": "Listen to the supplier update and summarize the reassuring headline, the remaining delivery risk, and the agreed next step.",
+              "starterText": "Most components are on schedule, but the spare units may still be delayed by customs clearance.",
+              "modelAnswer": "The supplier says that most of the components have already left the warehouse and should still arrive on schedule by Thursday. However, the final batch of spare units is still waiting for customs clearance, so installation may begin without them if the clearance is delayed. The agreed next step is that the supplier will confirm the customs update by noon tomorrow and arrange direct delivery to the site if necessary.",
+              "expectedKeywords": [
+                "on schedule",
+                "customs clearance",
+                "spare units",
+                "noon tomorrow",
+                "direct delivery"
+              ],
+              "minimumWordCount": 38,
+              "minimumKeywordMatches": 2,
+              "requiresContrastMarker": true
+            }
+          ],
+          "related": [
+            "client-escalation-call"
+          ],
+          "metadata": {
+            "sourceFile": "vocabulary\\unit-11.md"
+          }
+        },
+        {
+          "id": "stakeholder-recommendation-pitch",
+          "title": "Stakeholder recommendation pitch",
+          "order": 15,
+          "cefr": [
+            "C1"
+          ],
+          "tags": [
+            "vocabulary",
+            "speaking",
+            "stakeholders",
+            "recommendation"
+          ],
+          "summary": "Speaking practice focused on giving a concise recommendation, supporting it with evidence and acknowledging one trade-off.",
+          "points": [
+            "A strong recommendation states the preferred option early instead of delaying the conclusion.",
+            "Decision-makers expect at least one concrete reason or piece of evidence supporting the recommendation.",
+            "More advanced responses acknowledge one trade-off without weakening the main recommendation."
+          ],
+          "examples": [
+            {
+              "english": "I recommend the phased rollout because it reduces operational risk, although it will delay the full launch by two weeks.",
+              "note": "recommendation with trade-off"
+            }
+          ],
+          "pitfalls": [
+            "Do not present several options equally if the task requires a clear recommendation and justification."
+          ],
+          "practicePrompts": [
+            {
+              "id": "stakeholder-recommendation-pitch-prompt-1",
+              "type": "speak_response",
+              "targetSkill": "SPEAKING",
+              "prompt": "You are briefing senior stakeholders. Recommend one of two rollout options, give the strongest reason for your choice, and acknowledge one trade-off or limitation.",
+              "instructions": "Give a short spoken recommendation to senior stakeholders. State your preferred option early, justify it with one strong reason, and acknowledge one trade-off.",
+              "starterText": "I recommend the phased rollout because it reduces operational risk, although it will delay the full launch by two weeks.",
+              "modelAnswer": "I recommend the phased rollout because it reduces operational risk and gives the support team time to handle early issues before the wider release. The strongest reason for this option is that it protects the client experience while the team confirms that the new process is stable. However, the trade-off is that the full launch will take longer, so some commercial targets may move back by two weeks. Even so, the lower risk makes this the stronger option overall.",
+              "expectedKeywords": [
+                "recommend",
+                "phased rollout",
+                "operational risk",
+                "trade-off",
+                "overall"
+              ],
+              "minimumWordCount": 48,
+              "minimumKeywordMatches": 2
+            }
+          ],
+          "related": [
+            "handover-briefing"
+          ],
+          "metadata": {
+            "sourceFile": "vocabulary\\unit-12.md"
+          }
         }
       ]
     }
