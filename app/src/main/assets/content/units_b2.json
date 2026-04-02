@@ -4,13 +4,27 @@
     "title": "Reading Summaries",
     "level": "B2",
     "skill": "READING",
-    "description": "Read mid-length texts and summarize them clearly."
+    "description": "Read mid-length texts, identify the main claim, and summarize the writer's tone and support."
   },
   {
     "id": "b2_writing_opinions",
     "title": "Opinion Writing",
     "level": "B2",
     "skill": "WRITING",
-    "description": "Write focused opinion paragraphs with support."
+    "description": "Write focused opinion paragraphs with clear connectors, support, and natural collocations."
+  },
+  {
+    "id": "b2_listening_hybrid_work",
+    "title": "Listening: Hybrid Work",
+    "level": "B2",
+    "skill": "LISTENING",
+    "description": "Listen for the speaker's final position, contrast markers, and key supporting detail."
+  },
+  {
+    "id": "b2_speaking_remote_work",
+    "title": "Speaking: Remote Work",
+    "level": "B2",
+    "skill": "SPEAKING",
+    "description": "Respond aloud with a clear position, stronger fluency, and longer supported answers."
   }
 ]

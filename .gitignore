@@ -1,5 +1,7 @@
 # Gradle
 .gradle/
+.gradle-local/
+.gradle-project-cache/
 build/
 */build/
 
@@ -9,6 +11,7 @@ build/
 
 # Local machine config
 local.properties
+.android-local/
 
 # OS files
 .DS_Store
@@ -16,6 +19,7 @@ Thumbs.db
 
 # Logs
 *.log
+.codex-build/
 
 # Kotlin / Java generated artifacts
 out/

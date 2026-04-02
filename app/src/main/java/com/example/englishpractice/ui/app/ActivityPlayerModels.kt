@@ -5,12 +5,15 @@ import com.example.englishpractice.domain.model.SkillType
 
 data class PracticeActivityItem(
     val id: String,
+    val unitId: String? = null,
     val skill: SkillType,
     val title: String,
     val instructions: String,
     val prompt: String,
     val exerciseType: ExerciseType,
     val starterText: String = "",
+    val audioAssetPath: String? = null,
+    val listeningPromptText: String? = null,
     val modelAnswer: String,
     val evaluationTargets: List<String>,
     val supportNote: String

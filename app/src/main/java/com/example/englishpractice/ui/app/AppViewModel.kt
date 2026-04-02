@@ -3,12 +3,15 @@ package com.example.englishpractice.ui.app
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.englishpractice.data.repository.AssetContentRepository
 import com.example.englishpractice.data.repository.AppPreferencesRepository
 import com.example.englishpractice.data.repository.PersistedSubmission
+import com.example.englishpractice.data.repository.PracticeUnitAsset
 import com.example.englishpractice.data.repository.PracticeRepository
 import com.example.englishpractice.domain.model.CefrLevel
 import com.example.englishpractice.domain.model.ExerciseType
 import com.example.englishpractice.domain.model.SkillType
+import com.example.englishpractice.feature.listening.ListeningEvaluator
 import com.example.englishpractice.feature.listening.ListeningPlayer
 import com.example.englishpractice.feature.practice.PracticeFeedback
 import com.example.englishpractice.feature.progress.ProgressCalculator
@@ -25,11 +28,16 @@ import kotlinx.coroutines.launch
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val speakingManager = SpeakingManager(application)
-    private val listeningPlayer = ListeningPlayer()
+    private val listeningPlayer = ListeningPlayer(application)
+    private val contentRepository = AssetContentRepository(application)
     private val repository = PracticeRepository.create(application)
     private val preferencesRepository = AppPreferencesRepository(application)
+    private val currentPilotLevel = CefrLevel.B2
 
-    private val activityCatalog = buildActivityCatalog()
+    private val activityCatalog = buildActivityCatalog(currentPilotLevel)
+    private val unitCatalog = buildUnitCatalog(currentPilotLevel)
+    private val pilotLevels = buildPilotLevels()
+    private val dailyPlan = buildDailyPlan(unitCatalog, activityCatalog)
     private val baseProgressInputs = buildProgressInputs()
     private val defaultSpeakingLocaleTag = AppPreferencesRepository.DEFAULT_SPEAKING_LOCALE_TAG
     private val selectedSpeakingLocaleTag = MutableStateFlow(defaultSpeakingLocaleTag)
@@ -103,42 +111,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val skillProgress = progressInputs.map(ProgressCalculator::buildSnapshot)
 
         return AppUiState(
-            currentLevel = CefrLevel.B2,
+            currentLevel = currentPilotLevel,
             targetLevel = CefrLevel.C1,
             streakDays = 12,
             dailyGoalMinutes = 60,
-            pilotLevels = listOf(CefrLevel.B2, CefrLevel.C1),
+            pilotLevels = pilotLevels,
             overallCompletion = ProgressCalculator.overallCompletion(skillProgress),
-            dailyPlan = listOf(
-                DailyPracticeItem(
-                    skill = SkillType.READING,
-                    title = "Read and summarize an editorial",
-                    focus = "main idea, support, and more precise vocabulary",
-                    exerciseType = ExerciseType.READ_AND_SUMMARIZE,
-                    estimatedMinutes = 15
-                ),
-                DailyPracticeItem(
-                    skill = SkillType.WRITING,
-                    title = "Write a short opinion response",
-                    focus = "clarity, connectors, and stronger collocations",
-                    exerciseType = ExerciseType.OPEN_TEXT,
-                    estimatedMinutes = 15
-                ),
-                DailyPracticeItem(
-                    skill = SkillType.LISTENING,
-                    title = "Listen to a short debate and capture key details",
-                    focus = "detail recall and contrast markers",
-                    exerciseType = ExerciseType.LISTEN_AND_SUMMARIZE,
-                    estimatedMinutes = 15
-                ),
-                DailyPracticeItem(
-                    skill = SkillType.SPEAKING,
-                    title = "Answer a prompt aloud and improve the retry",
-                    focus = "fluency, relevance, and longer structured answers",
-                    exerciseType = ExerciseType.SPEAK_RESPONSE,
-                    estimatedMinutes = 15
-                )
-            ),
+            dailyPlan = dailyPlan,
             skillProgress = skillProgress,
             weakPatterns = weakPatterns,
             reviewSummary = ReviewSummary(
@@ -191,10 +170,110 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    private fun buildActivityCatalog(): List<PracticeActivityItem> {
+    private fun buildActivityCatalog(level: CefrLevel): List<PracticeActivityItem> {
+        val assetActivities = contentRepository.loadActivitiesForLevel(level)
+        return if (assetActivities.isNotEmpty()) {
+            assetActivities
+        } else {
+            fallbackActivityCatalog()
+        }
+    }
+
+    private fun buildUnitCatalog(level: CefrLevel): List<PracticeUnitAsset> {
+        return contentRepository.loadUnitsForLevel(level)
+    }
+
+    private fun buildPilotLevels(): List<CefrLevel> {
+        val levelsWithActivities = contentRepository.loadLevels().filter { level ->
+            contentRepository.loadActivitiesForLevel(level).isNotEmpty()
+        }
+        return if (levelsWithActivities.isNotEmpty()) {
+            levelsWithActivities
+        } else {
+            listOf(CefrLevel.B2, CefrLevel.C1)
+        }
+    }
+
+    private fun buildDailyPlan(
+        units: List<PracticeUnitAsset>,
+        activities: List<PracticeActivityItem>
+    ): List<DailyPracticeItem> {
+        val activityByUnitId = activities.mapNotNull { activity ->
+            activity.unitId?.let { unitId -> unitId to activity }
+        }.toMap()
+
+        val plannedUnits = units.sortedBy { unit ->
+            when (unit.skill) {
+                SkillType.READING -> 0
+                SkillType.WRITING -> 1
+                SkillType.LISTENING -> 2
+                SkillType.SPEAKING -> 3
+            }
+        }
+
+        return if (plannedUnits.isNotEmpty()) {
+            plannedUnits.map { unit ->
+                val activity = activityByUnitId[unit.id]
+                DailyPracticeItem(
+                    skill = unit.skill,
+                    title = unit.title,
+                    focus = unit.description,
+                    exerciseType = activity?.exerciseType ?: defaultExerciseType(unit.skill),
+                    estimatedMinutes = 15
+                )
+            }
+        } else {
+            fallbackDailyPlan()
+        }
+    }
+
+    private fun fallbackDailyPlan(): List<DailyPracticeItem> {
+        return listOf(
+            DailyPracticeItem(
+                skill = SkillType.READING,
+                title = "Read and summarize an editorial",
+                focus = "main idea, support, and more precise vocabulary",
+                exerciseType = ExerciseType.READ_AND_SUMMARIZE,
+                estimatedMinutes = 15
+            ),
+            DailyPracticeItem(
+                skill = SkillType.WRITING,
+                title = "Write a short opinion response",
+                focus = "clarity, connectors, and stronger collocations",
+                exerciseType = ExerciseType.OPEN_TEXT,
+                estimatedMinutes = 15
+            ),
+            DailyPracticeItem(
+                skill = SkillType.LISTENING,
+                title = "Listen to a short debate and capture key details",
+                focus = "detail recall and contrast markers",
+                exerciseType = ExerciseType.LISTEN_AND_SUMMARIZE,
+                estimatedMinutes = 15
+            ),
+            DailyPracticeItem(
+                skill = SkillType.SPEAKING,
+                title = "Answer a prompt aloud and improve the retry",
+                focus = "fluency, relevance, and longer structured answers",
+                exerciseType = ExerciseType.SPEAK_RESPONSE,
+                estimatedMinutes = 15
+            )
+        )
+    }
+
+    private fun defaultExerciseType(skill: SkillType): ExerciseType {
+        return when (skill) {
+            SkillType.READING -> ExerciseType.READ_AND_SUMMARIZE
+            SkillType.WRITING -> ExerciseType.OPEN_TEXT
+            SkillType.LISTENING -> ExerciseType.LISTEN_AND_SUMMARIZE
+            SkillType.SPEAKING -> ExerciseType.SPEAK_RESPONSE
+        }
+    }
+
+    private fun fallbackActivityCatalog(): List<PracticeActivityItem> {
         return listOf(
             PracticeActivityItem(
                 id = "reading-b2-editorial",
+                unitId = "b2_reading_summaries",
                 skill = SkillType.READING,
                 title = "Editorial summary and tone",
                 instructions = "Read the passage and write a short summary that states the main idea, one supporting point, and the writer's tone.",
@@ -207,6 +286,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             ),
             PracticeActivityItem(
                 id = "writing-b2-opinion",
+                unitId = "b2_writing_opinions",
                 skill = SkillType.WRITING,
                 title = "Opinion paragraph upgrade",
                 instructions = "Write one clear paragraph in response to the prompt. Use at least one connector and one reasoned example.",
@@ -219,18 +299,22 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             ),
             PracticeActivityItem(
                 id = "listening-b2-summary",
+                unitId = "b2_listening_hybrid_work",
                 skill = SkillType.LISTENING,
                 title = "Listening detail capture",
                 instructions = "Pretend you listened to a short debate. Write a summary of the speaker's final position and one contrasting detail they mentioned.",
                 prompt = "Audio prompt placeholder: a speaker first recognizes the convenience of remote work, then argues that junior employees still benefit from in-person mentoring several times per week.",
                 exerciseType = ExerciseType.LISTEN_AND_SUMMARIZE,
                 starterText = "The speaker ultimately argues that...",
+                audioAssetPath = "audio/listening_b2_remote_work.wav",
+                listeningPromptText = "A speaker first recognizes the convenience of remote work, then argues that junior employees still benefit from in-person mentoring several times per week.",
                 modelAnswer = "The speaker ends up supporting a hybrid model, arguing that junior employees need regular in-person mentoring even if remote work is convenient. The contrast is that convenience matters, but training and informal feedback matter more early in a career.",
                 evaluationTargets = listOf("hybrid", "mentoring", "junior", "contrast"),
-                supportNote = "In the real listening version, this prompt will come from Media3 playback."
+                supportNote = "Playback now prefers the bundled sample audio asset and falls back to prompt playback when no file is available."
             ),
             PracticeActivityItem(
                 id = "speaking-b2-argument",
+                unitId = "b2_speaking_remote_work",
                 skill = SkillType.SPEAKING,
                 title = "Spoken argument and retry",
                 instructions = "Answer the prompt aloud. For the MVP, use the transcript field or load the guided transcript sample, then submit for feedback.",
@@ -340,45 +424,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         return when (activity.skill) {
             SkillType.READING -> ReadingEvaluator.evaluateSummary(answer, activity.evaluationTargets)
             SkillType.WRITING -> WritingFeedbackRules.evaluateAnswer(answer)
-            SkillType.LISTENING -> evaluateListeningAnswer(answer, activity.evaluationTargets)
+            SkillType.LISTENING -> ListeningEvaluator.evaluateSummary(answer, activity.evaluationTargets)
             SkillType.SPEAKING -> evaluateSpeakingAnswer(
                 answer = answer,
                 transcriptText = transcriptText ?: answer,
                 expectedKeywords = activity.evaluationTargets
             )
         }
-    }
-
-    private fun evaluateListeningAnswer(
-        answer: String,
-        expectedKeywords: List<String>
-    ): PracticeFeedback {
-        val normalizedAnswer = answer.lowercase()
-        val matchedKeywords = expectedKeywords.count { keyword ->
-            normalizedAnswer.contains(keyword)
-        }
-        val feedback = mutableListOf<String>()
-        val weakTags = mutableListOf<String>()
-
-        if (matchedKeywords < 2) {
-            feedback += "State the final position more directly and mention the contrasting detail."
-            weakTags += "detail recall"
-        } else {
-            feedback += "You captured the main listening point and some contrast."
-        }
-
-        if (!normalizedAnswer.contains("however") && !normalizedAnswer.contains("but")) {
-            feedback += "Signal the contrast clearly with however, but, or although."
-            weakTags += "contrast markers"
-        }
-
-        if (answer.split(" ").size < 25) {
-            feedback += "Add one more sentence so the summary shows both the conclusion and the nuance."
-            weakTags += "summary length"
-        }
-
-        val score = (48 + matchedKeywords * 14 - weakTags.size * 5).coerceIn(0, 100)
-        return PracticeFeedback(score, feedback.distinct(), weakTags.distinct())
     }
 
     private fun evaluateSpeakingAnswer(

@@ -1,36 +1,104 @@
 [
   {
-    "id": "act_b2_read_001",
+    "id": "reading-b2-editorial",
     "unitId": "b2_reading_summaries",
-    "title": "Summarize a short article",
+    "title": "Editorial summary and tone",
     "level": "B2",
     "skill": "READING",
     "exerciseType": "READ_AND_SUMMARIZE",
-    "prompt": "Read the passage and write a 60-word summary.",
-    "instructions": "Focus on the main idea and two supporting details.",
+    "prompt": "City centers should reduce private car traffic, not because cars are inherently harmful, but because current street design prioritizes speed over public life. Supporters of the change argue that quieter streets improve health, increase local commerce, and make commuting more predictable. Critics worry that delivery times and commuter flexibility will suffer during the transition.",
+    "instructions": "Read the passage and write a short summary that states the main idea, one supporting point, and the writer's tone.",
     "tags": [
       "summary",
       "main-idea",
-      "supporting-details"
+      "tone-inference"
     ],
     "difficulty": 2,
-    "sampleAnswer": "A clear and concise summary model goes here."
+    "starterText": "The article argues that...",
+    "supportNote": "Aim for 3 to 4 sentences and mention both the argument and the tone.",
+    "evaluationTargets": [
+      "city",
+      "traffic",
+      "health",
+      "business",
+      "tone"
+    ],
+    "sampleAnswer": "The passage argues that city centers should reduce private car traffic because current streets favor speed over community life. It supports this by linking calmer streets to health and local business benefits, while acknowledging concerns about deliveries and commuter flexibility. The tone is balanced but clearly supportive of reform."
   },
   {
-    "id": "act_b2_write_001",
+    "id": "writing-b2-opinion",
     "unitId": "b2_writing_opinions",
-    "title": "Opinion paragraph",
+    "title": "Opinion paragraph upgrade",
     "level": "B2",
     "skill": "WRITING",
     "exerciseType": "OPEN_TEXT",
-    "prompt": "Do you think remote work improves productivity?",
-    "instructions": "Write 100 to 120 words and support your view with two reasons.",
+    "prompt": "Should universities require all students to take a communication course, even if it is outside their major?",
+    "instructions": "Write one clear paragraph in response to the prompt. Use at least one connector and one reasoned example.",
     "tags": [
       "opinion",
       "cohesion",
       "support"
     ],
     "difficulty": 2,
-    "sampleAnswer": "A balanced B2-level sample answer goes here."
+    "starterText": "Universities should...",
+    "supportNote": "Keep the paragraph focused: position, reason, and example.",
+    "evaluationTargets": [
+      "connector",
+      "example",
+      "clear opinion"
+    ],
+    "sampleAnswer": "Universities should require a communication course because most professions now depend on clear writing and speaking, not only technical knowledge. For example, engineers and designers often need to explain complex ideas to clients or multidisciplinary teams. Therefore, a communication course would strengthen employability and improve collaboration across fields."
+  },
+  {
+    "id": "listening-b2-summary",
+    "unitId": "b2_listening_hybrid_work",
+    "title": "Listening detail capture",
+    "level": "B2",
+    "skill": "LISTENING",
+    "exerciseType": "LISTEN_AND_SUMMARIZE",
+    "prompt": "Listen to the short debate and summarize the speaker's final position and one contrasting detail.",
+    "instructions": "Write a short summary of the speaker's conclusion and one contrast they mention.",
+    "tags": [
+      "listening",
+      "summary",
+      "contrast"
+    ],
+    "difficulty": 2,
+    "starterText": "The speaker ultimately argues that...",
+    "audioAsset": "audio/listening_b2_remote_work.wav",
+    "listeningPromptText": "A speaker first recognizes the convenience of remote work, then argues that junior employees still benefit from in-person mentoring several times per week.",
+    "supportNote": "Playback now prefers the bundled sample audio asset and falls back to prompt playback when no file is available.",
+    "evaluationTargets": [
+      "hybrid",
+      "mentoring",
+      "junior",
+      "contrast"
+    ],
+    "sampleAnswer": "The speaker ends up supporting a hybrid model, arguing that junior employees need regular in-person mentoring even if remote work is convenient. The contrast is that convenience matters, but training and informal feedback matter more early in a career."
+  },
+  {
+    "id": "speaking-b2-argument",
+    "unitId": "b2_speaking_remote_work",
+    "title": "Spoken argument and retry",
+    "level": "B2",
+    "skill": "SPEAKING",
+    "exerciseType": "SPEAK_RESPONSE",
+    "prompt": "Do you agree that remote work is harder for junior employees than for experienced employees? Explain your position.",
+    "instructions": "Answer the prompt aloud. For the MVP, use transcript capture or load the guided transcript sample, then submit for feedback.",
+    "tags": [
+      "argumentation",
+      "fluency",
+      "task-response"
+    ],
+    "difficulty": 2,
+    "starterText": "I partly agree because junior employees usually need faster feedback and more structure. However, remote work can still work if teams create regular mentoring routines and clear communication habits.",
+    "supportNote": "Speaking v1 uses transcript-first practice before deeper pronunciation scoring.",
+    "evaluationTargets": [
+      "agree",
+      "junior employees",
+      "feedback",
+      "however"
+    ],
+    "sampleAnswer": "I agree that remote work is usually harder for junior employees because they need quick feedback, observation, and informal learning opportunities that are easier to access in person. However, this does not mean remote work is impossible. If teams offer structured mentoring, regular check-ins, and clear expectations, junior staff can still develop effectively."
   }
 ]

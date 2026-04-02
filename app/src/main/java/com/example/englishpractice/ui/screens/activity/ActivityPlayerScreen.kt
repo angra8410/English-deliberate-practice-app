@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -37,6 +38,9 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import com.example.englishpractice.domain.model.SkillType
 import com.example.englishpractice.feature.listening.ListeningCapability
+import com.example.englishpractice.feature.listening.ListeningPlaybackMode
+import com.example.englishpractice.feature.listening.ListeningPlaybackState
+import com.example.englishpractice.feature.listening.ListeningPlayer
 import com.example.englishpractice.feature.speaking.SpeakingAvailability
 import com.example.englishpractice.feature.speaking.SpeakingCapability
 import com.example.englishpractice.feature.speaking.SpeakingCaptureState
@@ -69,7 +73,19 @@ fun ActivityPlayerScreen(
     }
 
     var answerText by rememberSaveable(activity.id) { mutableStateOf(activity.starterText) }
-    var listeningPlaybackReady by rememberSaveable(activity.id) { mutableStateOf(false) }
+    var listeningMode by rememberSaveable(activity.id) { mutableStateOf<ListeningPlaybackMode?>(null) }
+    var listeningStatus by rememberSaveable(activity.id) { mutableStateOf("Idle") }
+    var listeningHint by rememberSaveable(activity.id) {
+        mutableStateOf("Press Play to hear the listening prompt before writing your summary.")
+    }
+    var listeningSourceLabel by rememberSaveable(activity.id) { mutableStateOf("No source prepared") }
+    var listeningPositionMs by rememberSaveable(activity.id) { mutableStateOf(0L) }
+    var listeningDurationMs by rememberSaveable(activity.id) { mutableStateOf(0L) }
+    var isListeningPreparing by rememberSaveable(activity.id) { mutableStateOf(false) }
+    var isListeningPlaying by rememberSaveable(activity.id) { mutableStateOf(false) }
+    var hasStartedListeningPlayback by rememberSaveable(activity.id) { mutableStateOf(false) }
+    var hasCompletedListeningPlayback by rememberSaveable(activity.id) { mutableStateOf(false) }
+    var hasListeningPlaybackError by rememberSaveable(activity.id) { mutableStateOf(false) }
     var speakingStatus by rememberSaveable(activity.id) { mutableStateOf("Idle") }
     var capturedTranscript by rememberSaveable(activity.id) { mutableStateOf<String?>(null) }
     var lastAppliedTranscript by rememberSaveable(activity.id) { mutableStateOf<String?>(null) }
@@ -87,7 +103,9 @@ fun ActivityPlayerScreen(
 
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val listeningPlayer = remember(context) { ListeningPlayer(context) }
     val speakingManager = remember(context) { SpeakingManager(context) }
+    val isListeningBusy = isListeningPreparing || isListeningPlaying
     val isSpeakingBusy = isSpeakingListening || isSpeakingProcessing
 
     fun applyTranscript(transcript: String) {
@@ -103,6 +121,120 @@ fun ActivityPlayerScreen(
             answerText = safeTranscript
         }
         lastAppliedTranscript = safeTranscript
+    }
+
+    fun handleListeningState(state: ListeningPlaybackState) {
+        when (state) {
+            ListeningPlaybackState.Idle -> {
+                listeningMode = null
+                listeningStatus = "Idle"
+                listeningSourceLabel = "No source prepared"
+                listeningPositionMs = 0L
+                listeningDurationMs = 0L
+                isListeningPreparing = false
+                isListeningPlaying = false
+                hasStartedListeningPlayback = false
+                hasCompletedListeningPlayback = false
+                hasListeningPlaybackError = false
+                listeningHint = "Press Play to hear the listening prompt before writing your summary."
+            }
+
+            is ListeningPlaybackState.Preparing -> {
+                listeningMode = state.mode
+                listeningStatus = "Preparing playback..."
+                listeningSourceLabel = state.sourceLabel
+                listeningPositionMs = state.positionMs
+                listeningDurationMs = state.durationMs
+                isListeningPreparing = true
+                isListeningPlaying = false
+                hasListeningPlaybackError = false
+                listeningHint = when (state.mode) {
+                    ListeningPlaybackMode.BUNDLED_AUDIO -> {
+                        "Bundled audio is loading. Playback controls will activate when it is ready."
+                    }
+
+                    ListeningPlaybackMode.PROMPT_SYNTHESIS -> {
+                        "Prompt playback is preparing. The current English voice will be used for synthesis."
+                    }
+                }
+            }
+
+            is ListeningPlaybackState.Ready -> {
+                listeningMode = state.mode
+                listeningStatus = "Ready"
+                listeningSourceLabel = state.sourceLabel
+                listeningPositionMs = state.positionMs
+                listeningDurationMs = state.durationMs
+                isListeningPreparing = false
+                isListeningPlaying = false
+                hasListeningPlaybackError = false
+                listeningHint = when (state.mode) {
+                    ListeningPlaybackMode.BUNDLED_AUDIO -> {
+                        "Play the listening audio, then capture the speaker's conclusion and contrast."
+                    }
+
+                    ListeningPlaybackMode.PROMPT_SYNTHESIS -> {
+                        "Play the spoken prompt, then summarize the final position and contrasting detail."
+                    }
+                }
+            }
+
+            is ListeningPlaybackState.Playing -> {
+                listeningMode = state.mode
+                listeningStatus = "Playing..."
+                listeningSourceLabel = state.sourceLabel
+                listeningPositionMs = state.positionMs
+                listeningDurationMs = state.durationMs
+                isListeningPreparing = false
+                isListeningPlaying = true
+                hasStartedListeningPlayback = true
+                hasListeningPlaybackError = false
+                listeningHint = "Listen through the full prompt before writing the summary."
+            }
+
+            is ListeningPlaybackState.Paused -> {
+                listeningMode = state.mode
+                listeningStatus = "Paused"
+                listeningSourceLabel = state.sourceLabel
+                listeningPositionMs = state.positionMs
+                listeningDurationMs = state.durationMs
+                isListeningPreparing = false
+                isListeningPlaying = false
+                hasStartedListeningPlayback = true
+                hasListeningPlaybackError = false
+                listeningHint = when (state.mode) {
+                    ListeningPlaybackMode.BUNDLED_AUDIO -> {
+                        "Resume from Play or restart from Replay before submitting your answer."
+                    }
+
+                    ListeningPlaybackMode.PROMPT_SYNTHESIS -> {
+                        "Prompt synthesis will start again from the beginning when you press Play or Replay."
+                    }
+                }
+            }
+
+            is ListeningPlaybackState.Completed -> {
+                listeningMode = state.mode
+                listeningStatus = "Completed"
+                listeningSourceLabel = state.sourceLabel
+                listeningPositionMs = state.positionMs
+                listeningDurationMs = state.durationMs
+                isListeningPreparing = false
+                isListeningPlaying = false
+                hasStartedListeningPlayback = true
+                hasCompletedListeningPlayback = true
+                hasListeningPlaybackError = false
+                listeningHint = "Write the speaker's main position and one clear contrast while it is still fresh."
+            }
+
+            is ListeningPlaybackState.Error -> {
+                listeningStatus = state.message
+                isListeningPreparing = false
+                isListeningPlaying = false
+                hasListeningPlaybackError = true
+                listeningHint = "Retry playback or continue with the written prompt if audio is unavailable."
+            }
+        }
     }
 
     fun handleSpeakingState(state: SpeakingCaptureState) {
@@ -176,12 +308,36 @@ fun ActivityPlayerScreen(
         speakingManager.prepare(::handleSpeakingState)
     }
 
+    fun refreshListeningPlayback() {
+        listeningPlayer.prepare(
+            audioAssetPath = activity.audioAssetPath,
+            promptText = activity.listeningPromptText ?: activity.prompt,
+            localeTag = selectedSpeakingLocaleTag,
+            onStateChanged = ::handleListeningState
+        )
+    }
+
     DisposableEffect(speakingManager, activity.skill) {
         if (activity.skill == SkillType.SPEAKING) {
             refreshSpeakingReadiness()
         }
         onDispose {
             speakingManager.release()
+        }
+    }
+
+    DisposableEffect(
+        listeningPlayer,
+        activity.skill,
+        activity.audioAssetPath,
+        activity.listeningPromptText,
+        selectedSpeakingLocaleTag
+    ) {
+        if (activity.skill == SkillType.LISTENING) {
+            refreshListeningPlayback()
+        }
+        onDispose {
+            listeningPlayer.release()
         }
     }
 
@@ -268,9 +424,61 @@ fun ActivityPlayerScreen(
                 ) {
                     Text("Listening playback", style = MaterialTheme.typography.titleMedium)
                     Text("Engine: ${listeningCapability.playbackEngine}")
-                    Button(onClick = { listeningPlaybackReady = true }) {
-                        Text(if (listeningPlaybackReady) "Prompt marked as played" else "Mark prompt as played")
+                    Text("Source: $listeningSourceLabel")
+                    Text("Status: $listeningStatus")
+                    Text(listeningHint, style = MaterialTheme.typography.bodySmall)
+                    LinearProgressIndicator(
+                        progress = {
+                            if (listeningDurationMs > 0L) {
+                                (listeningPositionMs.toFloat() / listeningDurationMs.toFloat())
+                                    .coerceIn(0f, 1f)
+                            } else {
+                                0f
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text(
+                        "${formatPlaybackTime(listeningPositionMs)} / ${formatPlaybackTime(listeningDurationMs)}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(
+                            enabled = !isListeningPreparing,
+                            onClick = { listeningPlayer.play() }
+                        ) {
+                            Text(
+                                when {
+                                    isListeningPlaying -> "Playing..."
+                                    listeningMode == ListeningPlaybackMode.PROMPT_SYNTHESIS &&
+                                        listeningPositionMs > 0L -> "Play again"
+                                    else -> "Play"
+                                }
+                            )
+                        }
+                        Button(
+                            enabled = hasStartedListeningPlayback && !isListeningPreparing,
+                            onClick = { listeningPlayer.pause() }
+                        ) {
+                            Text("Pause")
+                        }
+                        Button(
+                            enabled = hasStartedListeningPlayback && !isListeningPreparing,
+                            onClick = { listeningPlayer.replay() }
+                        ) {
+                            Text("Replay")
+                        }
                     }
+                    Text(
+                        if (hasListeningPlaybackError) {
+                            "Audio is unavailable right now. You can continue with the written prompt and still submit your summary."
+                        } else if (hasCompletedListeningPlayback) {
+                            "Playback finished. You can replay it or submit your summary."
+                        } else {
+                            "Listen at least once before submitting the listening response."
+                        },
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
         }
@@ -429,7 +637,16 @@ fun ActivityPlayerScreen(
         )
 
         Button(
-            enabled = !isSpeakingBusy && answerText.isNotBlank(),
+            enabled = when (activity.skill) {
+                SkillType.SPEAKING -> !isSpeakingBusy && answerText.isNotBlank()
+                SkillType.LISTENING -> ListeningSubmissionPolicy.canSubmit(
+                    isPreparing = isListeningPreparing,
+                    hasStartedPlayback = hasStartedListeningPlayback,
+                    hasPlaybackError = hasListeningPlaybackError,
+                    answerText = answerText
+                )
+                else -> answerText.isNotBlank()
+            },
             onClick = {
                 val transcript = if (activity.skill == SkillType.SPEAKING) {
                     capturedTranscript ?: answerText
@@ -469,4 +686,11 @@ private tailrec fun Context.findActivity(): Activity? {
         is ContextWrapper -> baseContext.findActivity()
         else -> null
     }
+}
+
+private fun formatPlaybackTime(durationMs: Long): String {
+    val totalSeconds = (durationMs / 1000L).coerceAtLeast(0L)
+    val minutes = totalSeconds / 60L
+    val seconds = totalSeconds % 60L
+    return "%d:%02d".format(minutes, seconds)
 }
