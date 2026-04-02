@@ -4,6 +4,7 @@ import com.example.englishpractice.domain.model.CefrLevel
 import com.example.englishpractice.domain.model.ExerciseType
 import com.example.englishpractice.domain.model.SkillType
 import com.example.englishpractice.ui.app.PracticeActivityItem
+import com.example.englishpractice.ui.app.PromptScoringProfile
 
 object BookCatalogMapper {
     fun toLevels(catalog: BookCatalog): List<CefrLevel> {
@@ -48,13 +49,16 @@ object BookCatalogMapper {
                         unitId = chapter.id,
                         skill = skill,
                         title = buildActivityTitle(chapter.title, index, chapter.practicePrompts.size),
-                        instructions = buildInstructions(prompt.type),
+                        instructions = prompt.instructions ?: buildInstructions(prompt.type),
                         prompt = prompt.prompt,
                         exerciseType = prompt.type,
-                        starterText = defaultStarterText(skill),
-                        modelAnswer = defaultModelAnswer(skill),
-                        evaluationTargets = buildEvaluationTargets(chapter, skill),
-                        supportNote = buildSupportNote(book.title, level, chapter)
+                        starterText = prompt.starterText ?: defaultStarterText(skill),
+                        modelAnswer = prompt.modelAnswer ?: defaultModelAnswer(skill),
+                        evaluationTargets = buildEvaluationTargets(chapter, prompt, skill),
+                        supportNote = buildSupportNote(book.title, level, chapter),
+                        scoringProfile = prompt.scoringProfile ?: inferScoringProfile(prompt),
+                        minimumWordCount = prompt.minimumWordCount ?: inferMinimumWordCount(prompt),
+                        minimumResponseItems = prompt.minimumResponseItems ?: inferMinimumResponseItems(prompt)
                     )
                 }
             }
@@ -125,13 +129,77 @@ object BookCatalogMapper {
         }
     }
 
-    private fun buildEvaluationTargets(chapter: BookChapter, skill: SkillType): List<String> {
+    private fun buildEvaluationTargets(
+        chapter: BookChapter,
+        prompt: BookPracticePrompt,
+        skill: SkillType
+    ): List<String> {
+        if (prompt.expectedKeywords.isNotEmpty()) {
+            return prompt.expectedKeywords.distinct().take(6)
+        }
         return when (skill) {
             SkillType.READING,
             SkillType.WRITING,
             SkillType.LISTENING,
             SkillType.SPEAKING -> chapter.tags.take(4) + chapter.points.take(2).flatMap(::extractKeywords)
         }.distinct().take(6)
+    }
+
+    private fun inferScoringProfile(prompt: BookPracticePrompt): PromptScoringProfile {
+        val normalizedPrompt = prompt.prompt.lowercase()
+        return when {
+            prompt.type == ExerciseType.ERROR_CORRECTION ||
+                prompt.type == ExerciseType.SENTENCE_TRANSFORMATION ||
+                normalizedPrompt.startsWith("rewrite") -> PromptScoringProfile.REWRITE
+
+            normalizedPrompt.contains("sentence pair") -> PromptScoringProfile.SENTENCE_DRILL
+            normalizedPrompt.startsWith("list ") -> PromptScoringProfile.LIST
+            else -> PromptScoringProfile.DEFAULT
+        }
+    }
+
+    private fun inferMinimumWordCount(prompt: BookPracticePrompt): Int? {
+        return when (prompt.scoringProfile ?: inferScoringProfile(prompt)) {
+            PromptScoringProfile.LIST -> 10
+            PromptScoringProfile.SENTENCE_DRILL -> 18
+            PromptScoringProfile.REWRITE -> 20
+            PromptScoringProfile.DEFAULT -> null
+        }
+    }
+
+    private fun inferMinimumResponseItems(prompt: BookPracticePrompt): Int? {
+        val numericHint = Regex("\\b(\\d+)\\b")
+            .find(prompt.prompt)
+            ?.groupValues
+            ?.getOrNull(1)
+            ?.toIntOrNull()
+            ?: wordNumberHint(prompt.prompt)
+
+        return when (prompt.scoringProfile ?: inferScoringProfile(prompt)) {
+            PromptScoringProfile.LIST -> numericHint
+            PromptScoringProfile.SENTENCE_DRILL -> numericHint
+            PromptScoringProfile.REWRITE -> numericHint
+            PromptScoringProfile.DEFAULT -> null
+        }
+    }
+
+    private fun wordNumberHint(promptText: String): Int? {
+        val numberWords = mapOf(
+            "one" to 1,
+            "two" to 2,
+            "three" to 3,
+            "four" to 4,
+            "five" to 5,
+            "six" to 6,
+            "seven" to 7,
+            "eight" to 8,
+            "nine" to 9,
+            "ten" to 10
+        )
+        val normalizedPrompt = promptText.lowercase()
+        return numberWords.entries.firstOrNull { (word, _) ->
+            Regex("\\b$word\\b").containsMatchIn(normalizedPrompt)
+        }?.value
     }
 
     private fun extractKeywords(text: String): List<String> {

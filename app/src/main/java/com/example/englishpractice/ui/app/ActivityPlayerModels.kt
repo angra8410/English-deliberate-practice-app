@@ -3,6 +3,13 @@ package com.example.englishpractice.ui.app
 import com.example.englishpractice.domain.model.ExerciseType
 import com.example.englishpractice.domain.model.SkillType
 
+enum class PromptScoringProfile {
+    DEFAULT,
+    LIST,
+    SENTENCE_DRILL,
+    REWRITE
+}
+
 data class PracticeActivityItem(
     val id: String,
     val unitId: String? = null,
@@ -16,7 +23,10 @@ data class PracticeActivityItem(
     val listeningPromptText: String? = null,
     val modelAnswer: String,
     val evaluationTargets: List<String>,
-    val supportNote: String
+    val supportNote: String,
+    val scoringProfile: PromptScoringProfile = PromptScoringProfile.DEFAULT,
+    val minimumWordCount: Int? = null,
+    val minimumResponseItems: Int? = null
 )
 
 data class ActivityAttemptRecord(

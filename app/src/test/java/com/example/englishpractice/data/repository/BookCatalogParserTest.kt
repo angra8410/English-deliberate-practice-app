@@ -1,12 +1,13 @@
 package com.example.englishpractice.data.repository
 
 import com.example.englishpractice.domain.model.ExerciseType
+import com.example.englishpractice.ui.app.PromptScoringProfile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class BookCatalogParserTest {
     @Test
-    fun `parseCatalog maps prompt ids source skills and lowercase exercise types`() {
+    fun `parseCatalog maps prompt ids source skills and optional evaluation metadata`() {
         val rawJson = """
             {
               "version": 2,
@@ -37,7 +38,13 @@ class BookCatalogParserTest {
                           "id": "applying-for-a-job-prompt-2",
                           "type": "open_text",
                           "targetSkill": "VOCABULARY",
-                          "prompt": "List five phrases commonly used in job advertisements."
+                          "prompt": "List five phrases commonly used in job advertisements.",
+                          "instructions": "List five phrases from authentic job ads.",
+                          "modelAnswer": "competitive salary; excellent career prospects",
+                          "expectedKeywords": ["competitive salary", "career prospects"],
+                          "scoringProfile": "list",
+                          "minimumWordCount": 10,
+                          "minimumResponseItems": 5
                         }
                       ],
                       "related": ["job-interviews"],
@@ -56,5 +63,10 @@ class BookCatalogParserTest {
         assertEquals("applying-for-a-job-prompt-2", prompt.id)
         assertEquals(ExerciseType.OPEN_TEXT, prompt.type)
         assertEquals(SourceTargetSkill.VOCABULARY, prompt.targetSkill)
+        assertEquals("List five phrases from authentic job ads.", prompt.instructions)
+        assertEquals(PromptScoringProfile.LIST, prompt.scoringProfile)
+        assertEquals(listOf("competitive salary", "career prospects"), prompt.expectedKeywords)
+        assertEquals(10, prompt.minimumWordCount)
+        assertEquals(5, prompt.minimumResponseItems)
     }
 }

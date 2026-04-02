@@ -1,6 +1,7 @@
 package com.example.englishpractice.data.repository
 
 import com.example.englishpractice.domain.model.ExerciseType
+import com.example.englishpractice.ui.app.PromptScoringProfile
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -86,7 +87,17 @@ object BookCatalogParser {
                         id = item.getString("id"),
                         type = ExerciseType.valueOf(item.getString("type").uppercase()),
                         targetSkill = SourceTargetSkill.valueOf(item.getString("targetSkill").uppercase()),
-                        prompt = item.getString("prompt")
+                        prompt = item.getString("prompt"),
+                        instructions = item.optString("instructions").takeIf { it.isNotBlank() },
+                        starterText = item.optString("starterText").takeIf { it.isNotBlank() },
+                        modelAnswer = item.optString("modelAnswer").takeIf { it.isNotBlank() },
+                        expectedKeywords = item.optStringList("expectedKeywords"),
+                        scoringProfile = item.optString("scoringProfile")
+                            .takeIf { it.isNotBlank() }
+                            ?.let { value -> PromptScoringProfile.valueOf(value.uppercase()) },
+                        minimumWordCount = item.optInt("minimumWordCount").takeIf { value -> value > 0 },
+                        minimumResponseItems = item.optInt("minimumResponseItems")
+                            .takeIf { value -> value > 0 }
                     )
                 )
             }

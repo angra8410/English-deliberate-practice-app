@@ -3,6 +3,7 @@ package com.example.englishpractice.data.repository
 import com.example.englishpractice.domain.model.CefrLevel
 import com.example.englishpractice.domain.model.ExerciseType
 import com.example.englishpractice.domain.model.SkillType
+import com.example.englishpractice.ui.app.PromptScoringProfile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -37,7 +38,10 @@ class BookCatalogMapperTest {
                                     id = "applying-for-a-job-prompt-2",
                                     type = ExerciseType.OPEN_TEXT,
                                     targetSkill = SourceTargetSkill.VOCABULARY,
-                                    prompt = "List five phrases commonly used in job advertisements."
+                                    prompt = "List five phrases commonly used in job advertisements.",
+                                    expectedKeywords = listOf("competitive salary", "career prospects"),
+                                    scoringProfile = PromptScoringProfile.LIST,
+                                    minimumResponseItems = 5
                                 )
                             ),
                             related = listOf("job-interviews"),
@@ -60,6 +64,12 @@ class BookCatalogMapperTest {
         assertEquals("applying-for-a-job", activities.single().unitId)
         assertEquals(SkillType.WRITING, activities.single().skill)
         assertEquals("Applying for a job", activities.single().title)
+        assertEquals(PromptScoringProfile.LIST, activities.single().scoringProfile)
+        assertEquals(5, activities.single().minimumResponseItems)
+        assertEquals(
+            listOf("competitive salary", "career prospects"),
+            activities.single().evaluationTargets
+        )
         assertTrue(activities.single().supportNote.contains("English Vocabulary in Use Advanced"))
     }
 
@@ -104,5 +114,52 @@ class BookCatalogMapperTest {
         )
 
         assertEquals(listOf(CefrLevel.C1), BookCatalogMapper.toLevels(catalog))
+    }
+
+    @Test
+    fun `toActivities infers sentence drill profile from prompt wording`() {
+        val catalog = BookCatalog(
+            version = 2,
+            generatedAt = "2026-04-02T13:08:48.105482+00:00",
+            books = listOf(
+                BookSeed(
+                    id = "advanced-grammar-in-use",
+                    title = "Advanced Grammar in Use",
+                    author = "Martin Hewings",
+                    cefr = listOf("C1"),
+                    sourceType = "curated_notes",
+                    tags = listOf("grammar"),
+                    chapters = listOf(
+                        BookChapter(
+                            id = "present-simple-vs-continuous",
+                            title = "Present simple vs present continuous",
+                            order = 1,
+                            cefr = listOf("C1"),
+                            tags = listOf("grammar", "tense"),
+                            summary = "Use present simple for routines.",
+                            points = listOf("Present simple describes habits."),
+                            examples = emptyList(),
+                            pitfalls = emptyList(),
+                            practicePrompts = listOf(
+                                BookPracticePrompt(
+                                    id = "present-simple-vs-continuous-prompt-1",
+                                    type = ExerciseType.OPEN_TEXT,
+                                    targetSkill = SourceTargetSkill.WRITING,
+                                    prompt = "Write three sentence pairs contrasting present simple and present continuous."
+                                )
+                            ),
+                            related = emptyList(),
+                            metadata = emptyMap()
+                        )
+                    )
+                )
+            )
+        )
+
+        val activity = BookCatalogMapper.toActivities(catalog).single()
+
+        assertEquals(PromptScoringProfile.SENTENCE_DRILL, activity.scoringProfile)
+        assertEquals(3, activity.minimumResponseItems)
+        assertEquals(18, activity.minimumWordCount)
     }
 }

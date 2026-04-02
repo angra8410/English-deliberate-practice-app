@@ -2,6 +2,7 @@ package com.example.englishpractice.data.repository
 
 import com.example.englishpractice.domain.model.ExerciseType
 import com.example.englishpractice.domain.model.SkillType
+import com.example.englishpractice.ui.app.PromptScoringProfile
 
 data class BookCatalog(
     val version: Int,
@@ -43,7 +44,14 @@ data class BookPracticePrompt(
     val id: String,
     val type: ExerciseType,
     val targetSkill: SourceTargetSkill,
-    val prompt: String
+    val prompt: String,
+    val instructions: String? = null,
+    val starterText: String? = null,
+    val modelAnswer: String? = null,
+    val expectedKeywords: List<String> = emptyList(),
+    val scoringProfile: PromptScoringProfile? = null,
+    val minimumWordCount: Int? = null,
+    val minimumResponseItems: Int? = null
 )
 
 enum class SourceTargetSkill {

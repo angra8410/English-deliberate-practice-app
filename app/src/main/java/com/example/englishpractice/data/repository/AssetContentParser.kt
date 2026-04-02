@@ -4,6 +4,7 @@ import com.example.englishpractice.domain.model.CefrLevel
 import com.example.englishpractice.domain.model.ExerciseType
 import com.example.englishpractice.domain.model.SkillType
 import com.example.englishpractice.ui.app.PracticeActivityItem
+import com.example.englishpractice.ui.app.PromptScoringProfile
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -57,7 +58,12 @@ object AssetContentParser {
                 ?: optNullableString("sampleAnswer")
                 ?: defaultModelAnswer(skill),
             evaluationTargets = optStringList("evaluationTargets"),
-            supportNote = optNullableString("supportNote") ?: defaultSupportNote(skill)
+            supportNote = optNullableString("supportNote") ?: defaultSupportNote(skill),
+            scoringProfile = optNullableString("scoringProfile")
+                ?.let { value -> PromptScoringProfile.valueOf(value.uppercase()) }
+                ?: PromptScoringProfile.DEFAULT,
+            minimumWordCount = optInt("minimumWordCount").takeIf { value -> value > 0 },
+            minimumResponseItems = optInt("minimumResponseItems").takeIf { value -> value > 0 }
         )
     }
 

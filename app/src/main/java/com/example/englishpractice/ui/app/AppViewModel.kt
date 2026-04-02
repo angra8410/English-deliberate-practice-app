@@ -489,7 +489,13 @@ class AppViewModel(
     ): PracticeFeedback {
         return when (activity.skill) {
             SkillType.READING -> ReadingEvaluator.evaluateSummary(answer, activity.evaluationTargets)
-            SkillType.WRITING -> WritingFeedbackRules.evaluateAnswer(answer)
+            SkillType.WRITING -> WritingFeedbackRules.evaluateAnswer(
+                answer = answer,
+                expectedKeywords = activity.evaluationTargets,
+                scoringProfile = activity.scoringProfile,
+                minimumWordCount = activity.minimumWordCount,
+                minimumResponseItems = activity.minimumResponseItems
+            )
             SkillType.LISTENING -> ListeningEvaluator.evaluateSummary(answer, activity.evaluationTargets)
             SkillType.SPEAKING -> evaluateSpeakingAnswer(
                 answer = answer,
