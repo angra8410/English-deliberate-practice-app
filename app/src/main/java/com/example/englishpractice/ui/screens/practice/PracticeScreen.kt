@@ -24,7 +24,9 @@ import com.example.englishpractice.feature.progress.SkillProgressSnapshot
 import com.example.englishpractice.ui.app.AppUiState
 import com.example.englishpractice.ui.app.DailyPracticeItem
 import com.example.englishpractice.ui.components.ContentProvenanceBlock
+import com.example.englishpractice.ui.components.engineLabel
 import com.example.englishpractice.ui.components.skillTone
+import com.example.englishpractice.ui.components.uiLabel
 
 @Composable
 fun PracticeScreen(
@@ -55,8 +57,8 @@ fun PracticeScreen(
             SkillTrackCard(
                 progress = progress,
                 matchingPlan = state.dailyPlan.firstOrNull { item -> item.skill == progress.skill },
-                speakingStatus = state.speakingCapability.availability.toString(),
-                listeningEngine = state.listeningCapability.playbackEngine,
+                speakingStatus = state.speakingCapability.availability.uiLabel(),
+                listeningEngine = engineLabel(state.listeningCapability.playbackEngine),
                 onOpen = { onSkillSelected(progress.skill) }
             )
         }
@@ -149,7 +151,7 @@ private fun SkillTrackCard(
                     Text("Today's anchor", style = MaterialTheme.typography.labelLarge, color = tone.accent)
                     Text(plan.title, style = MaterialTheme.typography.titleMedium)
                     Text(
-                        "${plan.exerciseType}  |  ${plan.estimatedMinutes} min",
+                        "${plan.exerciseType.uiLabel()}  |  ${plan.estimatedMinutes} min",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

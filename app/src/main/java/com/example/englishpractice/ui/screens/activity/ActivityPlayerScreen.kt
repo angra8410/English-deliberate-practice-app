@@ -52,7 +52,11 @@ import com.example.englishpractice.feature.speaking.SpeakingManager
 import com.example.englishpractice.ui.app.ActivityAttemptRecord
 import com.example.englishpractice.ui.app.PracticeActivityItem
 import com.example.englishpractice.ui.components.ContentProvenanceBlock
+import com.example.englishpractice.ui.components.engineLabel
+import com.example.englishpractice.ui.components.prettyListItem
 import com.example.englishpractice.ui.components.skillTone
+import com.example.englishpractice.ui.components.uiEnabledLabel
+import com.example.englishpractice.ui.components.uiLabel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -466,7 +470,7 @@ fun ActivityPlayerScreen(
                         style = MaterialTheme.typography.titleMedium,
                         color = tone.accent
                     )
-                    Text("Engine: ${listeningCapability.playbackEngine}")
+                    Text("Engine: ${engineLabel(listeningCapability.playbackEngine)}")
                     Text("Source: $listeningSourceLabel")
                     Text("Status: $listeningStatus")
                     Text(listeningHint, style = MaterialTheme.typography.bodySmall)
@@ -540,7 +544,7 @@ fun ActivityPlayerScreen(
                         style = MaterialTheme.typography.titleMedium,
                         color = tone.accent
                     )
-                    Text("Availability: $speakingAvailability")
+                    Text("Availability: ${speakingAvailability.uiLabel()}")
                     Text("Status: $speakingStatus")
                     Text(speakingHint, style = MaterialTheme.typography.bodySmall)
                     Text(
@@ -550,7 +554,7 @@ fun ActivityPlayerScreen(
                             }?.label ?: selectedSpeakingLocaleTag
                         }"
                     )
-                    Text("Feedback dimensions: ${speakingCapability.feedbackDimensions.joinToString()}")
+                    Text("Feedback dimensions: ${speakingCapability.feedbackDimensions.joinToString { prettyListItem(it) }}")
                     Row(
                         modifier = Modifier.horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)

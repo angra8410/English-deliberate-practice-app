@@ -41,7 +41,7 @@ fun ContentProvenanceBlock(
             )
         }
         Text(
-            text = "Source: $sourceLabel",
+            text = "Source: ${sourceLabelUi(sourceLabel)}",
             style = MaterialTheme.typography.bodySmall
         )
     }

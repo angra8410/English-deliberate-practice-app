@@ -33,6 +33,7 @@ import com.example.englishpractice.ui.app.AppUiState
 import com.example.englishpractice.ui.app.ContentBrowserItem
 import com.example.englishpractice.ui.components.ContentProvenanceBlock
 import com.example.englishpractice.ui.components.skillTone
+import com.example.englishpractice.ui.components.uiLabel
 
 private const val ALL_SOURCES = "All sources"
 private const val ALL_SKILLS = "All skills"
@@ -234,7 +235,7 @@ private fun BrowserItemCard(
             )
 
             Text(
-                text = "${item.exerciseType}  |  ${item.effortLabel}  |  Target ${item.responseTargetLabel}",
+                text = "${item.exerciseType.uiLabel()}  |  ${item.effortLabel}  |  Target ${item.responseTargetLabel}",
                 style = MaterialTheme.typography.labelLarge
             )
 

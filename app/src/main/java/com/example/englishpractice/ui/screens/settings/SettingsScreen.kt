@@ -22,6 +22,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.englishpractice.domain.model.CefrLevel
 import com.example.englishpractice.ui.app.AppUiState
+import com.example.englishpractice.ui.components.engineLabel
+import com.example.englishpractice.ui.components.uiEnabledLabel
+import com.example.englishpractice.ui.components.uiLabel
 
 @Composable
 fun SettingsScreen(
@@ -83,8 +86,8 @@ fun SettingsScreen(
         }
 
         SettingsPanel(title = "Speaking input", description = "Speech recognition and transcript-first speaking practice.") {
-            Text("Status: ${state.speakingCapability.availability}")
-            Text("Speech recognizer: ${state.speakingCapability.usesSpeechRecognizer}")
+            Text("Status: ${state.speakingCapability.availability.uiLabel()}")
+            Text("Speech recognizer: ${state.speakingCapability.usesSpeechRecognizer.uiEnabledLabel(enabledText = "Available", disabledText = "Unavailable")}")
             Text("Speaking locale: ${selectedLocale?.label ?: state.selectedSpeakingLocaleTag}")
             Row(
                 modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -106,7 +109,7 @@ fun SettingsScreen(
         }
 
         SettingsPanel(title = "Prompt playback", description = "Text-to-speech and bundled listening playback.") {
-            Text("Listening engine: ${state.listeningCapability.playbackEngine}")
+            Text("Listening engine: ${engineLabel(state.listeningCapability.playbackEngine)}")
             Text("Enable prompt playback")
             Switch(
                 checked = ttsEnabled.value,

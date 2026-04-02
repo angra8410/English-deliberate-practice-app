@@ -47,7 +47,11 @@ import com.example.englishpractice.ui.app.DailyPracticeItem
 import com.example.englishpractice.ui.app.ReviewQueueItem
 import com.example.englishpractice.ui.app.WeakPattern
 import com.example.englishpractice.ui.components.ContentProvenanceBlock
+import com.example.englishpractice.ui.components.engineLabel
+import com.example.englishpractice.ui.components.prettyListItem
 import com.example.englishpractice.ui.components.skillTone
+import com.example.englishpractice.ui.components.uiEnabledLabel
+import com.example.englishpractice.ui.components.uiLabel
 
 @Composable
 fun HomeScreen(
@@ -375,7 +379,7 @@ private fun SkillHubCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "${item.exerciseType}  |  ${item.estimatedMinutes} min",
+                    text = "${item.exerciseType.uiLabel()}  |  ${item.estimatedMinutes} min",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -472,17 +476,17 @@ private fun SupportStrip(state: AppUiState) {
             title = "Speaking capture",
             accent = MaterialTheme.colorScheme.secondary,
             lines = listOf(
-                "Status: ${state.speakingCapability.availability}",
-                "Flow: ${state.speakingCapability.sessionFlow.joinToString(separator = " -> ")}",
-                "Feedback: ${state.speakingCapability.feedbackDimensions.joinToString()}"
+                "Status: ${state.speakingCapability.usesSpeechRecognizer.uiEnabledLabel(enabledText = "Available", disabledText = "Unavailable")}",
+                "Flow: ${state.speakingCapability.sessionFlow.joinToString(separator = " -> ") { prettyListItem(it) }}",
+                "Feedback: ${state.speakingCapability.feedbackDimensions.joinToString { prettyListItem(it) }}"
             )
         )
         SupportCard(
             title = "Listening playback",
             accent = MaterialTheme.colorScheme.tertiary,
             lines = listOf(
-                "Engine: ${state.listeningCapability.playbackEngine}",
-                "Flow: ${state.listeningCapability.workflowSteps.joinToString(separator = " -> ")}"
+                "Engine: ${engineLabel(state.listeningCapability.playbackEngine)}",
+                "Flow: ${state.listeningCapability.workflowSteps.joinToString(separator = " -> ") { prettyListItem(it) }}"
             )
         )
     }
