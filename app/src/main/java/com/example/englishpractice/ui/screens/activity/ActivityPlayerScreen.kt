@@ -33,6 +33,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -454,6 +455,22 @@ fun ActivityPlayerScreen(
         }
 
         if (activity.skill == SkillType.LISTENING) {
+            val listeningItems = availableListeningActivities.sortedWith(
+                compareBy<PracticeActivityItem>(
+                    { it.collectionTitle ?: it.sourceLabel },
+                    { it.unitTitle ?: it.title },
+                    { it.title }
+                )
+            )
+            val availableAssetCount = listeningItems.count { !it.audioAssetPath.isNullOrBlank() }
+            val currentListeningIndex = listeningItems.indexOfFirst { it.id == activity.id }
+
+            LaunchedEffect(activity.id, listeningItems.map(PracticeActivityItem::id)) {
+                if (listeningItems.isNotEmpty() && currentListeningIndex < 0) {
+                    onListeningActivitySelected(listeningItems.first().id)
+                }
+            }
+
             GlassPanel(accent = tone.accent.copy(alpha = 0.26f)) {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
@@ -521,15 +538,6 @@ fun ActivityPlayerScreen(
             }
 
             GlassPanel(accent = MaterialTheme.colorScheme.secondary.copy(alpha = 0.18f)) {
-                val listeningItems = availableListeningActivities.sortedWith(
-                    compareBy<PracticeActivityItem>(
-                        { it.collectionTitle ?: it.sourceLabel },
-                        { it.unitTitle ?: it.title },
-                        { it.title }
-                    )
-                )
-                val availableAssetCount = listeningItems.count { !it.audioAssetPath.isNullOrBlank() }
-
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
                         "Listening library for this level",
@@ -541,10 +549,39 @@ fun ActivityPlayerScreen(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Text(
+                        if (currentListeningIndex >= 0) {
+                            "Current file ${currentListeningIndex + 1} of ${listeningItems.size}"
+                        } else {
+                            "Current file is not part of the level listening library."
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        listeningItems.forEach { listeningItem ->
+                            val isCurrent = listeningItem.id == activity.id
+                            val chipLabel = listeningItem.audioAssetPath
+                                ?.substringAfterLast('/')
+                                ?: listeningItem.title
+                            FilterChip(
+                                selected = isCurrent,
+                                onClick = {
+                                    if (!isCurrent) {
+                                        onListeningActivitySelected(listeningItem.id)
+                                    }
+                                },
+                                label = { Text(chipLabel) }
+                            )
+                        }
+                    }
                     Button(
                         onClick = { showListeningLibrary = !showListeningLibrary }
                     ) {
-                        Text(if (showListeningLibrary) "Hide listening files" else "Show listening files")
+                        Text(if (showListeningLibrary) "Hide file details" else "Show file details")
                     }
 
                     if (showListeningLibrary) {
