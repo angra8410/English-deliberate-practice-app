@@ -80,6 +80,25 @@ python -m unittest discover -s tools -p "test_*.py"
 5. Run `python -m unittest discover -s tools -p "test_*.py"` to verify generator inference and drift behavior.
 6. Run `:app:testDebugUnitTest` to confirm the parser and asset smoke tests still pass.
 
+## External source inventory
+
+When you download new source books into a local folder outside the repo, inventory them first before curating chapters.
+
+```powershell
+python tools/inventory_external_books.py `
+  --source-root C:\path\to\your\content-repository-deliberatepracticeenglishapp
+```
+
+That scan does not modify the app catalog. It gives you a grouped view of what source material exists by level so you can choose the next book to curate into `tools/content_repository.raw.json`.
+
+Use `--format json` if you want machine-readable output:
+
+```powershell
+python tools/inventory_external_books.py `
+  --source-root C:\path\to\your\content-repository-deliberatepracticeenglishapp `
+  --format json
+```
+
 ## Listening audio workflow
 
 - Keep listening prompt scripts in `listeningPromptText` so the app can fall back to spoken prompt playback and local tooling can generate bundled audio from the same source data.
