@@ -39,7 +39,52 @@ Example:
 }
 ```
 
-## 3. Regenerate the book catalog asset when needed
+## 3. Scaffold a new built-in listening activity
+
+Use the helper when you want to add a new B2 or C1 listening item to the built-in activity packs without hand-editing the JSON shape:
+
+```powershell
+python tools/create_listening_activity.py `
+  --level C1 `
+  --title "Vendor handover call" `
+  --prompt "Listen to the handover call and summarize the final agreement and one risk." `
+  --evaluation-targets agreement risk deadline `
+  --tags handover operations `
+  --minimum-word-count 60 `
+  --requires-contrast-marker
+```
+
+What it does:
+
+- appends a new `LISTEN_AND_SUMMARIZE` item to `activities_b2.json` or `activities_c1.json`
+- auto-picks the level's listening unit id
+- derives a clean activity id if you do not pass `--id`
+- derives `audioAsset` as `audio/<activity_id>.wav` if you do not pass `--audio-asset`
+- prints the next local commands to generate the script with Ollama and the `.wav` with Piper
+
+Use `--dry-run` if you want to preview the JSON first:
+
+```powershell
+python tools/create_listening_activity.py `
+  --level B2 `
+  --title "Team stand-up recap" `
+  --prompt "Listen to the recap and summarize the team's final decision." `
+  --dry-run
+```
+
+You can also provide the spoken script up front:
+
+```powershell
+python tools/create_listening_activity.py `
+  --level B2 `
+  --title "Team stand-up recap" `
+  --prompt "Listen to the recap and summarize the team's final decision." `
+  --listening-prompt-text "Okay, so the team agrees to move the release by two days..."
+```
+
+If you leave out `--listening-prompt-text`, the helper creates the activity without a script and tells you to run the Ollama script next.
+
+## 4. Regenerate the book catalog asset when needed
 
 ```powershell
 python tools/generate_content_repository.py `
@@ -48,7 +93,7 @@ python tools/generate_content_repository.py `
   --overrides tools/content_metadata_overrides.json
 ```
 
-## 4. Create a local machine config
+## 5. Create a local machine config
 
 Copy the example file and fill in the local paths that only exist on your machine:
 
@@ -66,7 +111,7 @@ Recommended fields:
 
 The real config file is gitignored because it is machine-specific.
 
-## 5. Generate or improve the listening script with Ollama
+## 6. Generate or improve the listening script with Ollama
 
 Preview the prompt that will be sent to Ollama:
 
@@ -114,7 +159,7 @@ Notes:
 - generated catalog prompts are written into `tools/content_metadata_overrides.json`
 - after applying a generated catalog script, run the content generator again
 
-## 6. Generate bundled listening audio locally
+## 7. Generate bundled listening audio locally
 
 List installed Windows voices:
 
@@ -182,7 +227,7 @@ powershell -ExecutionPolicy Bypass -File tools/generate_listening_audio.ps1 `
   -Overwrite
 ```
 
-## 7. Run the full bulk pipeline
+## 8. Run the full bulk pipeline
 
 Generate scripts and audio for multiple prompt ids:
 
@@ -235,7 +280,7 @@ Notes:
 - it only writes `.wav` files
 - it fails if two prompts point at the same `audioAsset` but use different spoken scripts
 
-## 8. Verify before committing
+## 9. Verify before committing
 
 ```powershell
 python -m unittest discover -s tools -p "test_*.py"
