@@ -263,7 +263,20 @@ def sanitize_script(text: str) -> str:
         if "\n" in cleaned:
             cleaned = cleaned.split("\n", 1)[1].strip()
     cleaned = cleaned.strip().strip('"').strip("'").strip()
+    cleaned = normalize_ascii_punctuation(cleaned)
     return " ".join(cleaned.split())
+
+
+def normalize_ascii_punctuation(text: str) -> str:
+    return (
+        text.replace("\u2019", "'")
+        .replace("\u2018", "'")
+        .replace("\u201c", '"')
+        .replace("\u201d", '"')
+        .replace("\u2013", "-")
+        .replace("\u2014", "-")
+        .replace("\u2026", "...")
+    )
 
 
 def audio_output_path(candidate: ListeningCandidate, assets_root: Path) -> Path:

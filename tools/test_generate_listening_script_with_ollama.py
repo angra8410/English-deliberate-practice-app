@@ -139,6 +139,16 @@ class GenerateListeningScriptWithOllamaTest(unittest.TestCase):
         finally:
             shutil.rmtree(temp_path, ignore_errors=True)
 
+    def test_sanitize_script_normalizes_typographic_punctuation_to_ascii(self) -> None:
+        sanitized = script_helper.sanitize_script(
+            "“Okay, so we’ve talked about it already… however, it’s still risky – especially now.”"
+        )
+
+        self.assertEqual(
+            "\"Okay, so we've talked about it already... however, it's still risky - especially now.\"",
+            sanitized,
+        )
+
     def test_apply_script_updates_builtin_asset_file(self) -> None:
         temp_path = TOOLS_DIR / "listening_script_test_workspace"
         if temp_path.exists():

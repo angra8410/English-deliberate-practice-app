@@ -99,7 +99,7 @@
     ],
     "difficulty": 4,
     "audioAsset": "audio/c1_listen_001.wav",
-    "listeningPromptText": "Okay, so I’ve been thinking a lot about how remote teams measure collaboration. It’s easy to fall into the trap of counting meetings, right? And sure, frequent check-ins *can* help keep everyone on the same page. But honestly, I think they often get in the way of real work. We end up substituting actual coordination – like strong documentation – with just… talking. Ultimately, if remote work is going to scale, we need fewer meetings, clearer ownership of tasks, and way better documentation. It’s that simple.",
+    "listeningPromptText": "Okay, so I've been thinking a lot about how remote teams measure collaboration. It's easy to fall into the trap of counting meetings, right? And sure, frequent check-ins *can* help keep everyone on the same page. But honestly, I think they often get in the way of real work. We end up substituting actual coordination - like strong documentation - with just... talking. Ultimately, if remote work is going to scale, we need fewer meetings, clearer ownership of tasks, and way better documentation. It's that simple.",
     "starterText": "The speaker argues that...",
     "supportNote": "Summarize the speaker's main claim, include the concession about check-ins, and mention one implication for remote teams.",
     "evaluationTargets": [
