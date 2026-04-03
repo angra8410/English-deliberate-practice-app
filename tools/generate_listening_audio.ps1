@@ -5,6 +5,8 @@ param(
     [string[]]$PromptIds,
     [switch]$Overwrite,
     [switch]$UsePromptFallback,
+    [switch]$MissingOnly,
+    [switch]$ListCandidates,
     [switch]$ListVoices
 )
 
@@ -174,6 +176,40 @@ function Write-WaveFileFromText {
     }
 }
 
+function Get-AudioEntries {
+    param(
+        [System.Collections.Generic.List[object]]$Candidates,
+        [string]$ResolvedAssetsRoot,
+        [switch]$MissingOnly
+    )
+
+    $entries = foreach ($group in ($Candidates | Group-Object AudioAsset)) {
+        $groupEntries = @($group.Group)
+        $primary = $groupEntries[0]
+        $distinctScripts = @($groupEntries | Select-Object -ExpandProperty ScriptText -Unique)
+        $relativeAudioAsset = $primary.AudioAsset.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
+        $outputPath = Join-Path $ResolvedAssetsRoot $relativeAudioAsset
+        $fileExists = Test-Path -LiteralPath $outputPath
+
+        [pscustomobject]@{
+            Id = $primary.Id
+            AudioAsset = $primary.AudioAsset
+            OutputPath = $outputPath
+            Exists = $fileExists
+            SourcePath = $primary.SourcePath
+            ScriptVariantCount = $distinctScripts.Count
+            ScriptPreview = if ($distinctScripts.Count -gt 0) { $distinctScripts[0] } else { "" }
+            Entries = $groupEntries
+        }
+    }
+
+    if ($MissingOnly) {
+        return @($entries | Where-Object { -not $_.Exists })
+    }
+
+    return @($entries)
+}
+
 $candidates = New-Object 'System.Collections.Generic.List[object]'
 Get-ContentDocuments -Directory $ContentDirectory | ForEach-Object {
     Collect-AudioCandidates -Candidates $candidates -SourcePath $_.Path -Node $_.Json -UsePromptFallback:$UsePromptFallback -PromptIds $PromptIds
@@ -183,31 +219,40 @@ if ($candidates.Count -eq 0) {
     throw "No listening audio candidates were found. Add audioAsset plus listeningPromptText to your content JSON first."
 }
 
-$groupedCandidates = $candidates | Group-Object AudioAsset
 $resolvedAssetsRoot = (Resolve-Path -LiteralPath $AssetsRoot).Path
+$audioEntries = Get-AudioEntries -Candidates $candidates -ResolvedAssetsRoot $resolvedAssetsRoot -MissingOnly:$MissingOnly
 
-foreach ($group in $groupedCandidates) {
-    $entries = @($group.Group)
-    $primary = $entries[0]
-    $distinctScripts = @($entries | Select-Object -ExpandProperty ScriptText -Unique)
-    if ($distinctScripts.Count -ne 1) {
-        $sources = $entries | ForEach-Object { "$($_.Id) from $($_.SourcePath)" }
-        throw "Conflicting listeningPromptText values found for $($group.Name): $($sources -join '; ')"
+if ($ListCandidates) {
+    $audioEntries |
+        Sort-Object Id |
+        Select-Object Id, AudioAsset, Exists, SourcePath |
+        Format-Table -AutoSize
+    exit 0
+}
+
+if ($audioEntries.Count -eq 0) {
+    throw "No listening audio candidates matched the current filters."
+}
+
+foreach ($entry in $audioEntries) {
+    if ($entry.ScriptVariantCount -ne 1) {
+        $sources = $entry.Entries | ForEach-Object { "$($_.Id) from $($_.SourcePath)" }
+        throw "Conflicting listeningPromptText values found for $($entry.AudioAsset): $($sources -join '; ')"
     }
 
-    $relativeAudioAsset = $primary.AudioAsset.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
+    $relativeAudioAsset = $entry.AudioAsset.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
     $extension = [System.IO.Path]::GetExtension($relativeAudioAsset)
     if ($extension -ne ".wav") {
-        Write-Warning "Skipping $($primary.Id) because $($primary.AudioAsset) is not a .wav target."
+        Write-Warning "Skipping $($entry.Id) because $($entry.AudioAsset) is not a .wav target."
         continue
     }
 
-    $outputPath = Join-Path $resolvedAssetsRoot $relativeAudioAsset
+    $outputPath = $entry.OutputPath
     if ((Test-Path -LiteralPath $outputPath) -and -not $Overwrite) {
         Write-Host "Skipping existing file $outputPath"
         continue
     }
 
-    Write-WaveFileFromText -OutputPath $outputPath -Text $distinctScripts[0] -RequestedVoiceName $VoiceName
-    Write-Host "Generated $outputPath from $($primary.Id)"
+    Write-WaveFileFromText -OutputPath $outputPath -Text $entry.ScriptPreview -RequestedVoiceName $VoiceName
+    Write-Host "Generated $outputPath from $($entry.Id)"
 }

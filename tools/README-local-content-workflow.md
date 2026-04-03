@@ -56,6 +56,20 @@ List installed Windows voices:
 powershell -ExecutionPolicy Bypass -File tools/generate_listening_audio.ps1 -ListVoices
 ```
 
+List all listening candidates so you can see the exact prompt ids before generating:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/generate_listening_audio.ps1 -ListCandidates
+```
+
+List only the candidates that are still missing a bundled `.wav`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/generate_listening_audio.ps1 `
+  -ListCandidates `
+  -MissingOnly
+```
+
 Generate missing `.wav` files from all content JSON:
 
 ```powershell
@@ -82,7 +96,9 @@ Notes:
 
 - the script scans `app/src/main/assets/content/*.json`
 - it groups entries by `audioAsset`
+- it can list prompt ids before generating anything
 - it skips existing files unless `-Overwrite` is set
+- use `-MissingOnly` when you only want the still-unbundled listening items
 - it only writes `.wav` files
 - it fails if two prompts point at the same `audioAsset` but use different spoken scripts
 
