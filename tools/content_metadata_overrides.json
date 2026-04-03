@@ -29,9 +29,9 @@
       "minimumResponseItems": 5
     },
     "future-perfect-vs-future-continuous-prompt-1": {
-      "instructions": "Write four timeline sentences about a project. Use the future perfect for completed milestones before a future deadline and the future continuous for work that will still be happening at a specific future time.",
-      "starterText": "By Thursday, the analysts will have finished the budget review, and at 3 p.m. the finance lead will be presenting the revised figures to the board.",
-      "modelAnswer": "By next Monday, the design team will have completed the revised client pack. At 11 a.m. that day, the project manager will be meeting the client to discuss the final changes. By the end of the month, we will have updated the onboarding guide for the regional teams. During Friday's review session, the support lead will be explaining the rollout timeline to the new hires.",
+      "instructions": "Write four sentences about a project timeline. Use the future perfect for milestones completed before a future point and the future continuous for work that will still be in progress at that time.",
+      "starterText": "By next Wednesday, the design team will have finished the client deck, and at 10 a.m. the product manager will be presenting the revised launch plan.",
+      "modelAnswer": "By Monday morning, the engineers will have completed the final testing cycle. At the same time, the support team will be preparing the release notes for clients. By the end of the week, we will have updated the onboarding guide for the new feature. During Friday's review meeting, the operations lead will be explaining the rollout timeline to the regional managers.",
       "expectedKeywords": [
         "future perfect",
         "future continuous",
@@ -156,7 +156,7 @@
       "instructions": "Listen to the panel summary and write a short summary of the final decision plus the main reservation that was raised.",
       "starterText": "The panel decides to move the candidate forward, but they still want more detail about her experience with deadlines.",
       "audioAsset": "audio/c1_interview_panel_summary.wav",
-      "listeningPromptText": "The panel agrees that the candidate should move to the next stage because her preparation and communication were stronger than those of the other applicants. However, one interviewer still wants a clearer example of how she handles multiple deadlines under pressure.",
+      "listeningPromptText": "Okay, so we all agree she’s a strong candidate. Her preparation was really good, and she communicated confidently, especially with those customer service examples. However, Sarah did mention needing a bit more detail on how she prioritizes when facing multiple deadlines. Still, overall, we think she’s the strongest applicant so far. Let’s move her forward to the next stage. Sounds good?",
       "modelAnswer": "The panel decides to move the candidate to the next stage because her preparation and communication are stronger than those of the other applicants. However, one interviewer still wants a clearer example of how she manages multiple deadlines. The final judgment is positive overall, but that reservation remains important.",
       "expectedKeywords": [
         "next stage",
@@ -180,21 +180,6 @@
       ],
       "minimumWordCount": 40,
       "minimumKeywordMatches": 2
-    },
-    "future-perfect-vs-future-continuous-prompt-1": {
-      "instructions": "Write four sentences about a project timeline. Use the future perfect for milestones completed before a future point and the future continuous for work that will still be in progress at that time.",
-      "starterText": "By next Wednesday, the design team will have finished the client deck, and at 10 a.m. the product manager will be presenting the revised launch plan.",
-      "modelAnswer": "By Monday morning, the engineers will have completed the final testing cycle. At the same time, the support team will be preparing the release notes for clients. By the end of the week, we will have updated the onboarding guide for the new feature. During Friday's review meeting, the operations lead will be explaining the rollout timeline to the regional managers.",
-      "expectedKeywords": [
-        "future perfect",
-        "future continuous",
-        "completed",
-        "in progress",
-        "timeline"
-      ],
-      "scoringProfile": "sentence_drill",
-      "minimumWordCount": 32,
-      "minimumResponseItems": 4
     },
     "meeting-minutes-analysis-prompt-1": {
       "instructions": "Read the meeting minutes and summarize the final decision, the condition attached to it, and one action item in three or four sentences.",

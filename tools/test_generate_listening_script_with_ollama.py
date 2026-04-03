@@ -76,6 +76,69 @@ class GenerateListeningScriptWithOllamaTest(unittest.TestCase):
         self.assertIn("Evaluation targets: contrast, position", prompt)
         self.assertIn("around 65 words", prompt)
 
+    def test_select_candidates_filters_missing_script_and_audio(self) -> None:
+        temp_path = TOOLS_DIR / "listening_script_test_workspace"
+        if temp_path.exists():
+            shutil.rmtree(temp_path, ignore_errors=True)
+        temp_path.mkdir(parents=True, exist_ok=True)
+        try:
+            assets_root = temp_path / "assets"
+            (assets_root / "audio").mkdir(parents=True, exist_ok=True)
+            (assets_root / "audio" / "exists.wav").write_bytes(b"wav")
+
+            candidates = [
+                script_helper.ListeningCandidate(
+                    id="listen-1",
+                    title=None,
+                    prompt="Prompt 1",
+                    instructions=None,
+                    audio_asset="audio/exists.wav",
+                    listening_prompt_text="Existing script",
+                    support_note=None,
+                    evaluation_targets=[],
+                    sample_answer=None,
+                    source_path=Path("activities.json"),
+                ),
+                script_helper.ListeningCandidate(
+                    id="listen-2",
+                    title=None,
+                    prompt="Prompt 2",
+                    instructions=None,
+                    audio_asset="audio/missing.wav",
+                    listening_prompt_text=None,
+                    support_note=None,
+                    evaluation_targets=[],
+                    sample_answer=None,
+                    source_path=Path("activities.json"),
+                ),
+            ]
+
+            missing_script = script_helper.select_candidates(
+                candidates,
+                prompt_id=None,
+                prompt_ids=["listen-1", "listen-2"],
+                all_candidates=False,
+                missing_script_only=True,
+                missing_audio_only=False,
+                assets_root=assets_root,
+                limit=None,
+            )
+            missing_audio = script_helper.select_candidates(
+                candidates,
+                prompt_id=None,
+                prompt_ids=["listen-1", "listen-2"],
+                all_candidates=False,
+                missing_script_only=False,
+                missing_audio_only=True,
+                assets_root=assets_root,
+                limit=None,
+            )
+
+            self.assertEqual(["listen-2"], [candidate.id for candidate in missing_script])
+            self.assertEqual(["listen-2"], [candidate.id for candidate in missing_audio])
+        finally:
+            shutil.rmtree(temp_path, ignore_errors=True)
+
     def test_apply_script_updates_builtin_asset_file(self) -> None:
         temp_path = TOOLS_DIR / "listening_script_test_workspace"
         if temp_path.exists():

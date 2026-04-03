@@ -21,6 +21,8 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -68,11 +70,13 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 @Composable
 fun ActivityPlayerScreen(
     activity: PracticeActivityItem?,
+    availableListeningActivities: List<PracticeActivityItem>,
     lastAttempt: ActivityAttemptRecord?,
     selectedSpeakingLocaleTag: String,
     speakingCapability: SpeakingCapability,
     listeningCapability: ListeningCapability,
     onSpeakingLocaleSelected: (String) -> Unit,
+    onListeningActivitySelected: (String) -> Unit,
     onSubmit: (answer: String, transcriptText: String?) -> Unit
 ) {
     if (activity == null) {
@@ -114,6 +118,7 @@ fun ActivityPlayerScreen(
     var speakingHint by rememberSaveable(activity.id) {
         mutableStateOf("Tap Start listening, speak for a few seconds, then review the transcript.")
     }
+    var showListeningLibrary by rememberSaveable(activity.id) { mutableStateOf(false) }
 
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -512,6 +517,100 @@ fun ActivityPlayerScreen(
                         },
                         style = MaterialTheme.typography.bodySmall
                     )
+                }
+            }
+
+            GlassPanel(accent = MaterialTheme.colorScheme.secondary.copy(alpha = 0.18f)) {
+                val listeningItems = availableListeningActivities.sortedWith(
+                    compareBy<PracticeActivityItem>(
+                        { it.collectionTitle ?: it.sourceLabel },
+                        { it.unitTitle ?: it.title },
+                        { it.title }
+                    )
+                )
+                val availableAssetCount = listeningItems.count { !it.audioAssetPath.isNullOrBlank() }
+
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        "Listening library for this level",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
+                        "$availableAssetCount bundled files across ${listeningItems.size} listening activities.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Button(
+                        onClick = { showListeningLibrary = !showListeningLibrary }
+                    ) {
+                        Text(if (showListeningLibrary) "Hide listening files" else "Show listening files")
+                    }
+
+                    if (showListeningLibrary) {
+                        listeningItems.forEach { listeningItem ->
+                            val isCurrent = listeningItem.id == activity.id
+                            val audioLabel = listeningItem.audioAssetPath?.substringAfterLast('/')
+                                ?: "No bundled file"
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (isCurrent) {
+                                        tone.soft
+                                    } else {
+                                        MaterialTheme.colorScheme.surface
+                                    }
+                                )
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(14.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Text(
+                                        listeningItem.title,
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = if (isCurrent) tone.accent else MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        audioLabel,
+                                        style = MaterialTheme.typography.bodyMedium
+                                    )
+                                    Text(
+                                        "Source: ${listeningItem.sourceLabel}",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    listeningItem.unitTitle?.let { unitTitle ->
+                                        Text(
+                                            unitTitle,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    Row(
+                                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        AssistChip(
+                                            onClick = {},
+                                            enabled = false,
+                                            label = { Text(if (isCurrent) "Current activity" else "Available") },
+                                            colors = AssistChipDefaults.assistChipColors(
+                                                containerColor = if (isCurrent) tone.soft else MaterialTheme.colorScheme.surfaceVariant,
+                                                labelColor = if (isCurrent) tone.accent else MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        )
+                                        Button(
+                                            enabled = !isCurrent,
+                                            onClick = { onListeningActivitySelected(listeningItem.id) }
+                                        ) {
+                                            Text(if (isCurrent) "Open now" else "Open this file")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

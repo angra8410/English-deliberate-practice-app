@@ -12,6 +12,7 @@ from urllib import error, request
 DEFAULT_CONFIG_PATH = Path("tools/local_audio_pipeline.config.json")
 DEFAULT_CONTENT_DIR = Path("app/src/main/assets/content")
 DEFAULT_OVERRIDES_PATH = Path("tools/content_metadata_overrides.json")
+DEFAULT_ASSETS_ROOT = Path("app/src/main/assets")
 
 
 @dataclass
@@ -35,7 +36,18 @@ def parse_args() -> argparse.Namespace:
             "using a local Ollama model."
         )
     )
-    parser.add_argument("--prompt-id", required=True, help="Listening prompt id to target.")
+    target_group = parser.add_mutually_exclusive_group(required=True)
+    target_group.add_argument("--prompt-id", help="Single listening prompt id to target.")
+    target_group.add_argument(
+        "--prompt-ids",
+        nargs="+",
+        help="One or more listening prompt ids to target in bulk.",
+    )
+    target_group.add_argument(
+        "--all-candidates",
+        action="store_true",
+        help="Target every listening candidate discovered in the content JSON files.",
+    )
     parser.add_argument(
         "--content-dir",
         type=Path,
@@ -53,6 +65,12 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=DEFAULT_OVERRIDES_PATH,
         help="Prompt override JSON used when applying generated scripts for book-catalog prompts.",
+    )
+    parser.add_argument(
+        "--assets-root",
+        type=Path,
+        default=DEFAULT_ASSETS_ROOT,
+        help="Root directory used to check whether bundled audio files already exist.",
     )
     parser.add_argument(
         "--model",
@@ -75,6 +93,21 @@ def parse_args() -> argparse.Namespace:
         help="Approximate target length for the spoken script.",
     )
     parser.add_argument(
+        "--missing-script-only",
+        action="store_true",
+        help="Only target listening items that do not have listeningPromptText yet.",
+    )
+    parser.add_argument(
+        "--missing-audio-only",
+        action="store_true",
+        help="Only target listening items whose bundled audio file is still missing.",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        help="Optional maximum number of prompts to process after filtering.",
+    )
+    parser.add_argument(
         "--apply",
         action="store_true",
         help="Write the generated listeningPromptText back to the correct source JSON.",
@@ -83,6 +116,16 @@ def parse_args() -> argparse.Namespace:
         "--print-prompt",
         action="store_true",
         help="Print the Ollama prompt payload instead of calling the model.",
+    )
+    parser.add_argument(
+        "--list-candidates",
+        action="store_true",
+        help="List the filtered candidates and exit without calling Ollama.",
+    )
+    parser.add_argument(
+        "--list-ids",
+        action="store_true",
+        help="Print only the filtered prompt ids, one per line, and exit.",
     )
     return parser.parse_args()
 
@@ -223,6 +266,64 @@ def sanitize_script(text: str) -> str:
     return " ".join(cleaned.split())
 
 
+def audio_output_path(candidate: ListeningCandidate, assets_root: Path) -> Path:
+    return assets_root / Path(candidate.audio_asset.replace("/", "/"))
+
+
+def audio_exists(candidate: ListeningCandidate, assets_root: Path) -> bool:
+    return audio_output_path(candidate, assets_root).exists()
+
+
+def select_candidates(
+    candidates: list[ListeningCandidate],
+    *,
+    prompt_id: str | None,
+    prompt_ids: list[str] | None,
+    all_candidates: bool,
+    missing_script_only: bool,
+    missing_audio_only: bool,
+    assets_root: Path,
+    limit: int | None,
+) -> list[ListeningCandidate]:
+    if prompt_id:
+        selected = [candidate for candidate in candidates if candidate.id == prompt_id]
+    elif prompt_ids:
+        wanted_ids = set(prompt_ids)
+        selected = [candidate for candidate in candidates if candidate.id in wanted_ids]
+    elif all_candidates:
+        selected = list(candidates)
+    else:
+        selected = []
+
+    if missing_script_only:
+        selected = [candidate for candidate in selected if not candidate.listening_prompt_text]
+    if missing_audio_only:
+        selected = [candidate for candidate in selected if not audio_exists(candidate, assets_root)]
+    if limit is not None:
+        selected = selected[:limit]
+
+    return selected
+
+
+def print_candidates(candidates: list[ListeningCandidate], assets_root: Path) -> None:
+    if not candidates:
+        print("No candidates matched the current filters.")
+        return
+
+    header = f"{'Id':<36} {'HasScript':<10} {'AudioExists':<11} SourcePath"
+    print(header)
+    print("-" * len(header))
+    for candidate in candidates:
+        has_script = "yes" if candidate.listening_prompt_text else "no"
+        has_audio = "yes" if audio_exists(candidate, assets_root) else "no"
+        print(f"{candidate.id:<36} {has_script:<10} {has_audio:<11} {candidate.source_path}")
+
+
+def print_candidate_ids(candidates: list[ListeningCandidate]) -> None:
+    for candidate in candidates:
+        print(candidate.id)
+
+
 def apply_script(
     candidate: ListeningCandidate,
     script_text: str,
@@ -270,21 +371,42 @@ def main() -> None:
     model = args.model or config_value(config, "ollamaModel") or "gemma3:27b"
 
     candidates = collect_candidates(args.content_dir)
-    candidate = next((item for item in candidates if item.id == args.prompt_id), None)
-    if candidate is None:
-        raise SystemExit(f"Prompt id '{args.prompt_id}' was not found in {args.content_dir}")
+    selected_candidates = select_candidates(
+        candidates,
+        prompt_id=args.prompt_id,
+        prompt_ids=args.prompt_ids,
+        all_candidates=args.all_candidates,
+        missing_script_only=args.missing_script_only,
+        missing_audio_only=args.missing_audio_only,
+        assets_root=args.assets_root,
+        limit=args.limit,
+    )
+    if not selected_candidates:
+        raise SystemExit("No listening candidates matched the current filters.")
 
-    prompt = build_ollama_prompt(candidate, args.style, args.word_count)
-    if args.print_prompt:
-        print(prompt)
+    if args.list_candidates:
+        print_candidates(selected_candidates, args.assets_root)
         return
 
-    script = call_ollama(host=host, model=model, prompt=prompt)
-    print(script)
+    if args.list_ids:
+        print_candidate_ids(selected_candidates)
+        return
 
-    if args.apply:
-        message = apply_script(candidate, script, args.overrides)
-        print(message)
+    if args.print_prompt and len(selected_candidates) != 1:
+        raise SystemExit("--print-prompt only works when exactly one prompt is selected.")
+
+    for candidate in selected_candidates:
+        prompt = build_ollama_prompt(candidate, args.style, args.word_count)
+        if args.print_prompt:
+            print(prompt)
+            return
+
+        script = call_ollama(host=host, model=model, prompt=prompt)
+        print(f"[{candidate.id}] {script}")
+
+        if args.apply:
+            message = apply_script(candidate, script, args.overrides)
+            print(message)
 
 
 if __name__ == "__main__":

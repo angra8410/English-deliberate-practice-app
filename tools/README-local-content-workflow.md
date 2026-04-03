@@ -91,6 +91,23 @@ python tools/generate_listening_script_with_ollama.py `
   --apply
 ```
 
+Generate scripts for multiple prompt ids in one run:
+
+```powershell
+python tools/generate_listening_script_with_ollama.py `
+  --prompt-ids listening-b2-summary act_c1_listen_001 `
+  --apply
+```
+
+List only the candidates that still need a generated script:
+
+```powershell
+python tools/generate_listening_script_with_ollama.py `
+  --all-candidates `
+  --missing-script-only `
+  --list-candidates
+```
+
 Notes:
 
 - built-in asset prompts are updated in their source file such as `activities_b2.json`
@@ -165,6 +182,46 @@ powershell -ExecutionPolicy Bypass -File tools/generate_listening_audio.ps1 `
   -Overwrite
 ```
 
+## 7. Run the full bulk pipeline
+
+Generate scripts and audio for multiple prompt ids:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/bulk_generate_listening_assets.ps1 `
+  -PromptIds listening-b2-summary act_c1_listen_001 `
+  -Engine piper `
+  -Overwrite
+```
+
+Or target every listening candidate that is still missing audio:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/bulk_generate_listening_assets.ps1 `
+  -AllCandidates `
+  -MissingAudioOnly `
+  -Engine piper `
+  -Overwrite
+```
+
+Or list what would be processed without changing files:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/bulk_generate_listening_assets.ps1 `
+  -AllCandidates `
+  -MissingScriptOnly `
+  -ListOnly
+```
+
+Or process only the first few filtered candidates while you tune prompts and voices:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/bulk_generate_listening_assets.ps1 `
+  -AllCandidates `
+  -Limit 3 `
+  -Engine piper `
+  -Overwrite
+```
+
 Notes:
 
 - the script scans `app/src/main/assets/content/*.json`
@@ -172,12 +229,13 @@ Notes:
 - it falls back to Windows SAPI when Piper is not configured
 - it groups entries by `audioAsset`
 - it can list prompt ids before generating anything
+- it can cap a run with `-Limit` so you can work in small batches
 - it skips existing files unless `-Overwrite` is set
 - use `-MissingOnly` when you only want the still-unbundled listening items
 - it only writes `.wav` files
 - it fails if two prompts point at the same `audioAsset` but use different spoken scripts
 
-## 7. Verify before committing
+## 8. Verify before committing
 
 ```powershell
 python -m unittest discover -s tools -p "test_*.py"

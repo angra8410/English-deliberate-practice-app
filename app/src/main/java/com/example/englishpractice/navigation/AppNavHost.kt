@@ -219,6 +219,9 @@ fun AppNavHost() {
 
                 ActivityPlayerScreen(
                     activity = activity,
+                    availableListeningActivities = uiState.activityCatalog.filter { item ->
+                        item.skill == com.example.englishpractice.domain.model.SkillType.LISTENING
+                    },
                     lastAttempt = activityId?.let { selectedActivityId ->
                         uiState.recentAttempts.firstOrNull { attempt ->
                             attempt.activityId == selectedActivityId
@@ -228,6 +231,11 @@ fun AppNavHost() {
                     speakingCapability = uiState.speakingCapability,
                     listeningCapability = uiState.listeningCapability,
                     onSpeakingLocaleSelected = appViewModel::updateSpeakingLocale,
+                    onListeningActivitySelected = { selectedListeningActivityId ->
+                        navController.navigate(
+                            AppDestination.ActivityPlayer.createRoute(selectedListeningActivityId)
+                        )
+                    },
                     onSubmit = { answer, transcript ->
                         if (activityId != null) {
                             appViewModel.submitActivity(activityId, answer, transcript)
