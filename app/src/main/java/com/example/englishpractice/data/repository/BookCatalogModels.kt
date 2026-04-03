@@ -48,6 +48,7 @@ data class BookPracticePrompt(
     val instructions: String? = null,
     val starterText: String? = null,
     val audioAsset: String? = null,
+    val listeningPromptText: String? = null,
     val modelAnswer: String? = null,
     val expectedKeywords: List<String> = emptyList(),
     val scoringProfile: PromptScoringProfile? = null,

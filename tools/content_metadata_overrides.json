@@ -156,6 +156,7 @@
       "instructions": "Listen to the panel summary and write a short summary of the final decision plus the main reservation that was raised.",
       "starterText": "The panel decides to move the candidate forward, but they still want more detail about her experience with deadlines.",
       "audioAsset": "audio/c1_interview_panel_summary.wav",
+      "listeningPromptText": "The panel agrees that the candidate should move to the next stage because her preparation and communication were stronger than those of the other applicants. However, one interviewer still wants a clearer example of how she handles multiple deadlines under pressure.",
       "modelAnswer": "The panel decides to move the candidate to the next stage because her preparation and communication are stronger than those of the other applicants. However, one interviewer still wants a clearer example of how she manages multiple deadlines. The final judgment is positive overall, but that reservation remains important.",
       "expectedKeywords": [
         "next stage",
@@ -214,6 +215,7 @@
       "instructions": "Listen to the call summary and write a short summary of the final agreement plus the main condition attached to the revised deadline.",
       "starterText": "The client accepts the revised delivery date, but they insist on a written progress update before the board review.",
       "audioAsset": "audio/c1_deadline_renegotiation_call.wav",
+      "listeningPromptText": "The client agrees to move the delivery date to 18 June because they understand the technical issue that caused the delay. However, they make it clear that the deadline cannot slip again because the board review is scheduled for the following week. The revised agreement includes a written progress update by Tuesday and confirmation of final testing by Friday.",
       "modelAnswer": "The client agrees to move the delivery date to 18 June because they understand the technical issue that caused the delay. However, they make it clear that the deadline cannot slip again because the board review is scheduled for the following week. The agreement therefore includes a written progress update by Tuesday and confirmation of final testing by Friday.",
       "expectedKeywords": [
         "18 June",
@@ -243,6 +245,7 @@
       "instructions": "Listen to the escalation summary and explain the final concession, the immediate requirement attached to it, and the longer follow-up expectation.",
       "starterText": "The account manager grants a forty-eight-hour extension, but only if the project lead sends a revised plan by 5 p.m.",
       "audioAsset": "audio/c1_client_escalation_call.wav",
+      "listeningPromptText": "The account manager grants a forty-eight-hour extension because the client says the current delay has already affected two regional teams. However, the concession is conditional, since the project lead must send a revised implementation plan by 5 p.m. and join a follow-up call the next morning. The client also expects weekly status updates until the rollout is stable.",
       "modelAnswer": "The call ends with the account manager granting a forty-eight-hour extension because the client says the current delay has already affected two regional teams. However, the concession is conditional, since the project lead must send a revised implementation plan by 5 p.m. and join a follow-up call the next morning. The client also makes it clear that weekly status updates will still be expected until the rollout is stable.",
       "expectedKeywords": [
         "forty-eight-hour extension",
@@ -273,6 +276,7 @@
       "instructions": "Listen to the supplier update and summarize the reassuring headline, the remaining delivery risk, and the agreed next step.",
       "starterText": "Most components are on schedule, but the spare units may still be delayed by customs clearance.",
       "audioAsset": "audio/c1_vendor_status_update_call.wav",
+      "listeningPromptText": "The supplier says that most of the components have already left the warehouse and should still arrive on schedule by Thursday. However, the final batch of spare units is still waiting for customs clearance, so installation may begin without them if the clearance is delayed. The next step is for the supplier to confirm the customs update by noon tomorrow and arrange direct delivery to the site if necessary.",
       "modelAnswer": "The supplier says that most of the components have already left the warehouse and should still arrive on schedule by Thursday. However, the final batch of spare units is still waiting for customs clearance, so installation may begin without them if the clearance is delayed. The agreed next step is that the supplier will confirm the customs update by noon tomorrow and arrange direct delivery to the site if necessary.",
       "expectedKeywords": [
         "on schedule",

@@ -113,6 +113,13 @@ def merge_prompt_metadata(
     if audio_asset:
         enriched["audioAsset"] = audio_asset
 
+    listening_prompt_text = first_non_blank(
+        enriched.get("listeningPromptText"),
+        override.get("listeningPromptText"),
+    )
+    if listening_prompt_text:
+        enriched["listeningPromptText"] = listening_prompt_text
+
     enriched["modelAnswer"] = first_non_blank(
         enriched.get("modelAnswer"),
         override.get("modelAnswer"),
@@ -206,6 +213,7 @@ def order_prompt_fields(prompt: dict[str, Any]) -> dict[str, Any]:
         "instructions",
         "starterText",
         "audioAsset",
+        "listeningPromptText",
         "modelAnswer",
         "expectedKeywords",
         "scoringProfile",

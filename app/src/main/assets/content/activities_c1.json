@@ -98,7 +98,7 @@
       "implications"
     ],
     "difficulty": 4,
-    "audioAsset": "audio/c1_listen_001.mp3",
+    "audioAsset": "audio/c1_listen_001.wav",
     "listeningPromptText": "The speaker argues that remote-first companies should not evaluate collaboration only by meeting frequency. She accepts that frequent check-ins can prevent misalignment, but says they often replace deeper written coordination and independent problem-solving. Her conclusion is that teams need fewer meetings, clearer ownership, and stronger documentation if they want remote collaboration to remain effective at scale.",
     "starterText": "The speaker argues that...",
     "supportNote": "Summarize the speaker's main claim, include the concession about check-ins, and mention one implication for remote teams.",

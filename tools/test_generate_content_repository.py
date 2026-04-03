@@ -46,6 +46,7 @@ class GenerateContentRepositoryTest(unittest.TestCase):
             "instructions": "List five realistic expressions used in update emails.",
             "minimumWordCount": 12,
             "audioAsset": "audio/client_update.wav",
+            "listeningPromptText": "The speaker confirms the revised delivery schedule and explains the next approval step.",
         }
 
         enriched = generator.merge_prompt_metadata(prompt, chapter, book, override)
@@ -55,6 +56,10 @@ class GenerateContentRepositoryTest(unittest.TestCase):
         self.assertEqual(12, enriched["minimumWordCount"])
         self.assertEqual(5, enriched["minimumResponseItems"])
         self.assertEqual("audio/client_update.wav", enriched["audioAsset"])
+        self.assertEqual(
+            "The speaker confirms the revised delivery schedule and explains the next approval step.",
+            enriched["listeningPromptText"],
+        )
         self.assertIn("I am writing to confirm the revised delivery schedule.", enriched["modelAnswer"])
         self.assertIn("vocabulary", enriched["expectedKeywords"])
 

@@ -25,6 +25,7 @@ Use JSON files in assets for initial content packs.
 - choices
 - explanation
 - audioAsset
+- listeningPromptText
 - transcript
 - reviewWeight
 
@@ -35,6 +36,8 @@ Use JSON files in assets for initial content packs.
 - prompt
 - instructions
 - starterText
+- audioAsset
+- listeningPromptText
 - modelAnswer
 - expectedKeywords
 - scoringProfile
@@ -57,6 +60,12 @@ Use JSON files in assets for initial content packs.
 4. write the result to `app/src/main/assets/content/content_repository.json`
 5. run the generator again with `--check` to detect drift
 6. run the app tests to verify the new asset still parses
+
+## Local listening authoring
+- keep generated listening audio under `app/src/main/assets/audio`
+- use `audioAsset` for the bundled file path
+- use `listeningPromptText` for the spoken source script that local TTS should render
+- prefer `.wav` when the file will be generated locally
 
 ## Import strategy
 On first launch:

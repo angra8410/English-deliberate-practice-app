@@ -38,6 +38,13 @@ class BookCatalogAssetSmokeTest {
                     .mapNotNull { prompt -> prompt.audioAsset }
             }
         }
+        val listeningPromptScripts = catalog.books.flatMap { book ->
+            book.chapters.flatMap { chapter ->
+                chapter.practicePrompts
+                    .filter { prompt -> prompt.type.name == "LISTEN_AND_SUMMARIZE" }
+                    .mapNotNull { prompt -> prompt.listeningPromptText }
+            }
+        }
 
         assertTrue(catalog.version >= 2)
         assertTrue(catalog.books.isNotEmpty(), "Expected at least one book in the content repository asset")
@@ -55,6 +62,10 @@ class BookCatalogAssetSmokeTest {
         assertTrue(
             listeningPromptAudioAssets.size == listeningPromptCount,
             "Expected every seeded listening prompt to include a bundled audio asset in the content repository asset"
+        )
+        assertTrue(
+            listeningPromptScripts.size == listeningPromptCount,
+            "Expected every seeded listening prompt to include a spoken listeningPromptText script"
         )
         listeningPromptAudioAssets.forEach { audioAsset ->
             val audioFile = File("src/main/assets/$audioAsset")

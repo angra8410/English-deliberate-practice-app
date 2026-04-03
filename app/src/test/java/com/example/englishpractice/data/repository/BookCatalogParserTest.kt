@@ -41,6 +41,7 @@ class BookCatalogParserTest {
                           "prompt": "List five phrases commonly used in job advertisements.",
                           "instructions": "List five phrases from authentic job ads.",
                           "audioAsset": "audio/job_ads.wav",
+                          "listeningPromptText": "This spoken script should be preserved when present.",
                           "modelAnswer": "competitive salary; excellent career prospects",
                           "expectedKeywords": ["competitive salary", "career prospects"],
                           "scoringProfile": "list",
@@ -69,6 +70,7 @@ class BookCatalogParserTest {
         assertEquals(SourceTargetSkill.VOCABULARY, prompt.targetSkill)
         assertEquals("List five phrases from authentic job ads.", prompt.instructions)
         assertEquals("audio/job_ads.wav", prompt.audioAsset)
+        assertEquals("This spoken script should be preserved when present.", prompt.listeningPromptText)
         assertEquals(PromptScoringProfile.LIST, prompt.scoringProfile)
         assertEquals(listOf("competitive salary", "career prospects"), prompt.expectedKeywords)
         assertEquals(10, prompt.minimumWordCount)

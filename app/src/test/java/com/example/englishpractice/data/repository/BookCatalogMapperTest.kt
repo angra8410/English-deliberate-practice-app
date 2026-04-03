@@ -217,7 +217,8 @@ class BookCatalogMapperTest {
                                     type = ExerciseType.LISTEN_AND_SUMMARIZE,
                                     targetSkill = SourceTargetSkill.LISTENING,
                                     prompt = "Listen to the debate and summarize the conclusion.",
-                                    audioAsset = "audio/listening-summary.wav"
+                                    audioAsset = "audio/listening-summary.wav",
+                                    listeningPromptText = "The speaker accepts one short-term benefit, but still concludes that stricter rules are necessary overall."
                                 )
                             ),
                             related = emptyList(),
@@ -237,6 +238,10 @@ class BookCatalogMapperTest {
         assertEquals(true, readingActivity.requiresToneReference)
         assertEquals(SkillType.LISTENING, listeningActivity.skill)
         assertEquals("audio/listening-summary.wav", listeningActivity.audioAssetPath)
+        assertEquals(
+            "The speaker accepts one short-term benefit, but still concludes that stricter rules are necessary overall.",
+            listeningActivity.listeningPromptText
+        )
         assertEquals(2, listeningActivity.minimumKeywordMatches)
         assertEquals(true, listeningActivity.requiresContrastMarker)
     }
