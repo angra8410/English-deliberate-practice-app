@@ -220,7 +220,7 @@ if ($candidates.Count -eq 0) {
 }
 
 $resolvedAssetsRoot = (Resolve-Path -LiteralPath $AssetsRoot).Path
-$audioEntries = Get-AudioEntries -Candidates $candidates -ResolvedAssetsRoot $resolvedAssetsRoot -MissingOnly:$MissingOnly
+$audioEntries = @(Get-AudioEntries -Candidates $candidates -ResolvedAssetsRoot $resolvedAssetsRoot -MissingOnly:$MissingOnly)
 
 if ($ListCandidates) {
     $audioEntries |
