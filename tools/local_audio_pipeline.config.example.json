@@ -1,0 +1,9 @@
+{
+  "preferredEngine": "piper",
+  "ollamaModel": "gemma3:27b",
+  "ollamaHost": "http://127.0.0.1:11434",
+  "piperExecutable": "C:/tools/piper/piper.exe",
+  "piperModel": "C:/tools/piper/models/en_US-lessac-medium.onnx",
+  "piperConfig": "C:/tools/piper/models/en_US-lessac-medium.onnx.json",
+  "piperSpeakerId": 0
+}

@@ -48,12 +48,67 @@ python tools/generate_content_repository.py `
   --overrides tools/content_metadata_overrides.json
 ```
 
-## 4. Generate bundled listening audio locally
+## 4. Create a local machine config
+
+Copy the example file and fill in the local paths that only exist on your machine:
+
+```powershell
+Copy-Item tools/local_audio_pipeline.config.example.json tools/local_audio_pipeline.config.json
+```
+
+Recommended fields:
+
+- `ollamaModel`: local model name such as `gemma3:27b`
+- `ollamaHost`: usually `http://127.0.0.1:11434`
+- `piperExecutable`: full path to `piper.exe`
+- `piperModel`: full path to the Piper `.onnx` voice model
+- `piperConfig`: full path to the matching `.onnx.json` file
+
+The real config file is gitignored because it is machine-specific.
+
+## 5. Generate or improve the listening script with Ollama
+
+Preview the prompt that will be sent to Ollama:
+
+```powershell
+python tools/generate_listening_script_with_ollama.py `
+  --prompt-id listening-b2-summary `
+  --print-prompt
+```
+
+Generate a new TTS-friendly script:
+
+```powershell
+python tools/generate_listening_script_with_ollama.py `
+  --prompt-id listening-b2-summary
+```
+
+Generate and apply it back to the correct source JSON:
+
+```powershell
+python tools/generate_listening_script_with_ollama.py `
+  --prompt-id listening-b2-summary `
+  --apply
+```
+
+Notes:
+
+- built-in asset prompts are updated in their source file such as `activities_b2.json`
+- generated catalog prompts are written into `tools/content_metadata_overrides.json`
+- after applying a generated catalog script, run the content generator again
+
+## 6. Generate bundled listening audio locally
 
 List installed Windows voices:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File tools/generate_listening_audio.ps1 -ListVoices
+```
+
+Show which engine and config the script will use:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/generate_listening_audio.ps1 -ShowConfig
 ```
 
 List all listening candidates so you can see the exact prompt ids before generating:
@@ -92,9 +147,29 @@ powershell -ExecutionPolicy Bypass -File tools/generate_listening_audio.ps1 `
   -Overwrite
 ```
 
+Force Piper when it is configured:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/generate_listening_audio.ps1 `
+  -Engine piper `
+  -PromptIds listening-b2-summary `
+  -Overwrite
+```
+
+Or stay with Windows SAPI:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File tools/generate_listening_audio.ps1 `
+  -Engine sapi `
+  -PromptIds listening-b2-summary `
+  -Overwrite
+```
+
 Notes:
 
 - the script scans `app/src/main/assets/content/*.json`
+- it prefers Piper automatically when the local config points to a Piper executable and model
+- it falls back to Windows SAPI when Piper is not configured
 - it groups entries by `audioAsset`
 - it can list prompt ids before generating anything
 - it skips existing files unless `-Overwrite` is set
@@ -102,7 +177,7 @@ Notes:
 - it only writes `.wav` files
 - it fails if two prompts point at the same `audioAsset` but use different spoken scripts
 
-## 5. Verify before committing
+## 7. Verify before committing
 
 ```powershell
 python -m unittest discover -s tools -p "test_*.py"

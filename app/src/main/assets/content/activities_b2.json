@@ -66,7 +66,7 @@
     "difficulty": 2,
     "starterText": "The speaker ultimately argues that...",
     "audioAsset": "audio/listening_b2_remote_work.wav",
-    "listeningPromptText": "A speaker first recognizes the convenience of remote work, then argues that junior employees still benefit from in-person mentoring several times per week.",
+    "listeningPromptText": "Okay, so we’ve talked a lot about remote work, and honestly, it’s fantastic for many people. It’s convenient, saves time, and can boost productivity. However, I think we need to be realistic about junior team members. They really benefit from being in the office, even just a few times a week. It’s about more than formal training, you know? It’s the quick questions, the observing, the informal feedback. That’s harder to replicate remotely. So, a hybrid approach feels best – balancing convenience with crucial early career development.",
     "supportNote": "Playback now prefers the bundled sample audio asset and falls back to prompt playback when no file is available.",
     "evaluationTargets": [
       "hybrid",

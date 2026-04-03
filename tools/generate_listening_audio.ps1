@@ -1,17 +1,108 @@
 param(
     [string]$ContentDirectory = "app/src/main/assets/content",
     [string]$AssetsRoot = "app/src/main/assets",
+    [ValidateSet("auto", "piper", "sapi")]
+    [string]$Engine = "auto",
+    [string]$ConfigPath = "tools/local_audio_pipeline.config.json",
     [string]$VoiceName,
+    [string]$PiperExecutable,
+    [string]$PiperModel,
+    [string]$PiperConfig,
+    [int]$PiperSpeakerId = -1,
     [string[]]$PromptIds,
     [switch]$Overwrite,
     [switch]$UsePromptFallback,
     [switch]$MissingOnly,
     [switch]$ListCandidates,
-    [switch]$ListVoices
+    [switch]$ListVoices,
+    [switch]$ShowConfig
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+
+function Get-PipelineConfig {
+    param([string]$Path)
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return [pscustomobject]@{}
+    }
+
+    return Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json
+}
+
+function Get-ConfigValue {
+    param(
+        $Config,
+        [string]$PropertyName
+    )
+
+    if ($null -eq $Config) {
+        return $null
+    }
+
+    $property = $Config.PSObject.Properties[$PropertyName]
+    if ($null -eq $property) {
+        return $null
+    }
+
+    return $property.Value
+}
+
+function First-NonBlank {
+    param([object[]]$Values)
+
+    foreach ($value in $Values) {
+        if ($value -is [string] -and -not [string]::IsNullOrWhiteSpace($value)) {
+            return $value.Trim()
+        }
+    }
+
+    return $null
+}
+
+function Resolve-FirstCommandOrPath {
+    param([object[]]$Values)
+
+    foreach ($candidate in $Values) {
+        if (-not ($candidate -is [string]) -or [string]::IsNullOrWhiteSpace($candidate)) {
+            continue
+        }
+
+        $value = $candidate.Trim()
+        $looksLikePath = $value.Contains("\") -or $value.Contains("/") -or $value.Contains(":")
+        if ($looksLikePath) {
+            if (Test-Path -LiteralPath $value) {
+                return (Resolve-Path -LiteralPath $value).Path
+            }
+            continue
+        }
+
+        $command = Get-Command $value -ErrorAction SilentlyContinue
+        if ($null -ne $command) {
+            return $command.Source
+        }
+    }
+
+    return $null
+}
+
+function Resolve-FirstExistingPath {
+    param([object[]]$Values)
+
+    foreach ($candidate in $Values) {
+        if (-not ($candidate -is [string]) -or [string]::IsNullOrWhiteSpace($candidate)) {
+            continue
+        }
+
+        $value = $candidate.Trim()
+        if (Test-Path -LiteralPath $value) {
+            return (Resolve-Path -LiteralPath $value).Path
+        }
+    }
+
+    return $null
+}
 
 function Get-SapiVoiceDescriptions {
     $voice = New-Object -ComObject SAPI.SpVoice
@@ -24,9 +115,74 @@ function Get-SapiVoiceDescriptions {
     }
 }
 
-if ($ListVoices) {
-    Get-SapiVoiceDescriptions
-    exit 0
+function Get-ResolvedAudioSettings {
+    param(
+        [string]$RequestedEngine,
+        [string]$ConfigPath,
+        [string]$VoiceName,
+        [string]$PiperExecutable,
+        [string]$PiperModel,
+        [string]$PiperConfig,
+        [int]$PiperSpeakerId,
+        [switch]$AllowIncomplete
+    )
+
+    $config = Get-PipelineConfig -Path $ConfigPath
+    $configuredPreferredEngine = First-NonBlank @(Get-ConfigValue -Config $config -PropertyName "preferredEngine")
+    $effectiveRequestedEngine = if ($RequestedEngine -eq "auto" -and $configuredPreferredEngine) {
+        $configuredPreferredEngine.ToLowerInvariant()
+    } else {
+        $RequestedEngine
+    }
+
+    $resolvedPiperExecutable = Resolve-FirstCommandOrPath @(
+        $PiperExecutable,
+        (Get-ConfigValue -Config $config -PropertyName "piperExecutable"),
+        "piper"
+    )
+    $resolvedPiperModel = Resolve-FirstExistingPath @(
+        $PiperModel,
+        (Get-ConfigValue -Config $config -PropertyName "piperModel")
+    )
+    $resolvedPiperConfig = Resolve-FirstExistingPath @(
+        $PiperConfig,
+        (Get-ConfigValue -Config $config -PropertyName "piperConfig")
+    )
+    $resolvedPiperSpeakerId = if ($PiperSpeakerId -ge 0) {
+        $PiperSpeakerId
+    } else {
+        $configuredSpeaker = Get-ConfigValue -Config $config -PropertyName "piperSpeakerId"
+        if ($configuredSpeaker -is [int]) { $configuredSpeaker } else { -1 }
+    }
+    $resolvedVoiceName = First-NonBlank @($VoiceName)
+
+    $hasPiper = $null -ne $resolvedPiperExecutable -and -not [string]::IsNullOrWhiteSpace($resolvedPiperModel)
+    $resolvedEngine = switch ($effectiveRequestedEngine) {
+        "piper" {
+            if (-not $AllowIncomplete -and $null -eq $resolvedPiperExecutable) {
+                throw "Piper was requested, but no Piper executable was found. Install piper-tts or set piperExecutable in tools/local_audio_pipeline.config.json."
+            }
+            if (-not $AllowIncomplete -and [string]::IsNullOrWhiteSpace($resolvedPiperModel)) {
+                throw "Piper was requested, but no Piper voice model .onnx file was found. Download a voice such as en_US-lessac-medium and set piperModel in tools/local_audio_pipeline.config.json."
+            }
+            "piper"
+        }
+        "sapi" { "sapi" }
+        default {
+            if ($hasPiper) { "piper" } else { "sapi" }
+        }
+    }
+
+    return [pscustomobject]@{
+        Engine = $resolvedEngine
+        VoiceName = $resolvedVoiceName
+        PiperExecutable = $resolvedPiperExecutable
+        PiperModel = $resolvedPiperModel
+        PiperConfig = $resolvedPiperConfig
+        PiperSpeakerId = $resolvedPiperSpeakerId
+        ConfigPath = $ConfigPath
+        ConfigLoaded = Test-Path -LiteralPath $ConfigPath
+    }
 }
 
 function Get-ContentDocuments {
@@ -69,11 +225,16 @@ function Add-Candidate {
         return
     }
 
+    $titleProperty = $Node.PSObject.Properties["title"]
+    $title = if ($null -ne $titleProperty) { $titleProperty.Value } else { $null }
+
+    $promptProperty = $Node.PSObject.Properties["prompt"]
+    $promptText = if ($null -ne $promptProperty) { $promptProperty.Value } else { $null }
+
     $listeningPromptProperty = $Node.PSObject.Properties["listeningPromptText"]
     $scriptText = if ($null -ne $listeningPromptProperty) { $listeningPromptProperty.Value } else { $null }
     if ([string]::IsNullOrWhiteSpace($scriptText) -and $UsePromptFallback) {
-        $promptProperty = $Node.PSObject.Properties["prompt"]
-        $scriptText = if ($null -ne $promptProperty) { $promptProperty.Value } else { $null }
+        $scriptText = $promptText
     }
     if ([string]::IsNullOrWhiteSpace($scriptText)) {
         return
@@ -81,6 +242,8 @@ function Add-Candidate {
 
     $Candidates.Add([pscustomobject]@{
         Id = $id
+        Title = [string]$title
+        Prompt = [string]$promptText
         AudioAsset = [string]$audioAsset
         ScriptText = ([string]$scriptText).Trim()
         SourcePath = $SourcePath
@@ -143,7 +306,7 @@ function Select-SapiVoice {
     $Voice.Voice = $matchingVoice
 }
 
-function Write-WaveFileFromText {
+function Write-WaveFileWithSapi {
     param(
         [string]$OutputPath,
         [string]$Text,
@@ -176,6 +339,68 @@ function Write-WaveFileFromText {
     }
 }
 
+function Write-WaveFileWithPiper {
+    param(
+        [string]$OutputPath,
+        [string]$Text,
+        $Settings
+    )
+
+    if (-not (Test-Path -LiteralPath $Settings.PiperExecutable)) {
+        throw "Piper executable was not found at $($Settings.PiperExecutable)"
+    }
+    if (-not (Test-Path -LiteralPath $Settings.PiperModel)) {
+        throw "Piper model was not found at $($Settings.PiperModel)"
+    }
+    if ($Settings.PiperConfig -and -not (Test-Path -LiteralPath $Settings.PiperConfig)) {
+        throw "Piper config was not found at $($Settings.PiperConfig)"
+    }
+
+    $outputDirectory = Split-Path -Parent $OutputPath
+    if (-not (Test-Path -LiteralPath $outputDirectory)) {
+        New-Item -ItemType Directory -Path $outputDirectory -Force | Out-Null
+    }
+
+    $tempInput = [System.IO.Path]::GetTempFileName()
+    try {
+        [System.IO.File]::WriteAllText($tempInput, $Text, [System.Text.Encoding]::UTF8)
+        $arguments = @(
+            "--model", $Settings.PiperModel,
+            "--output_file", $OutputPath
+        )
+        if ($Settings.PiperConfig) {
+            $arguments += @("--config", $Settings.PiperConfig)
+        }
+        if ($Settings.PiperSpeakerId -ge 0) {
+            $arguments += @("--speaker", [string]$Settings.PiperSpeakerId)
+        }
+
+        $piperInput = Get-Content -LiteralPath $tempInput -Raw
+        $piperInput | & $Settings.PiperExecutable @arguments
+        if ($LASTEXITCODE -ne 0) {
+            throw "Piper exited with code $LASTEXITCODE while writing $OutputPath"
+        }
+    } finally {
+        if (Test-Path -LiteralPath $tempInput) {
+            Remove-Item -LiteralPath $tempInput -Force
+        }
+    }
+}
+
+function Write-WaveFileFromText {
+    param(
+        [string]$OutputPath,
+        [string]$Text,
+        $Settings
+    )
+
+    switch ($Settings.Engine) {
+        "piper" { Write-WaveFileWithPiper -OutputPath $OutputPath -Text $Text -Settings $Settings }
+        "sapi" { Write-WaveFileWithSapi -OutputPath $OutputPath -Text $Text -RequestedVoiceName $Settings.VoiceName }
+        default { throw "Unsupported audio engine: $($Settings.Engine)" }
+    }
+}
+
 function Get-AudioEntries {
     param(
         [System.Collections.Generic.List[object]]$Candidates,
@@ -193,6 +418,7 @@ function Get-AudioEntries {
 
         [pscustomobject]@{
             Id = $primary.Id
+            Title = $primary.Title
             AudioAsset = $primary.AudioAsset
             OutputPath = $outputPath
             Exists = $fileExists
@@ -210,6 +436,33 @@ function Get-AudioEntries {
     return @($entries)
 }
 
+$settings = Get-ResolvedAudioSettings `
+    -RequestedEngine $Engine `
+    -ConfigPath $ConfigPath `
+    -VoiceName $VoiceName `
+    -PiperExecutable $PiperExecutable `
+    -PiperModel $PiperModel `
+    -PiperConfig $PiperConfig `
+    -PiperSpeakerId $PiperSpeakerId `
+    -AllowIncomplete:$ShowConfig
+
+if ($ShowConfig) {
+    $settings | Format-List
+    exit 0
+}
+
+if ($ListVoices) {
+    if ($settings.Engine -eq "piper") {
+        Write-Host "Piper uses model files rather than installed Windows desktop voices."
+        Write-Host "Resolved Piper executable: $($settings.PiperExecutable)"
+        Write-Host "Resolved Piper model: $($settings.PiperModel)"
+        exit 0
+    }
+
+    Get-SapiVoiceDescriptions
+    exit 0
+}
+
 $candidates = New-Object 'System.Collections.Generic.List[object]'
 Get-ContentDocuments -Directory $ContentDirectory | ForEach-Object {
     Collect-AudioCandidates -Candidates $candidates -SourcePath $_.Path -Node $_.Json -UsePromptFallback:$UsePromptFallback -PromptIds $PromptIds
@@ -225,7 +478,7 @@ $audioEntries = @(Get-AudioEntries -Candidates $candidates -ResolvedAssetsRoot $
 if ($ListCandidates) {
     $audioEntries |
         Sort-Object Id |
-        Select-Object Id, AudioAsset, Exists, SourcePath |
+        Select-Object Id, Title, AudioAsset, Exists, SourcePath |
         Format-Table -AutoSize
     exit 0
 }
@@ -253,6 +506,6 @@ foreach ($entry in $audioEntries) {
         continue
     }
 
-    Write-WaveFileFromText -OutputPath $outputPath -Text $entry.ScriptPreview -RequestedVoiceName $VoiceName
-    Write-Host "Generated $outputPath from $($entry.Id)"
+    Write-WaveFileFromText -OutputPath $outputPath -Text $entry.ScriptPreview -Settings $settings
+    Write-Host "Generated $outputPath from $($entry.Id) using $($settings.Engine)"
 }

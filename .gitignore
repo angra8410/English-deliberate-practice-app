@@ -12,6 +12,7 @@ build/
 # Local machine config
 local.properties
 .android-local/
+tools/local_audio_pipeline.config.json
 
 # OS files
 .DS_Store
