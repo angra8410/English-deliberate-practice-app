@@ -158,6 +158,20 @@ private fun BrowserHero(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Text(
+                text = state.contentSourceSummaries.joinToString("  |  ") { summary ->
+                    "${summary.sourceLabel}: ${summary.activityCount} activities, ${summary.listeningCount} listening"
+                }.ifBlank { "No content sources loaded." },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            state.bookCatalogStatusMessage?.let { status ->
+                Text(
+                    text = status,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }

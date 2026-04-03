@@ -21,10 +21,18 @@ data class AppUiState(
     val reviewQueue: List<ReviewQueueItem>,
     val activityCatalog: List<PracticeActivityItem>,
     val contentBrowserItems: List<ContentBrowserItem>,
+    val contentSourceSummaries: List<ContentSourceSummary>,
+    val bookCatalogStatusMessage: String? = null,
     val recentAttempts: List<ActivityAttemptRecord>,
     val selectedSpeakingLocaleTag: String,
     val speakingCapability: SpeakingCapability,
     val listeningCapability: ListeningCapability
+)
+
+data class ContentSourceSummary(
+    val sourceLabel: String,
+    val activityCount: Int,
+    val listeningCount: Int
 )
 
 data class DailyPracticeItem(

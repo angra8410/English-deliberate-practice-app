@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.englishpractice.data.repository.AssetContentRepository
 import com.example.englishpractice.data.repository.AppPreferencesRepository
 import com.example.englishpractice.data.repository.BookCatalogRepository
+import com.example.englishpractice.data.repository.BookCatalogLoadDiagnostics
 import com.example.englishpractice.data.repository.CompositeContentRepository
 import com.example.englishpractice.data.repository.ContentRepository
 import com.example.englishpractice.data.repository.PersistedSubmission
@@ -153,6 +154,17 @@ class AppViewModel(
         speakingLocaleTag: String
     ): AppUiState {
         val skillProgress = progressInputs.map(ProgressCalculator::buildSnapshot)
+        val contentSourceSummaries = activityCatalog
+            .groupBy(PracticeActivityItem::sourceLabel)
+            .map { (sourceLabel, items) ->
+                ContentSourceSummary(
+                    sourceLabel = sourceLabel,
+                    activityCount = items.size,
+                    listeningCount = items.count { activity -> activity.skill == SkillType.LISTENING }
+                )
+            }
+            .sortedBy(ContentSourceSummary::sourceLabel)
+        val bookCatalogDiagnostics = BookCatalogRepository.diagnostics()
 
         return AppUiState(
             currentLevel = currentLevel,
@@ -175,6 +187,11 @@ class AppViewModel(
             reviewQueue = reviewQueue,
             activityCatalog = activityCatalog,
             contentBrowserItems = contentBrowserItems,
+            contentSourceSummaries = contentSourceSummaries,
+            bookCatalogStatusMessage = buildBookCatalogStatusMessage(
+                diagnostics = bookCatalogDiagnostics,
+                sourceSummaries = contentSourceSummaries
+            ),
             recentAttempts = recentAttempts,
             selectedSpeakingLocaleTag = speakingLocaleTag,
             speakingCapability = speakingManager.capability(),
@@ -664,6 +681,34 @@ class AppViewModel(
                 persistedInput
             } else {
                 baseInput
+            }
+        }
+    }
+
+    private fun buildBookCatalogStatusMessage(
+        diagnostics: BookCatalogLoadDiagnostics,
+        sourceSummaries: List<ContentSourceSummary>
+    ): String? {
+        val loadedBookCatalogActivities = sourceSummaries
+            .firstOrNull { summary -> summary.sourceLabel == "Book catalog" }
+            ?.activityCount
+            ?: 0
+
+        return when {
+            diagnostics.lastError != null -> {
+                "Book catalog failed to load: ${diagnostics.lastError}"
+            }
+
+            loadedBookCatalogActivities == 0 && diagnostics.loadedBooks > 0 -> {
+                "Book catalog asset parsed, but no book-catalog activities reached the current level."
+            }
+
+            loadedBookCatalogActivities == 0 -> {
+                "Book catalog has not been loaded in this app session yet."
+            }
+
+            else -> {
+                "Book catalog loaded: ${diagnostics.loadedBooks} books, ${diagnostics.loadedChapters} chapters, ${diagnostics.loadedPrompts} prompts."
             }
         }
     }

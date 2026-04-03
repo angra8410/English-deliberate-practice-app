@@ -1,8 +1,16 @@
 package com.example.englishpractice.data.repository
 
 import android.content.Context
+import android.util.Log
 import com.example.englishpractice.domain.model.CefrLevel
 import com.example.englishpractice.ui.app.PracticeActivityItem
+
+data class BookCatalogLoadDiagnostics(
+    val loadedBooks: Int = 0,
+    val loadedChapters: Int = 0,
+    val loadedPrompts: Int = 0,
+    val lastError: String? = null
+)
 
 class BookCatalogRepository(private val context: Context) : ContentRepository {
     override fun loadLevels(): List<CefrLevel> {
@@ -32,10 +40,29 @@ class BookCatalogRepository(private val context: Context) : ContentRepository {
         return runCatching {
             val rawJson = context.assets.open(BOOK_CATALOG_ASSET_PATH).bufferedReader().use { it.readText() }
             BookCatalogParser.parseCatalog(rawJson)
+        }.onSuccess { catalog ->
+            diagnostics = BookCatalogLoadDiagnostics(
+                loadedBooks = catalog.books.size,
+                loadedChapters = catalog.books.sumOf { book -> book.chapters.size },
+                loadedPrompts = catalog.books.sumOf { book ->
+                    book.chapters.sumOf { chapter -> chapter.practicePrompts.size }
+                },
+                lastError = null
+            )
+        }.onFailure { throwable ->
+            diagnostics = BookCatalogLoadDiagnostics(
+                lastError = "${throwable::class.simpleName}: ${throwable.message ?: "Unknown error"}"
+            )
+            Log.e(TAG, "Failed to load $BOOK_CATALOG_ASSET_PATH", throwable)
         }.getOrNull()
     }
 
     companion object {
         const val BOOK_CATALOG_ASSET_PATH = "content/content_repository.json"
+        private const val TAG = "BookCatalogRepository"
+        @Volatile
+        private var diagnostics: BookCatalogLoadDiagnostics = BookCatalogLoadDiagnostics()
+
+        fun diagnostics(): BookCatalogLoadDiagnostics = diagnostics
     }
 }
