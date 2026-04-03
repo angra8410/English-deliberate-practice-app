@@ -15,34 +15,34 @@ data class SkillTone(
 fun skillTone(skill: SkillType): SkillTone {
     return when (skill) {
         SkillType.READING -> SkillTone(
-            accent = Color(0xFF3B5F8B),
-            soft = Color(0xFFE0E9F8),
+            accent = Color(0xFF8AE8FF),
+            soft = Color(0xFF263D7F),
             gradient = Brush.linearGradient(
-                colors = listOf(Color(0xFFEAF1FB), Color(0xFFD6E4F7))
+                colors = listOf(Color(0xFF4A41BC), Color(0xFF2866C9))
             )
         )
 
         SkillType.WRITING -> SkillTone(
-            accent = Color(0xFF9A5B28),
-            soft = Color(0xFFF6E2D2),
+            accent = Color(0xFFFFC95D),
+            soft = Color(0xFF6A3E0C),
             gradient = Brush.linearGradient(
-                colors = listOf(Color(0xFFF9EEE5), Color(0xFFF2DBC8))
+                colors = listOf(Color(0xFFB95435), Color(0xFFF18A3A))
             )
         )
 
         SkillType.LISTENING -> SkillTone(
-            accent = Color(0xFF1D6A63),
-            soft = Color(0xFFD7EEE8),
+            accent = Color(0xFF85F5D0),
+            soft = Color(0xFF155D63),
             gradient = Brush.linearGradient(
-                colors = listOf(Color(0xFFE7F7F2), Color(0xFFD0ECE4))
+                colors = listOf(Color(0xFF0F9288), Color(0xFF31CDA7))
             )
         )
 
         SkillType.SPEAKING -> SkillTone(
-            accent = Color(0xFF8B4C63),
-            soft = Color(0xFFF4DDE6),
+            accent = Color(0xFFFF9EE8),
+            soft = Color(0xFF72318B),
             gradient = Brush.linearGradient(
-                colors = listOf(Color(0xFFF8EBF0), Color(0xFFF1D4DF))
+                colors = listOf(Color(0xFF7D2DD0), Color(0xFFFF4FD8))
             )
         )
     }

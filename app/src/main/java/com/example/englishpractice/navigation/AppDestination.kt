@@ -1,8 +1,8 @@
 package com.example.englishpractice.navigation
 
 sealed class AppDestination(val route: String, val label: String) {
-    data object Home : AppDestination("home", "Home")
-    data object Practice : AppDestination("practice", "Practice")
+    data object Home : AppDestination("home", "Explore")
+    data object Practice : AppDestination("practice", "Learn")
     data object Browse : AppDestination("browse", "Browse")
     data object Review : AppDestination("review", "Review")
     data object Progress : AppDestination("progress", "Progress")

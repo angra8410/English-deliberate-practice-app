@@ -1,18 +1,31 @@
 package com.example.englishpractice.navigation
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.MenuBook
+import androidx.compose.material.icons.rounded.BarChart
+import androidx.compose.material.icons.rounded.ChevronLeft
+import androidx.compose.material.icons.rounded.Home
+import androidx.compose.material.icons.rounded.Refresh
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -56,64 +69,86 @@ fun AppNavHost() {
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
-            TopAppBar(
-                title = { Text(topBarTitle) },
-                navigationIcon = {
-                    if (!isTopLevelDestination) {
-                        TextButton(onClick = { navController.popBackStack() }) {
-                            Text("Back")
+            if (!isTopLevelDestination) {
+                TopAppBar(
+                    title = { Text(topBarTitle) },
+                    navigationIcon = {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(Icons.Rounded.ChevronLeft, contentDescription = "Back")
                         }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface,
-                    titleContentColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
-                    navigationIconContentColor = androidx.compose.material3.MaterialTheme.colorScheme.primary
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent,
+                        titleContentColor = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
+                        navigationIconContentColor = androidx.compose.material3.MaterialTheme.colorScheme.onBackground
+                    )
                 )
-            )
+            }
         },
         bottomBar = {
             if (isTopLevelDestination) {
-                NavigationBar(
-                    containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surface,
-                    tonalElevation = 0.dp
-                ) {
-                    items.forEach { destination ->
-                        NavigationBarItem(
-                            selected = currentRoute == destination.route,
-                            onClick = {
-                                if (destination == AppDestination.Home) {
-                                    val popped = navController.popBackStack(
-                                        AppDestination.Home.route,
-                                        inclusive = false
-                                    )
-                                    if (!popped) {
-                                        navController.navigate(AppDestination.Home.route) {
-                                            popUpTo(navController.graph.findStartDestination().id) {
-                                                saveState = true
-                                            }
-                                            launchSingleTop = true
-                                        }
-                                    }
-                                } else {
-                                    navController.navigate(destination.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
-                                        }
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    }
-                                }
-                            },
-                            icon = {},
-                            label = { Text(destination.label) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedTextColor = androidx.compose.material3.MaterialTheme.colorScheme.primary,
-                                indicatorColor = androidx.compose.material3.MaterialTheme.colorScheme.primaryContainer,
-                                unselectedTextColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = androidx.compose.foundation.shape.RoundedCornerShape(28.dp),
+                        color = androidx.compose.material3.MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+                        shadowElevation = 16.dp,
+                        tonalElevation = 0.dp,
+                        border = BorderStroke(
+                            1.dp,
+                            androidx.compose.material3.MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
                         )
+                    ) {
+                        NavigationBar(
+                            containerColor = Color.Transparent,
+                            tonalElevation = 0.dp
+                        ) {
+                            items.forEach { destination ->
+                                NavigationBarItem(
+                                    selected = currentRoute == destination.route,
+                                    onClick = {
+                                        if (destination == AppDestination.Home) {
+                                            val popped = navController.popBackStack(
+                                                AppDestination.Home.route,
+                                                inclusive = false
+                                            )
+                                            if (!popped) {
+                                                navController.navigate(AppDestination.Home.route) {
+                                                    popUpTo(navController.graph.findStartDestination().id) {
+                                                        saveState = true
+                                                    }
+                                                    launchSingleTop = true
+                                                }
+                                            }
+                                        } else {
+                                            navController.navigate(destination.route) {
+                                                popUpTo(navController.graph.findStartDestination().id) {
+                                                    saveState = true
+                                                }
+                                                launchSingleTop = true
+                                                restoreState = true
+                                            }
+                                        }
+                                    },
+                                    icon = {
+                                        Icon(
+                                            imageVector = destinationIcon(destination),
+                                            contentDescription = destination.label
+                                        )
+                                    },
+                                    label = { Text(destination.label) },
+                                    colors = NavigationBarItemDefaults.colors(
+                                        selectedIconColor = androidx.compose.material3.MaterialTheme.colorScheme.onPrimary,
+                                        selectedTextColor = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
+                                        indicatorColor = androidx.compose.material3.MaterialTheme.colorScheme.primary,
+                                        unselectedIconColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
+                                        unselectedTextColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -202,4 +237,13 @@ fun AppNavHost() {
             }
         }
     }
+}
+
+private fun destinationIcon(destination: AppDestination) = when (destination) {
+    AppDestination.Home -> Icons.Rounded.Home
+    AppDestination.Practice -> Icons.AutoMirrored.Rounded.MenuBook
+    AppDestination.Review -> Icons.Rounded.Refresh
+    AppDestination.Progress -> Icons.Rounded.BarChart
+    AppDestination.Settings -> Icons.Rounded.Settings
+    else -> Icons.Rounded.Home
 }

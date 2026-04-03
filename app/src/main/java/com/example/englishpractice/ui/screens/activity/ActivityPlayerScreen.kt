@@ -53,7 +53,11 @@ import com.example.englishpractice.ui.app.ActivityAttemptRecord
 import com.example.englishpractice.ui.app.PracticeActivityItem
 import com.example.englishpractice.ui.components.ContentProvenanceBlock
 import com.example.englishpractice.ui.components.engineLabel
+import com.example.englishpractice.ui.components.GlassPanel
+import com.example.englishpractice.ui.components.GlowButton
+import com.example.englishpractice.ui.components.ImmersiveScreen
 import com.example.englishpractice.ui.components.prettyListItem
+import com.example.englishpractice.ui.components.StatusPill
 import com.example.englishpractice.ui.components.skillTone
 import com.example.englishpractice.ui.components.uiEnabledLabel
 import com.example.englishpractice.ui.components.uiLabel
@@ -406,65 +410,47 @@ fun ActivityPlayerScreen(
         else -> "Your response"
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(tone.gradient, RoundedCornerShape(28.dp))
-                .padding(20.dp)
-        ) {
+    ImmersiveScreen {
+        GlassPanel(accent = tone.accent.copy(alpha = 0.32f)) {
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                StatusPill(text = activity.skill.label, accent = tone.accent)
+                StatusPill(text = activity.exerciseType.uiLabel(), accent = MaterialTheme.colorScheme.tertiary)
+            }
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
-                    text = activity.skill.label,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = tone.accent
-                )
                 Text(activity.title, style = MaterialTheme.typography.headlineMedium)
                 Text(
                     activity.instructions,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
-        }
-
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
                 ContentProvenanceBlock(
                     sourceLabel = activity.sourceLabel,
                     collectionTitle = activity.collectionTitle,
                     unitTitle = activity.unitTitle,
                     currentTitle = activity.title
                 )
-                Text(activity.prompt)
-                Text(activity.supportNote, style = MaterialTheme.typography.bodySmall)
             }
         }
 
+        GlassPanel(accent = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)) {
+            Text(
+                text = "Prompt",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.secondary
+            )
+            Text(activity.prompt)
+            Text(activity.supportNote, style = MaterialTheme.typography.bodySmall)
+        }
+
         if (activity.skill == SkillType.LISTENING) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
+            GlassPanel(accent = tone.accent.copy(alpha = 0.26f)) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         "Listening playback",
                         style = MaterialTheme.typography.titleMedium,
@@ -531,14 +517,8 @@ fun ActivityPlayerScreen(
         }
 
         if (activity.skill == SkillType.SPEAKING) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
+            GlassPanel(accent = tone.accent.copy(alpha = 0.26f)) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         "Speaking capture",
                         style = MaterialTheme.typography.titleMedium,
@@ -682,14 +662,8 @@ fun ActivityPlayerScreen(
             }
         }
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
+        GlassPanel(accent = MaterialTheme.colorScheme.primary.copy(alpha = 0.28f)) {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
                     text = "Response workspace",
                     style = MaterialTheme.typography.titleMedium,
@@ -703,7 +677,8 @@ fun ActivityPlayerScreen(
                     label = { Text(fieldLabel) }
                 )
 
-                Button(
+                GlowButton(
+                    text = "Submit and get feedback",
                     enabled = when (activity.skill) {
                         SkillType.SPEAKING -> !isSpeakingBusy && answerText.isNotBlank()
                         SkillType.LISTENING -> ListeningSubmissionPolicy.canSubmit(
@@ -723,21 +698,13 @@ fun ActivityPlayerScreen(
                         onSubmit(answerText, transcript)
                     },
                     modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Submit and get feedback")
-                }
+                )
             }
         }
 
         if (lastAttempt != null && lastAttempt.activityId == activity.id) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
+            GlassPanel(accent = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.24f)) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         "Latest attempt",
                         style = MaterialTheme.typography.titleMedium,

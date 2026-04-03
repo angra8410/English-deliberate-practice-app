@@ -1,25 +1,32 @@
 package com.example.englishpractice.ui.screens.review
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.englishpractice.ui.app.AppUiState
 import com.example.englishpractice.ui.app.ReviewQueueItem
 import com.example.englishpractice.ui.components.ContentProvenanceBlock
+import com.example.englishpractice.ui.components.GlassPanel
+import com.example.englishpractice.ui.components.GlowButton
+import com.example.englishpractice.ui.components.ImmersiveScreen
+import com.example.englishpractice.ui.components.StatusPill
 import com.example.englishpractice.ui.components.skillTone
 
 @Composable
@@ -27,25 +34,61 @@ fun ReviewScreen(
     state: AppUiState,
     onOpenReviewActivity: (String) -> Unit = {}
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 18.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp)
-    ) {
-        ReviewHero(state = state)
+    ImmersiveScreen {
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            StatusPill(text = "${state.reviewSummary.dueToday} due today")
+            StatusPill(
+                text = "${state.reviewSummary.recurringPatterns} patterns",
+                accent = MaterialTheme.colorScheme.tertiary
+            )
+            StatusPill(
+                text = "Next check ${state.reviewSummary.nextCheckpointDays}d",
+                accent = MaterialTheme.colorScheme.secondary
+            )
+        }
 
-        SectionHeading(
-            eyebrow = "Queue",
-            title = "Retry order",
-            description = "These items are already ranked by urgency and recent weakness, so you can resume the right one quickly."
+        GlassPanel {
+            Text(
+                text = "Review",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.secondary
+            )
+            Text(
+                text = "Clean retries, clearer priorities",
+                style = MaterialTheme.typography.displaySmall
+            )
+            Text(
+                text = "The queue now highlights the exact item worth reopening instead of forcing you through a noisy list.",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        ReviewQueuePanel(
+            items = state.reviewQueue,
+            onOpenReviewActivity = onOpenReviewActivity
         )
+    }
+}
 
-        state.reviewQueue.forEachIndexed { index, item ->
-            ReviewQueueCard(
-                index = index,
+@Composable
+private fun ReviewQueuePanel(
+    items: List<ReviewQueueItem>,
+    onOpenReviewActivity: (String) -> Unit
+) {
+    GlassPanel {
+        Text(
+            text = "Retry queue",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        items.forEachIndexed { index, item ->
+            if (index > 0) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.08f))
+            }
+            ReviewRow(
                 item = item,
+                index = index,
                 onOpenReviewActivity = onOpenReviewActivity
             )
         }
@@ -53,72 +96,68 @@ fun ReviewScreen(
 }
 
 @Composable
-private fun ReviewHero(state: AppUiState) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = "Review loop",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = "Turn weak attempts into deliberate retries instead of letting them disappear into history.",
-                style = MaterialTheme.typography.headlineMedium
-            )
-            Text(
-                text = "Due today ${state.reviewSummary.dueToday}  |  Recurring patterns ${state.reviewSummary.recurringPatterns}  |  Next checkpoint ${state.reviewSummary.nextCheckpointDays} days",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun ReviewQueueCard(
-    index: Int,
+private fun ReviewRow(
     item: ReviewQueueItem,
+    index: Int,
     onOpenReviewActivity: (String) -> Unit
 ) {
     val tone = skillTone(item.skill)
-    Card(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onOpenReviewActivity(item.activityId) },
-        colors = CardDefaults.cardColors(containerColor = reviewCardColor(item.dueLabel))
+            .clickable { onOpenReviewActivity(item.activityId) }
+            .padding(vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Box(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(CircleShape)
+                .background(tone.gradient),
+            contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Retry ${index + 1}  |  ${item.skill.label}  |  ${item.dueLabel}",
-                style = MaterialTheme.typography.labelLarge,
-                color = tone.accent
+                text = "${index + 1}",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onBackground
             )
-            Text(item.title, style = MaterialTheme.typography.titleLarge)
-            ContentProvenanceBlock(
-                sourceLabel = item.sourceLabel,
-                collectionTitle = item.collectionTitle,
-                unitTitle = item.unitTitle,
-                currentTitle = item.title
+        }
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = item.skill.label,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = tone.accent
+                )
+                Surface(
+                    shape = MaterialTheme.shapes.small,
+                    color = reviewChipColor(item.dueLabel)
+                ) {
+                    Text(
+                        text = item.dueLabel,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+            Text(
+                text = item.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
             )
             Text(
-                text = item.prompt,
-                style = MaterialTheme.typography.bodyMedium
+                text = item.reason,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            item.lastScore?.let { score ->
-                Text(
-                    text = "Last score $score",
-                    style = MaterialTheme.typography.labelMedium
-                )
-            }
             if (item.weakTags.isNotEmpty()) {
                 Text(
                     text = "Weak tags: ${item.weakTags.joinToString()}",
@@ -126,41 +165,22 @@ private fun ReviewQueueCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Text(
-                text = item.reason,
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Medium
+            ContentProvenanceBlock(
+                sourceLabel = item.sourceLabel,
+                collectionTitle = item.collectionTitle,
+                unitTitle = item.unitTitle,
+                currentTitle = item.title
             )
-            Button(onClick = { onOpenReviewActivity(item.activityId) }) {
-                Text("Open retry")
-            }
         }
-    }
-}
-
-@Composable
-private fun SectionHeading(
-    eyebrow: String,
-    title: String,
-    description: String
-) {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
-            text = eyebrow,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Text(text = title, style = MaterialTheme.typography.headlineMedium)
-        Text(
-            text = description,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        GlowButton(
+            text = "Open",
+            onClick = { onOpenReviewActivity(item.activityId) }
         )
     }
 }
 
 @Composable
-private fun reviewCardColor(dueLabel: String) = when (dueLabel) {
+private fun reviewChipColor(dueLabel: String) = when (dueLabel) {
     "Due now" -> MaterialTheme.colorScheme.errorContainer
     "Today" -> MaterialTheme.colorScheme.secondaryContainer
     else -> MaterialTheme.colorScheme.tertiaryContainer
