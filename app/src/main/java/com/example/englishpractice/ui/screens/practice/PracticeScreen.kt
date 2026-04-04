@@ -222,8 +222,8 @@ private fun LearnPath(
         )
         items.forEachIndexed { index, item ->
             val offset = when (index % 3) {
-                1 -> 30.dp
-                2 -> (-22).dp
+                1 -> 12.dp
+                2 -> (-10).dp
                 else -> 0.dp
             }
             MissionNode(
