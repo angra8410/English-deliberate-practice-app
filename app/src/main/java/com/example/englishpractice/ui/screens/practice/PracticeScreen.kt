@@ -1,15 +1,21 @@
 package com.example.englishpractice.ui.screens.practice
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
@@ -20,19 +26,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.englishpractice.domain.model.SkillType
 import com.example.englishpractice.feature.progress.SkillProgressSnapshot
 import com.example.englishpractice.ui.app.AppUiState
 import com.example.englishpractice.ui.app.DailyPracticeItem
-import com.example.englishpractice.ui.components.ContentProvenanceBlock
-import com.example.englishpractice.ui.components.GlassPanel
 import com.example.englishpractice.ui.components.GlowButton
 import com.example.englishpractice.ui.components.ImmersiveScreen
-import com.example.englishpractice.ui.components.MiniSectionTitle
 import com.example.englishpractice.ui.components.StatusPill
-import com.example.englishpractice.ui.components.engineLabel
 import com.example.englishpractice.ui.components.skillTone
 import com.example.englishpractice.ui.components.uiLabel
 
@@ -42,194 +45,337 @@ fun PracticeScreen(
     onSkillSelected: (SkillType) -> Unit = {},
     onBrowseContent: () -> Unit = {}
 ) {
-    val spotlight = state.skillProgress.firstOrNull()
+    val spotlight = state.skillProgress.maxByOrNull { progress -> progress.completionPercent }
+        ?: state.skillProgress.firstOrNull()
+    val pathItems = state.skillProgress.map { progress ->
+        LearnPathItem(
+            progress = progress,
+            matchingPlan = state.dailyPlan.firstOrNull { item -> item.skill == progress.skill }
+        )
+    }
 
     ImmersiveScreen {
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            StatusPill(text = "Learn")
-            StatusPill(text = "Level ${state.currentLevel}", accent = MaterialTheme.colorScheme.tertiary)
-            StatusPill(text = "${state.overallCompletion}% path complete", accent = MaterialTheme.colorScheme.primary)
-        }
-
-        spotlight?.let { progress ->
-            LearnSpotlight(
-                progress = progress,
-                matchingPlan = state.dailyPlan.firstOrNull { item -> item.skill == progress.skill },
-                onOpen = { onSkillSelected(progress.skill) },
-                onBrowseContent = onBrowseContent
-            )
-        }
-
-        MiniSectionTitle(
-            eyebrow = "Tracks",
-            title = "Choose a lane and go deep"
+        LearnHero(
+            state = state,
+            spotlight = spotlight,
+            onOpenSpotlight = { spotlight?.let { onSkillSelected(it.skill) } },
+            onBrowseContent = onBrowseContent
         )
-        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            state.skillProgress.forEach { progress ->
-                ProgressLaneRow(
-                    progress = progress,
-                    matchingPlan = state.dailyPlan.firstOrNull { item -> item.skill == progress.skill },
-                    onOpen = { onSkillSelected(progress.skill) }
-                )
-            }
-        }
+        LearnPath(
+            items = pathItems,
+            onSkillSelected = onSkillSelected
+        )
     }
 }
 
+private data class LearnPathItem(
+    val progress: SkillProgressSnapshot,
+    val matchingPlan: DailyPracticeItem?
+)
+
 @Composable
-private fun LearnSpotlight(
-    progress: SkillProgressSnapshot,
-    matchingPlan: DailyPracticeItem?,
-    onOpen: () -> Unit,
+private fun LearnHero(
+    state: AppUiState,
+    spotlight: SkillProgressSnapshot?,
+    onOpenSpotlight: () -> Unit,
     onBrowseContent: () -> Unit
 ) {
-    val tone = skillTone(progress.skill)
-    GlassPanel(accent = tone.accent.copy(alpha = 0.3f)) {
-        Text(
-            text = "Current lane",
-            style = MaterialTheme.typography.labelLarge,
-            color = tone.accent
-        )
-        Text(
-            text = progress.skill.label,
-            style = MaterialTheme.typography.displaySmall
-        )
-        Text(
-            text = progress.skill.deliberatePracticeFocus,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+    Surface(
+        shape = RoundedCornerShape(34.dp),
+        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.16f),
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(170.dp)
-                .clip(RoundedCornerShape(30.dp))
-                .background(tone.gradient)
+                .clip(RoundedCornerShape(34.dp))
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.52f),
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.3f)
+                        )
+                    )
+                )
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.12f),
+                    shape = RoundedCornerShape(34.dp)
+                )
+                .padding(22.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(160.dp)
-                    .align(Alignment.Center)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.onBackground.copy(alpha = 0.12f))
-            )
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = "Completion ${progress.completionPercent}%",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Text(
-                    text = "Average score ${progress.averageScore}%",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
+            LearningAura()
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Row(
+                    modifier = Modifier.horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    StatusPill(text = "B2 path")
+                    StatusPill(
+                        text = "${state.dailyPlan.size} live missions",
+                        accent = MaterialTheme.colorScheme.tertiary
+                    )
+                    StatusPill(
+                        text = "${state.overallCompletion}% complete",
+                        accent = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = "Learn through a moving lesson path",
+                        style = MaterialTheme.typography.displaySmall
+                    )
+                    Text(
+                        text = "One focused mission at a time. Open the next lane, clear it, then move down the path instead of browsing a static book grid.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                spotlight?.let { progress ->
+                    val tone = skillTone(progress.skill)
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(
+                            text = "Recommended next lane",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = tone.accent
+                        )
+                        Text(
+                            text = progress.skill.label,
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                        Text(
+                            text = progress.skill.deliberatePracticeFocus,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    GlowButton(
+                        text = "Open next mission",
+                        onClick = onOpenSpotlight,
+                        modifier = Modifier.weight(1f)
+                    )
+                    GlowButton(
+                        text = "Browse all lessons",
+                        onClick = onBrowseContent,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
         }
-        LinearProgressIndicator(
-            progress = { progress.completionPercent / 100f },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(9.dp)
-                .clip(RoundedCornerShape(999.dp)),
-            color = tone.accent,
-            trackColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.12f)
+    }
+}
+
+@Composable
+private fun BoxScope.LearningAura() {
+    Box(
+        modifier = Modifier
+            .size(210.dp)
+            .align(Alignment.TopEnd)
+            .offset(x = 76.dp, y = (-58).dp)
+            .clip(CircleShape)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
+                        androidx.compose.ui.graphics.Color.Transparent
+                    )
+                )
+            )
+    )
+    Box(
+        modifier = Modifier
+            .size(170.dp)
+            .align(Alignment.BottomStart)
+            .offset(x = (-42).dp, y = 56.dp)
+            .clip(CircleShape)
+            .background(
+                Brush.radialGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.secondary.copy(alpha = 0.16f),
+                        androidx.compose.ui.graphics.Color.Transparent
+                    )
+                )
+            )
+    )
+}
+
+@Composable
+private fun LearnPath(
+    items: List<LearnPathItem>,
+    onSkillSelected: (SkillType) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        Text(
+            text = "Mission path",
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground
         )
-        matchingPlan?.let { plan ->
-            ContentProvenanceBlock(
-                sourceLabel = plan.sourceLabel,
-                collectionTitle = plan.collectionTitle,
-                currentTitle = plan.title
-            )
-            Text(
-                text = "${plan.title}  |  ${plan.exerciseType.uiLabel()}",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            GlowButton(
-                text = "Open lane",
-                onClick = onOpen,
-                modifier = Modifier.weight(1f)
-            )
-            GlowButton(
-                text = "Browse all",
-                onClick = onBrowseContent,
-                modifier = Modifier.weight(1f)
+        items.forEachIndexed { index, item ->
+            val offset = when (index % 3) {
+                1 -> 30.dp
+                2 -> (-22).dp
+                else -> 0.dp
+            }
+            MissionNode(
+                index = index,
+                item = item,
+                modifier = Modifier.offset(x = offset),
+                onClick = { onSkillSelected(item.progress.skill) }
             )
         }
     }
 }
 
 @Composable
-private fun ProgressLaneRow(
-    progress: SkillProgressSnapshot,
-    matchingPlan: DailyPracticeItem?,
-    onOpen: () -> Unit
+private fun MissionNode(
+    index: Int,
+    item: LearnPathItem,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
-    val tone = skillTone(progress.skill)
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onOpen),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.82f),
-        shadowElevation = 10.dp,
-        tonalElevation = 0.dp
+    val tone = skillTone(item.progress.skill)
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(14.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(52.dp)
+                    .size(54.dp)
                     .clip(CircleShape)
-                    .background(tone.gradient),
+                    .background(tone.gradient)
+                    .border(
+                        width = 2.dp,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.12f),
+                        shape = CircleShape
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = progress.skill.label.take(1),
-                    style = MaterialTheme.typography.titleLarge,
+                    text = "${index + 1}",
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onBackground
                 )
             }
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = progress.skill.label,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = tone.accent
-                )
-                matchingPlan?.let { plan ->
-                    Text(
-                        text = "${plan.title}  |  ${plan.exerciseType.uiLabel()}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Text(
-                    text = "Completion ${progress.completionPercent}%  |  Average ${progress.averageScore}%",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            if (index < 3) {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 6.dp)
+                        .width(6.dp)
+                        .height(74.dp)
+                        .clip(RoundedCornerShape(999.dp))
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    tone.accent.copy(alpha = 0.8f),
+                                    tone.accent.copy(alpha = 0.18f)
+                                )
+                            )
+                        )
                 )
             }
-            Text(
-                text = "Open",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+        }
+        Surface(
+            modifier = Modifier
+                .weight(1f)
+                .clickable(onClick = onClick),
+            shape = RoundedCornerShape(32.dp),
+            color = MaterialTheme.colorScheme.surface.copy(alpha = 0.78f),
+            tonalElevation = 0.dp,
+            shadowElevation = 12.dp
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        Brush.linearGradient(
+                            colors = listOf(
+                                tone.soft.copy(alpha = 0.92f),
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)
+                            )
+                        )
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = tone.accent.copy(alpha = 0.22f),
+                        shape = RoundedCornerShape(32.dp)
+                    )
+                    .padding(18.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(
+                            text = item.progress.skill.label,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = tone.accent
+                        )
+                        Text(
+                            text = item.matchingPlan?.title ?: item.progress.skill.deliberatePracticeFocus,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                    Surface(
+                        shape = RoundedCornerShape(999.dp),
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.08f)
+                    ) {
+                        Text(
+                            text = "${item.progress.averageScore}%",
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+                Text(
+                    text = item.matchingPlan?.focus ?: item.progress.skill.deliberatePracticeFocus,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                item.matchingPlan?.let { plan ->
+                    Row(
+                        modifier = Modifier.horizontalScroll(rememberScrollState()),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        StatusPill(text = plan.exerciseType.uiLabel(), accent = tone.accent)
+                        StatusPill(
+                            text = "${plan.estimatedMinutes} min",
+                            accent = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+                }
+                LinearProgressIndicator(
+                    progress = { item.progress.completionPercent / 100f },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(10.dp)
+                        .clip(RoundedCornerShape(999.dp)),
+                    color = tone.accent,
+                    trackColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.14f)
+                )
+                Text(
+                    text = if (item.progress.completionPercent == 0) {
+                        "Tap to start this lane"
+                    } else {
+                        "Continue this lane"
+                    },
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
         }
     }
 }

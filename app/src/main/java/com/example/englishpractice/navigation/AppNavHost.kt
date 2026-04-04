@@ -61,6 +61,7 @@ fun AppNavHost() {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val isTopLevelDestination = items.any { destination -> destination.route == currentRoute }
+    val isImmersiveActivityDestination = currentRoute == AppDestination.ActivityPlayer.route
     val topBarTitle = when (currentRoute) {
         AppDestination.Browse.route -> AppDestination.Browse.label
         AppDestination.ActivityPlayer.route -> AppDestination.ActivityPlayer.label
@@ -71,7 +72,7 @@ fun AppNavHost() {
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
-            if (!isTopLevelDestination) {
+            if (!isTopLevelDestination && !isImmersiveActivityDestination) {
                 TopAppBar(
                     title = { Text(topBarTitle) },
                     navigationIcon = {
@@ -230,6 +231,7 @@ fun AppNavHost() {
                     selectedSpeakingLocaleTag = uiState.selectedSpeakingLocaleTag,
                     speakingCapability = uiState.speakingCapability,
                     listeningCapability = uiState.listeningCapability,
+                    onBack = { navController.popBackStack() },
                     onSpeakingLocaleSelected = appViewModel::updateSpeakingLocale,
                     onListeningActivitySelected = { selectedListeningActivityId ->
                         navController.navigate(
