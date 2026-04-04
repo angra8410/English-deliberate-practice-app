@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.englishpractice.domain.model.SkillType
 import com.example.englishpractice.feature.progress.SkillProgressSnapshot
@@ -321,7 +322,10 @@ private fun MissionNode(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
                         Text(
                             text = item.progress.skill.label,
                             style = MaterialTheme.typography.labelLarge,
@@ -330,23 +334,24 @@ private fun MissionNode(
                         Text(
                             text = item.matchingPlan?.title ?: item.progress.skill.deliberatePracticeFocus,
                             style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = MaterialTheme.colorScheme.onBackground,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
-                    Surface(
-                        shape = RoundedCornerShape(999.dp),
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.08f)
-                    ) {
-                        Text(
-                            text = if (item.showSessionScore && item.progress.averageScore > 0) {
-                                "Score ${item.progress.averageScore}%"
-                            } else {
-                                "No score yet"
-                            },
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
+                    if (item.showSessionScore && item.progress.averageScore > 0) {
+                        Surface(
+                            modifier = Modifier.padding(start = 12.dp),
+                            shape = RoundedCornerShape(999.dp),
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.08f)
+                        ) {
+                            Text(
+                                text = "Score ${item.progress.averageScore}%",
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
                     }
                 }
                 Text(
