@@ -64,6 +64,7 @@ class AppViewModel(
     private val defaultSpeakingLocaleTag = AppPreferencesRepository.DEFAULT_SPEAKING_LOCALE_TAG
     private val selectedPilotLevel = MutableStateFlow(defaultPilotLevel)
     private val selectedSpeakingLocaleTag = MutableStateFlow(defaultSpeakingLocaleTag)
+    private val sessionSubmittedActivityIds = MutableStateFlow<Set<String>>(emptySet())
 
     private val _uiState = MutableStateFlow(
         buildUiState(
@@ -75,6 +76,7 @@ class AppViewModel(
             weakPatterns = defaultWeakPatterns(),
             reviewQueue = defaultReviewQueue(defaultLevelContent.activityCatalog),
             recentAttempts = emptyList(),
+            sessionSubmittedActivityIds = emptySet(),
             speakingLocaleTag = defaultSpeakingLocaleTag
         )
     )
@@ -138,6 +140,7 @@ class AppViewModel(
                     weakTags = feedback.weakTags
                 )
             )
+            sessionSubmittedActivityIds.value = sessionSubmittedActivityIds.value + activityId
             refreshPersistedState(selectedPilotLevel.value)
         }
     }
@@ -145,6 +148,7 @@ class AppViewModel(
     fun clearActivityHistory(activityId: String) {
         viewModelScope.launch {
             repository.clearActivityHistory(activityId)
+            sessionSubmittedActivityIds.value = sessionSubmittedActivityIds.value - activityId
             refreshPersistedState(selectedPilotLevel.value)
         }
     }
@@ -158,6 +162,7 @@ class AppViewModel(
         weakPatterns: List<WeakPattern>,
         reviewQueue: List<ReviewQueueItem>,
         recentAttempts: List<ActivityAttemptRecord>,
+        sessionSubmittedActivityIds: Set<String>,
         speakingLocaleTag: String
     ): AppUiState {
         val skillProgress = progressInputs.map(ProgressCalculator::buildSnapshot)
@@ -200,6 +205,7 @@ class AppViewModel(
                 sourceSummaries = contentSourceSummaries
             ),
             recentAttempts = recentAttempts,
+            sessionSubmittedActivityIds = sessionSubmittedActivityIds,
             selectedSpeakingLocaleTag = speakingLocaleTag,
             speakingCapability = speakingManager.capability(),
             listeningCapability = listeningPlayer.capability()
@@ -567,6 +573,7 @@ class AppViewModel(
                 weakPatterns = effectiveWeakPatterns,
                 reviewQueue = effectiveReviewQueue,
                 recentAttempts = snapshot.recentAttempts,
+                sessionSubmittedActivityIds = sessionSubmittedActivityIds.value,
                 speakingLocaleTag = selectedSpeakingLocaleTag.value
             )
         }

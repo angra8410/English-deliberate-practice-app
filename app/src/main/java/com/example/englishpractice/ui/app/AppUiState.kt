@@ -24,6 +24,7 @@ data class AppUiState(
     val contentSourceSummaries: List<ContentSourceSummary>,
     val bookCatalogStatusMessage: String? = null,
     val recentAttempts: List<ActivityAttemptRecord>,
+    val sessionSubmittedActivityIds: Set<String>,
     val selectedSpeakingLocaleTag: String,
     val speakingCapability: SpeakingCapability,
     val listeningCapability: ListeningCapability

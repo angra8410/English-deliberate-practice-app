@@ -47,10 +47,15 @@ fun PracticeScreen(
 ) {
     val spotlight = state.skillProgress.maxByOrNull { progress -> progress.completionPercent }
         ?: state.skillProgress.firstOrNull()
+    val sessionScoredSkills = state.activityCatalog
+        .filter { activity -> activity.id in state.sessionSubmittedActivityIds }
+        .map { activity -> activity.skill }
+        .toSet()
     val pathItems = state.skillProgress.map { progress ->
         LearnPathItem(
             progress = progress,
-            matchingPlan = state.dailyPlan.firstOrNull { item -> item.skill == progress.skill }
+            matchingPlan = state.dailyPlan.firstOrNull { item -> item.skill == progress.skill },
+            showSessionScore = progress.skill in sessionScoredSkills
         )
     }
 
@@ -70,7 +75,8 @@ fun PracticeScreen(
 
 private data class LearnPathItem(
     val progress: SkillProgressSnapshot,
-    val matchingPlan: DailyPracticeItem?
+    val matchingPlan: DailyPracticeItem?,
+    val showSessionScore: Boolean
 )
 
 @Composable
@@ -332,7 +338,11 @@ private fun MissionNode(
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.08f)
                     ) {
                         Text(
-                            text = "${item.progress.averageScore}%",
+                            text = if (item.showSessionScore && item.progress.averageScore > 0) {
+                                "Score ${item.progress.averageScore}%"
+                            } else {
+                                "No score yet"
+                            },
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
                             style = MaterialTheme.typography.labelLarge,
                             color = MaterialTheme.colorScheme.onBackground
@@ -367,9 +377,9 @@ private fun MissionNode(
                 )
                 Text(
                     text = if (item.progress.completionPercent == 0) {
-                        "Tap to start this lane"
+                        "Progress 0% • Tap to start this lane"
                     } else {
-                        "Continue this lane"
+                        "Progress ${item.progress.completionPercent}% • Continue this lane"
                     },
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold,
