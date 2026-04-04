@@ -169,7 +169,7 @@ class AppViewModel(
         return AppUiState(
             currentLevel = currentLevel,
             targetLevel = pilotLevels.lastOrNull() ?: CefrLevel.C1,
-            streakDays = 12,
+            streakDays = 0,
             dailyGoalMinutes = 60,
             pilotLevels = pilotLevels,
             overallCompletion = ProgressCalculator.overallCompletion(skillProgress),
@@ -179,7 +179,7 @@ class AppViewModel(
             reviewSummary = ReviewSummary(
                 dueToday = reviewQueue.size,
                 recurringPatterns = weakPatterns.size.coerceAtMost(5),
-                nextCheckpointDays = ReviewScheduler.nextIntervalDays(
+                nextCheckpointDays = if (reviewQueue.isEmpty()) 0 else ReviewScheduler.nextIntervalDays(
                     previousIntervalDays = 3,
                     wasSuccessful = true
                 )
@@ -220,31 +220,31 @@ class AppViewModel(
         return listOf(
             SkillProgressInput(
                 skill = SkillType.READING,
-                completedActivities = 8,
+                completedActivities = 0,
                 targetActivities = 10,
-                averageScore = 81,
-                weakTags = listOf("tone inference", "supporting ideas")
+                averageScore = 0,
+                weakTags = emptyList()
             ),
             SkillProgressInput(
                 skill = SkillType.WRITING,
-                completedActivities = 6,
+                completedActivities = 0,
                 targetActivities = 10,
-                averageScore = 74,
-                weakTags = listOf("collocations", "paragraph structure", "connectors")
+                averageScore = 0,
+                weakTags = emptyList()
             ),
             SkillProgressInput(
                 skill = SkillType.LISTENING,
-                completedActivities = 7,
+                completedActivities = 0,
                 targetActivities = 10,
-                averageScore = 77,
-                weakTags = listOf("contrast markers", "detail recall")
+                averageScore = 0,
+                weakTags = emptyList()
             ),
             SkillProgressInput(
                 skill = SkillType.SPEAKING,
-                completedActivities = 5,
+                completedActivities = 0,
                 targetActivities = 10,
-                averageScore = 69,
-                weakTags = listOf("response length", "connector range", "task relevance")
+                averageScore = 0,
+                weakTags = emptyList()
             )
         )
     }
@@ -492,75 +492,13 @@ class AppViewModel(
     }
 
     private fun defaultWeakPatterns(): List<WeakPattern> {
-        return listOf(
-            WeakPattern(
-                skill = SkillType.SPEAKING,
-                tag = "response length",
-                note = "Speaking answers stop too early before giving evidence."
-            ),
-            WeakPattern(
-                skill = SkillType.WRITING,
-                tag = "collocations",
-                note = "Writing uses basic verb + noun combinations too often."
-            ),
-            WeakPattern(
-                skill = SkillType.LISTENING,
-                tag = "contrast markers",
-                note = "Listening misses turns introduced by however, although, and while."
-            ),
-            WeakPattern(
-                skill = SkillType.READING,
-                tag = "tone inference",
-                note = "Reading summaries capture facts but miss stance and tone."
-            )
-        )
+        return emptyList()
     }
 
     private fun defaultReviewQueue(
         activityCatalog: List<PracticeActivityItem>
     ): List<ReviewQueueItem> {
-        val fallbackWeakTags = mapOf(
-            SkillType.SPEAKING to listOf("response length", "connector range"),
-            SkillType.WRITING to listOf("collocations", "paragraph structure"),
-            SkillType.LISTENING to listOf("detail recall", "contrast markers"),
-            SkillType.READING to listOf("tone inference", "supporting ideas")
-        )
-        val fallbackDueLabels = mapOf(
-            SkillType.SPEAKING to "Due now",
-            SkillType.WRITING to "Today",
-            SkillType.LISTENING to "Tomorrow",
-            SkillType.READING to "In 3 days"
-        )
-        val fallbackScores = mapOf(
-            SkillType.SPEAKING to 69,
-            SkillType.WRITING to 74,
-            SkillType.LISTENING to 77,
-            SkillType.READING to 81
-        )
-
-        return listOf(
-            SkillType.SPEAKING,
-            SkillType.WRITING,
-            SkillType.LISTENING,
-            SkillType.READING
-        ).mapNotNull { skill ->
-            val activity = activityCatalog.firstOrNull { item -> item.skill == skill } ?: return@mapNotNull null
-            val weakTags = fallbackWeakTags[skill].orEmpty()
-            val score = fallbackScores[skill]
-            ReviewQueueItem(
-                activityId = activity.id,
-                skill = skill,
-                title = activity.title,
-                prompt = activity.prompt,
-                dueLabel = fallbackDueLabels.getValue(skill),
-                reason = "Retry after score $score with focus on ${weakTags.joinToString()}.",
-                sourceLabel = activity.sourceLabel,
-                collectionTitle = activity.collectionTitle,
-                unitTitle = activity.unitTitle,
-                weakTags = weakTags,
-                lastScore = score
-            )
-        }
+        return emptyList()
     }
 
     private fun attachUnitMetadata(
