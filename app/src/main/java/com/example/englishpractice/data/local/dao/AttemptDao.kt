@@ -19,4 +19,7 @@ interface AttemptDao {
 
     @Query("SELECT COUNT(*) FROM attempts WHERE activityId = :activityId")
     suspend fun countByActivity(activityId: String): Int
+
+    @Query("DELETE FROM attempts WHERE activityId = :activityId")
+    suspend fun deleteByActivity(activityId: String)
 }

@@ -16,4 +16,7 @@ interface MistakeDao {
 
     @Query("SELECT * FROM mistakes WHERE attemptId = :attemptId")
     suspend fun getByAttempt(attemptId: String): List<MistakeEntity>
+
+    @Query("DELETE FROM mistakes WHERE attemptId IN (SELECT id FROM attempts WHERE activityId = :activityId)")
+    suspend fun deleteByActivity(activityId: String)
 }

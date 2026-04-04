@@ -16,4 +16,7 @@ interface ReviewItemDao {
 
     @Query("SELECT * FROM review_items WHERE activityId = :activityId ORDER BY dueAt DESC LIMIT 1")
     suspend fun getLatestByActivity(activityId: String): ReviewItemEntity?
+
+    @Query("DELETE FROM review_items WHERE activityId = :activityId")
+    suspend fun deleteByActivity(activityId: String)
 }

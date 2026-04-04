@@ -233,6 +233,7 @@ fun AppNavHost() {
                     listeningCapability = uiState.listeningCapability,
                     onBack = { navController.popBackStack() },
                     onSpeakingLocaleSelected = appViewModel::updateSpeakingLocale,
+                    onClearHistory = appViewModel::clearActivityHistory,
                     onListeningActivitySelected = { selectedListeningActivityId ->
                         navController.navigate(
                             AppDestination.ActivityPlayer.createRoute(selectedListeningActivityId)

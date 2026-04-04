@@ -58,6 +58,7 @@ fun ActivityPlayerScreen(
     listeningCapability: ListeningCapability,
     onBack: () -> Unit,
     onSpeakingLocaleSelected: (String) -> Unit,
+    onClearHistory: (String) -> Unit,
     onListeningActivitySelected: (String) -> Unit,
     onSubmit: (answer: String, transcriptText: String?) -> Unit
 ) {
@@ -68,11 +69,11 @@ fun ActivityPlayerScreen(
         return
     }
 
-    val initialStage = if (lastAttempt?.activityId == activity.id) PlayerStage.Feedback else PlayerStage.Brief
-    var playerStageName by rememberSaveable(activity.id, lastAttempt?.activityId) {
-        mutableStateOf(initialStage.name)
+    var playerStageName by rememberSaveable(activity.id) {
+        mutableStateOf(PlayerStage.Brief.name)
     }
     val playerStage = PlayerStage.valueOf(playerStageName)
+    var hasSubmittedInCurrentSession by rememberSaveable(activity.id) { mutableStateOf(false) }
     var answerText by rememberSaveable(activity.id) { mutableStateOf(activity.starterText) }
     var listeningMode by rememberSaveable(activity.id) { mutableStateOf<ListeningPlaybackMode?>(null) }
     var listeningStatus by rememberSaveable(activity.id) { mutableStateOf("Idle") }
@@ -126,6 +127,7 @@ fun ActivityPlayerScreen(
     }
     val currentListeningIndex = listeningItems.indexOfFirst { it.id == activity.id }
     val focusTokens = remember(activity.id) { buildFocusTokens(activity) }
+    val hasSavedHistory = lastAttempt?.activityId == activity.id
     val submitEnabled = when (activity.skill) {
         SkillType.SPEAKING -> !isSpeakingBusy && answerText.isNotBlank()
         SkillType.LISTENING -> ListeningSubmissionPolicy.canSubmit(
@@ -348,10 +350,6 @@ fun ActivityPlayerScreen(
         }
     }
 
-    LaunchedEffect(lastAttempt?.activityId, activity.id) {
-        if (lastAttempt?.activityId == activity.id) playerStageName = PlayerStage.Feedback.name
-    }
-
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
         if (granted) {
             showOpenSettings = false
@@ -383,6 +381,12 @@ fun ActivityPlayerScreen(
                     activity = activity,
                     listeningCapability = listeningCapability,
                     toneColor = tone.accent,
+                    hasSavedHistory = hasSavedHistory,
+                    onClearHistory = {
+                        onClearHistory(activity.id)
+                        hasSubmittedInCurrentSession = false
+                        playerStageName = PlayerStage.Brief.name
+                    },
                     onStart = { playerStageName = PlayerStage.Exercise.name }
                 )
                 PlayerStage.Exercise -> ExerciseStage(
@@ -472,20 +476,25 @@ fun ActivityPlayerScreen(
                     onSubmit = {
                         val transcript = if (activity.skill == SkillType.SPEAKING) capturedTranscript ?: answerText else null
                         onSubmit(answerText, transcript)
+                        hasSubmittedInCurrentSession = true
                         playerStageName = PlayerStage.Feedback.name
                     }
                 )
                 PlayerStage.Feedback -> FeedbackStage(
                     activity = activity,
-                    lastAttempt = lastAttempt,
+                    lastAttempt = if (hasSubmittedInCurrentSession) lastAttempt else null,
                     onTryAgain = { playerStageName = PlayerStage.Response.name },
                     onBackToPath = onBack
                 )
             }
         }
 
-        AnimatedVisibility(visible = playerStage != PlayerStage.Feedback && lastAttempt?.activityId == activity.id) {
-            lastAttempt?.let { CompactAttemptSummary(attempt = it, modelAnswer = activity.modelAnswer) }
+        AnimatedVisibility(
+            visible = hasSubmittedInCurrentSession &&
+                playerStage != PlayerStage.Feedback &&
+                lastAttempt?.activityId == activity.id
+        ) {
+            lastAttempt?.let { CompactAttemptSummary(attempt = it) }
         }
     }
 }
@@ -543,6 +552,8 @@ private fun MissionBriefStage(
     activity: PracticeActivityItem,
     listeningCapability: ListeningCapability,
     toneColor: Color,
+    hasSavedHistory: Boolean,
+    onClearHistory: () -> Unit,
     onStart: () -> Unit
 ) {
     GlassPanel(accent = toneColor.copy(alpha = 0.26f)) {
@@ -573,6 +584,15 @@ private fun MissionBriefStage(
             currentTitle = activity.unitTitle ?: activity.title
         )
         MissionMetaRow(activity, listeningCapability)
+        if (hasSavedHistory) {
+            OutlinedButton(
+                onClick = onClearHistory,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(999.dp)
+            ) {
+                Text("Clear saved mission history")
+            }
+        }
         GlowButton(text = "Start mission", onClick = onStart, modifier = Modifier.fillMaxWidth())
     }
 }
@@ -1095,15 +1115,13 @@ private fun ScoreBadge(score: Int) {
 }
 
 @Composable
-private fun CompactAttemptSummary(attempt: ActivityAttemptRecord, modelAnswer: String) {
+private fun CompactAttemptSummary(attempt: ActivityAttemptRecord) {
     GlassPanel(accent = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f)) {
         Text("Latest saved attempt", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.tertiary)
         Text(
             text = "Score ${attempt.score} • Weak tags: ${attempt.weakTags.joinToString().ifBlank { "None" }}",
             style = MaterialTheme.typography.bodyMedium
         )
-        Text("Model answer", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(modelAnswer, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

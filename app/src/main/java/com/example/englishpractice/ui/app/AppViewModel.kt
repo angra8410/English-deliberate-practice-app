@@ -142,6 +142,13 @@ class AppViewModel(
         }
     }
 
+    fun clearActivityHistory(activityId: String) {
+        viewModelScope.launch {
+            repository.clearActivityHistory(activityId)
+            refreshPersistedState(selectedPilotLevel.value)
+        }
+    }
+
     private fun buildUiState(
         currentLevel: CefrLevel,
         activityCatalog: List<PracticeActivityItem>,

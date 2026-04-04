@@ -18,6 +18,12 @@ import java.util.UUID
 class PracticeRepository private constructor(
     private val database: AppDatabase
 ) {
+    suspend fun clearActivityHistory(activityId: String) {
+        database.mistakeDao().deleteByActivity(activityId)
+        database.reviewItemDao().deleteByActivity(activityId)
+        database.attemptDao().deleteByActivity(activityId)
+    }
+
     suspend fun saveSubmission(submission: PersistedSubmission) {
         val attemptId = UUID.randomUUID().toString()
         val submittedAt = System.currentTimeMillis()
