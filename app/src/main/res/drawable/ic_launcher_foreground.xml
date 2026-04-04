@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <inset
+            android:insetLeft="10dp"
+            android:insetTop="10dp"
+            android:insetRight="10dp"
+            android:insetBottom="10dp">
+            <shape android:shape="oval">
+                <solid android:color="#14FFFFFF" />
+            </shape>
+        </inset>
+    </item>
+    <item>
+        <inset
+            android:insetLeft="18dp"
+            android:insetTop="18dp"
+            android:insetRight="18dp"
+            android:insetBottom="18dp">
+            <shape android:shape="rectangle">
+                <corners android:radius="24dp" />
+                <gradient
+                    android:angle="270"
+                    android:endColor="#FFF6FF"
+                    android:startColor="#F6EEFF" />
+            </shape>
+        </inset>
+    </item>
+    <item>
+        <inset
+            android:insetLeft="30dp"
+            android:insetTop="35dp"
+            android:insetRight="54dp"
+            android:insetBottom="31dp">
+            <shape android:shape="rectangle">
+                <corners android:radius="8dp" />
+                <gradient
+                    android:angle="270"
+                    android:endColor="#FF8A3A"
+                    android:startColor="#FFC95D" />
+            </shape>
+        </inset>
+    </item>
+    <item>
+        <inset
+            android:insetLeft="54dp"
+            android:insetTop="35dp"
+            android:insetRight="30dp"
+            android:insetBottom="31dp">
+            <shape android:shape="rectangle">
+                <corners android:radius="8dp" />
+                <gradient
+                    android:angle="270"
+                    android:endColor="#7D2DD0"
+                    android:startColor="#FF62E0" />
+            </shape>
+        </inset>
+    </item>
+    <item>
+        <inset
+            android:insetLeft="50dp"
+            android:insetTop="33dp"
+            android:insetRight="50dp"
+            android:insetBottom="29dp">
+            <shape android:shape="rectangle">
+                <corners android:radius="2dp" />
+                <solid android:color="#CC45209A" />
+            </shape>
+        </inset>
+    </item>
+    <item>
+        <inset
+            android:insetLeft="58dp"
+            android:insetTop="24dp"
+            android:insetRight="22dp"
+            android:insetBottom="66dp">
+            <shape android:shape="rectangle">
+                <corners android:radius="8dp" />
+                <solid android:color="#FF7FE5FF" />
+            </shape>
+        </inset>
+    </item>
+    <item>
+        <inset
+            android:insetLeft="66dp"
+            android:insetTop="29dp"
+            android:insetRight="38dp"
+            android:insetBottom="73dp">
+            <shape android:shape="oval">
+                <solid android:color="#FF2D146B" />
+            </shape>
+        </inset>
+    </item>
+    <item>
+        <inset
+            android:insetLeft="74dp"
+            android:insetTop="29dp"
+            android:insetRight="30dp"
+            android:insetBottom="73dp">
+            <shape android:shape="oval">
+                <solid android:color="#FF2D146B" />
+            </shape>
+        </inset>
+    </item>
+    <item>
+        <inset
+            android:insetLeft="82dp"
+            android:insetTop="29dp"
+            android:insetRight="22dp"
+            android:insetBottom="73dp">
+            <shape android:shape="oval">
+                <solid android:color="#FF2D146B" />
+            </shape>
+        </inset>
+    </item>
+</layer-list>
